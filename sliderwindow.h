@@ -13,6 +13,11 @@ public:
 	virtual ~AlsaVolume();
 	void runAboutDialog();
 	void setWindowPosition(int x_, int y_);
+	bool getVisible();
+	void showWindow();
+	void hideWindow();
+	int getHeight();
+	int getWidth();
 	void setVolumeValue(double value);
 	double getVolumeValue();
 protected:

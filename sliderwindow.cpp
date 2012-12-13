@@ -76,3 +76,28 @@ double AlsaVolume::getVolumeValue()
 {
 	return volumeSlider_->get_value();
 }
+
+bool AlsaVolume::getVisible()
+{
+	return property_visible();
+}
+
+void AlsaVolume::showWindow()
+{
+	show_all();
+}
+
+void AlsaVolume::hideWindow()
+{
+	hide();
+}
+
+int AlsaVolume::getHeight()
+{
+	return get_height();
+}
+
+int AlsaVolume::getWidth()
+{
+	return get_width();
+}

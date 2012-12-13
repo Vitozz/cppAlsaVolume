@@ -3,12 +3,16 @@
 #include "gtkmm/separatormenuitem.h"
 #include "gtkmm/stock.h"
 #include <iostream>
+#include "gdk/gdk.h"
 
-TrayIcon::TrayIcon(AlsaVolume *parent, const char *iconName)
-: hidden_(true)
+const uint MIDDLE_BUTTON = 2;
+const int OFFSET = 2;
+
+TrayIcon::TrayIcon(AlsaVolume *parent)
+: avWindow_(parent),
+  volumeValue_(0)
 {
-	avWindow_ = parent;
-	avWindow_->hide();
+	avWindow_->hideWindow();
 	menu_ = Gtk::manage(new Gtk::Menu());
 	//menu creation
 	restoreItem_ = Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::GO_UP));
@@ -40,8 +44,8 @@ TrayIcon::TrayIcon(AlsaVolume *parent, const char *iconName)
 	signal_popup_menu().connect(sigc::mem_fun(*this, &TrayIcon::onPopup));
 	signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onLeftClick));
 	signal_scroll_event().connect(sigc::mem_fun(*this, &TrayIcon::onScrollEvent));
-	getGeometry();
-	setIcon(Glib::ustring(iconName));
+	signal_button_press_event().connect(sigc::mem_fun(*this, &TrayIcon::onButtonClick));
+	setIcon(volumeValue_);
 }
 
 TrayIcon::~TrayIcon()
@@ -50,22 +54,26 @@ TrayIcon::~TrayIcon()
 
 void TrayIcon::onHideRestore()
 {
-	hidden_ = avWindow_->property_visible();
-	if (hidden_) {
-		avWindow_->set_visible(false);
+	if (!avWindow_->getVisible()) {
+		Glib::RefPtr<Gdk::Screen> screen;
+		Gdk::Rectangle area;
+		Gtk::Orientation orientation;
+		int x_ = 0;
+		int y_ = 0;
+		if (get_geometry(screen, area, orientation)) {
+			if (area.get_y() <= 200) {
+				y_ = area.get_y() + area.get_height() + 2;
+			}
+			else {
+				y_ = area.get_y() - avWindow_->getHeight() - 4;
+			}
+			x_ = area.get_x();
+		}
+		avWindow_->setWindowPosition(x_, y_);
+		avWindow_->showWindow();
 	}
 	else {
-		getGeometry();
-		int x_, y_;
-		if (geometry_[1] <= 200) {
-			y_ = geometry_[1] + geometry_[2] + 2;
-		}
-		else {
-			y_ = geometry_[1] - avWindow_->get_height() - 4;
-		}
-		x_ = geometry_[0];
-		avWindow_->setWindowPosition(x_, y_);
-		avWindow_->show_all();
+		avWindow_->hideWindow();
 	}
 }
 
@@ -87,11 +95,35 @@ void TrayIcon::onAbout()
 
 void TrayIcon::onMute()
 {
-	std::cout << muteItem_->get_active() << std::endl;
+	if (muteItem_->get_active()) {
+		setIcon(0);
+	}
+	else {
+		setIcon(volumeValue_);
+	}
 }
 
-void TrayIcon::setIcon(Glib::ustring iconPath)
+void TrayIcon::setIcon(int value)
 {
+	Glib::ustring iconPath;
+	if (value <= 0) {
+		iconPath = Glib::ustring("icons/tb_icon0.png");
+	}
+	if (value >0 && value < 40) {
+		iconPath = Glib::ustring("icons/tb_icon20.png");
+	}
+	if (value >40 && value < 60) {
+		iconPath = Glib::ustring("icons/tb_icon40.png");
+	}
+	if (value >60 && value < 80) {
+		iconPath = Glib::ustring("icons/tb_icon60.png");
+	}
+	if (value >80 && value < 100) {
+		iconPath = Glib::ustring("icons/tb_icon80.png");
+	}
+	if (value >= 100) {
+		iconPath = Glib::ustring("icons/tb_icon100.png");
+	}
 	if (!iconPath.empty())
 		set_from_file(getResPath(iconPath.c_str()));
 }
@@ -116,30 +148,22 @@ bool TrayIcon::onScrollEvent(GdkEventScroll* event)
 {
 	double value = avWindow_->getVolumeValue();
 	if (event->direction == GDK_SCROLL_UP) {
-		value+=2;
+		value+=OFFSET;
 	}
 	else if(event->direction == GDK_SCROLL_DOWN) {
-		value-=2;
+		value-=OFFSET;
 	}
 	avWindow_->setVolumeValue(value);
+	volumeValue_ = (int)value;
+	setIcon(volumeValue_);
 	return false;
 }
 
 bool TrayIcon::onButtonClick(GdkEventButton* event)
 {
-	(void)event;
-	return false;
-}
-
-void TrayIcon::getGeometry()
-{
-	Glib::RefPtr<Gdk::Screen> screen;
-	Gdk::Rectangle area;
-	Gtk::Orientation orientation;
-	if (get_geometry(screen, area, orientation)) {
-		geometry_[0] = area.get_x();
-		geometry_[1] = area.get_y();
-		geometry_[2] = area.get_height();
-		geometry_[3] = area.get_width();
+	if (event->button == MIDDLE_BUTTON) {
+		muteItem_->set_active(!muteItem_->get_active());
+		onMute();
 	}
+	return false;
 }

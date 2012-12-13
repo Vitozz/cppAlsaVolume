@@ -12,9 +12,9 @@
 class TrayIcon : public Gtk::StatusIcon
 {
 public:
-	TrayIcon(AlsaVolume *parent, const char *iconName);
+	TrayIcon(AlsaVolume *parent);
 	virtual ~TrayIcon();
-	void setIcon(Glib::ustring iconPath);
+	void setIcon(int value);
 	void setTooltip(Glib::ustring message);
 
 protected:
@@ -35,12 +35,11 @@ private:
 	void getGeometry();
 
 private:
-	bool hidden_;
 	AlsaVolume *avWindow_;
+	int volumeValue_;
 	Gtk::Menu *menu_;
 	Gtk::ImageMenuItem *restoreItem_, *mixerItem_, *settingsItem_, *aboutItem_, *quitItem_;
 	Gtk::CheckMenuItem* muteItem_;
-	int geometry_[4];
 };
 
 #endif // TRAYICON_H
