@@ -1,5 +1,6 @@
 #include "sliderwindow.h"
 #include "filework.h"
+#include "alsawork.h"
 #include <iostream>
 #include "gtkmm/aboutdialog.h"
 
@@ -44,7 +45,7 @@ void AlsaVolume::setWindowPosition(int x_, int y_)
 
 void AlsaVolume::on_volume_slider()
 {
-	std::cout << volumeSlider_->get_value() << std::endl;
+	setAlsaVolume("Master", (long)volumeSlider_->get_value());
 }
 
 bool AlsaVolume::on_focus_out(GdkEventCrossing* event)

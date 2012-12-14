@@ -11,7 +11,7 @@ PKGCONFIG += gtkmm-3.0 \
 	     alsa
 
 SOURCES += main.cpp \
-	alsawork.cpp \
+	alsawork.cc \
 	trayicon.cpp \
 	filework.cpp \
     sliderwindow.cpp

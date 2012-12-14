@@ -1,15 +1,9 @@
 #ifndef ALSAWORK_H
 #define ALSAWORK_H
 
-#include <alsa/asoundlib.h>
+#include "alsa/asoundlib.h"
 
-class AlsaWork
-{
-public:
-	AlsaWork();
-	void setVolume (int volume);
-private:
-	void onError(int index);
-};
+void onError (int errorIndex);
+void setAlsaVolume(const char *mixer, long volume);
 
 #endif // ALSAWORK_H
