@@ -1,6 +1,6 @@
 ### eqmake4 was here ###
-CONFIG -= release debug
-CONFIG += debug_and_release
+CONFIG -= debug_and_release debug
+CONFIG += release
 
 TEMPLATE = app
 CONFIG += console

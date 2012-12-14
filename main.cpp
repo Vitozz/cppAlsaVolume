@@ -11,7 +11,7 @@ int main (int argc, char *argv[])
 
 	Glib::RefPtr<Gtk::Builder> refBuilder = Gtk::Builder::create();
 	try {
-		Glib::ustring ui_ = getResPath("gladefiles/pySliderFrame.glade");
+		Glib::ustring ui_ = getResPath("gladefiles/SliderFrame.glade");
 		if (ui_.empty()) {
 			std::cerr << "No pySliderFrame.glade file found" << std::endl;
 			return 1;
@@ -32,7 +32,7 @@ int main (int argc, char *argv[])
 	}
 	AlsaVolume *volumechanger = 0;
 	refBuilder->get_widget_derived("volumeFrame", volumechanger);
-	Glib::RefPtr<TrayIcon> trayicon = Glib::RefPtr<TrayIcon>(new TrayIcon(volumechanger, "icons/tb_icon100.png"));
+	Glib::RefPtr<TrayIcon> trayicon = Glib::RefPtr<TrayIcon>(new TrayIcon(volumechanger));
 	trayicon->setTooltip(Glib::ustring("Alsa Volume Changer"));
 	app->hold();
 	volumechanger->set_visible(false);
