@@ -15,10 +15,14 @@ AlsaVolume::AlsaVolume(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
 	}
 	set_events(Gdk::LEAVE_NOTIFY_MASK);
 	signal_leave_notify_event().connect(sigc::mem_fun(*this, &AlsaVolume::on_focus_out));
+	settings_ = new Settings();
+	volumeValue_ = settings_->getVolume();
+	volumeSlider_->set_value(volumeValue_);
 }
 
 AlsaVolume::~AlsaVolume()
 {
+	delete settings_;
 }
 
 void AlsaVolume::runAboutDialog()
@@ -45,7 +49,8 @@ void AlsaVolume::setWindowPosition(int x_, int y_)
 
 void AlsaVolume::on_volume_slider()
 {
-	setAlsaVolume("Master", (long)volumeSlider_->get_value());
+	volumeValue_ = volumeSlider_->get_value();
+	setAlsaVolume("Master", volumeValue_);
 }
 
 bool AlsaVolume::on_focus_out(GdkEventCrossing* event)
@@ -71,11 +76,12 @@ void AlsaVolume::setVolumeValue(double value)
 	else if (value < 0) {
 		volumeSlider_->set_value(0);
 	}
+	volumeValue_ = volumeSlider_->get_value();
 }
 
 double AlsaVolume::getVolumeValue()
 {
-	return volumeSlider_->get_value();
+	return volumeValue_;
 }
 
 bool AlsaVolume::getVisible()
@@ -101,4 +107,9 @@ int AlsaVolume::getHeight()
 int AlsaVolume::getWidth()
 {
 	return get_width();
+}
+
+void AlsaVolume::saveSettings()
+{
+	settings_->saveVolume(volumeValue_);
 }

@@ -8,11 +8,10 @@ void onError (int errorIndex)
 	}
 }
 
-void setAlsaVolume(const char *mixer, long volume)
+void setAlsaVolume(const char *mixer, double volume)
 {
-	long min, max;
 	snd_mixer_t *handle;
-	snd_mixer_selem_id_t *sid;
+	snd_mixer_selem_id_t *smid;
 	int err = snd_mixer_open(&handle, 0);
 	if (err < 0) {
 		fprintf(stderr, "%s\n", snd_strerror(err));
@@ -40,14 +39,15 @@ void setAlsaVolume(const char *mixer, long volume)
 	err = snd_mixer_load(handle);
 	onError(err);
 
-	snd_mixer_selem_id_alloca(&sid);
-	snd_mixer_selem_id_set_index(sid, 0);
-	snd_mixer_selem_id_set_name(sid, mixer);
-	snd_mixer_elem_t* elem = snd_mixer_find_selem(handle, sid);
-
+	snd_mixer_selem_id_alloca(&smid);
+	snd_mixer_selem_id_set_index(smid, 0);
+	snd_mixer_selem_id_set_name(smid, mixer);
+	snd_mixer_elem_t* elem = snd_mixer_find_selem(handle, smid);
+	long min, max;
 	err = snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
 	onError(err);
-	err = snd_mixer_selem_set_playback_volume_all(elem, volume * max / 100);
+	long volume_ = (long)volume;
+	err = snd_mixer_selem_set_playback_volume_all(elem, volume_ * max / 100);
 	onError(err);
 	err = snd_mixer_close(handle);
 	onError(err);

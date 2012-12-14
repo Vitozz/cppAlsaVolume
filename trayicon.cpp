@@ -1,5 +1,6 @@
 #include "trayicon.h"
 #include "filework.h"
+#include "settings.h"
 #include "gtkmm/separatormenuitem.h"
 #include "gtkmm/stock.h"
 #include <iostream>
@@ -9,8 +10,7 @@ const uint MIDDLE_BUTTON = 2;
 const int OFFSET = 2;
 
 TrayIcon::TrayIcon(AlsaVolume *parent)
-: avWindow_(parent),
-  volumeValue_(0)
+: avWindow_(parent)
 {
 	avWindow_->hideWindow();
 	menu_ = Gtk::manage(new Gtk::Menu());
@@ -42,10 +42,12 @@ TrayIcon::TrayIcon(AlsaVolume *parent)
 	menu_->show_all_children();
 	//
 	signal_popup_menu().connect(sigc::mem_fun(*this, &TrayIcon::onPopup));
-	signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onLeftClick));
+	signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onHideRestore));
 	signal_scroll_event().connect(sigc::mem_fun(*this, &TrayIcon::onScrollEvent));
 	signal_button_press_event().connect(sigc::mem_fun(*this, &TrayIcon::onButtonClick));
+	volumeValue_ = avWindow_->getVolumeValue();
 	setIcon(volumeValue_);
+	setTooltip(Glib::ustring("Master volume: ") + Glib::ustring::format(volumeValue_,"%"));
 }
 
 TrayIcon::~TrayIcon()
@@ -79,14 +81,17 @@ void TrayIcon::onHideRestore()
 
 void TrayIcon::onQuit()
 {
+	avWindow_->saveSettings();
 	exit(0);
 }
 
 void TrayIcon::runMixerApp()
-{}
+{
+}
 
 void TrayIcon::runSettings()
-{}
+{
+}
 
 void TrayIcon::onAbout()
 {
@@ -134,11 +139,6 @@ void TrayIcon::setTooltip(Glib::ustring message)
 		set_tooltip_text(message);
 }
 
-void TrayIcon::onLeftClick()
-{
-	onHideRestore();
-}
-
 void TrayIcon::onPopup(guint button, guint32 activate_time)
 {
 	popup_menu_at_position(*menu_, button, activate_time);
@@ -154,8 +154,9 @@ bool TrayIcon::onScrollEvent(GdkEventScroll* event)
 		value-=OFFSET;
 	}
 	avWindow_->setVolumeValue(value);
-	volumeValue_ = (int)value;
+	volumeValue_ = (int)avWindow_->getVolumeValue();
 	setIcon(volumeValue_);
+	setTooltip(Glib::ustring("Master volume: ") + Glib::ustring::format(volumeValue_,"%"));
 	return false;
 }
 

@@ -26,7 +26,6 @@ protected:
 	void onAbout();
 	void onQuit();
 	//icon actions
-	virtual void onLeftClick();
 	virtual void onPopup(guint button, guint32 activate_time);
 	virtual bool onScrollEvent(GdkEventScroll *event);
 	virtual bool onButtonClick(GdkEventButton *event);

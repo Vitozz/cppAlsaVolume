@@ -3,7 +3,6 @@
 
 #include "alsa/asoundlib.h"
 
-void onError (int errorIndex);
-void setAlsaVolume(const char *mixer, long volume);
+void setAlsaVolume(const char *mixer, double volume);
 
 #endif // ALSAWORK_H

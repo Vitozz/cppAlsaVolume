@@ -33,7 +33,6 @@ int main (int argc, char *argv[])
 	AlsaVolume *volumechanger = 0;
 	refBuilder->get_widget_derived("volumeFrame", volumechanger);
 	Glib::RefPtr<TrayIcon> trayicon = Glib::RefPtr<TrayIcon>(new TrayIcon(volumechanger));
-	trayicon->setTooltip(Glib::ustring("Alsa Volume Changer"));
 	app->hold();
 	volumechanger->set_visible(false);
 	app->add_window(*volumechanger);

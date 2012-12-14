@@ -1,7 +1,12 @@
 #include "filework.h"
 #include <list>
-#include <fstream>
 #include <cstdlib>
+#include "glibmm/fileutils.h"
+
+bool checkFileExists(const char *fileName)
+{
+	return Glib::file_test(std::string(fileName), Glib::FILE_TEST_EXISTS);
+}
 
 Glib::ustring getResPath(const char *resName)
 {
@@ -19,15 +24,10 @@ Glib::ustring getResPath(const char *resName)
 	std::list<Glib::ustring>::iterator i = list.begin();
 	for (uint j=0; j < list.size(); j++) {
 		std::advance(i,j);
-		if (checkFileExists(*i)) {
+		const char *fileName = (char*)i->c_str();
+		if (checkFileExists(fileName)) {
 			return Glib::ustring(*i);
 		}
 	}
 	return "";
-}
-
-bool checkFileExists(Glib::ustring &fileName)
-{
-	std::ifstream infile(fileName.c_str());
-		return infile.good();
 }

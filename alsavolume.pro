@@ -14,13 +14,15 @@ SOURCES += main.cpp \
 	alsawork.cc \
 	trayicon.cpp \
 	filework.cpp \
-    sliderwindow.cpp
+    sliderwindow.cpp \
+    settings.cpp
 
 HEADERS += \
 	alsawork.h \
 	trayicon.h \
 	filework.h \
-    sliderwindow.h
+    sliderwindow.h \
+    settings.h
 
 INCLUDEPATH += \
 	/usr/include/gtkmm-3.0 \
