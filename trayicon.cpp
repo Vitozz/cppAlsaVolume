@@ -79,7 +79,7 @@ void TrayIcon::onHideRestore()
 				x_ = (aX + aW/2) - winWidth/2;
 			}
 			else {
-				x_ = aX - aW/2;
+				x_ = aX;
 			}
 		}
 		sliderWindow_->setWindowPosition(x_, y_);

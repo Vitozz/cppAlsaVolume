@@ -6,6 +6,7 @@
 SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade)
 : Gtk::Window(cobject)
 {
+	alsaWork_ = new AlsaWork();
 	Glib::RefPtr<Gtk::Builder>builder = refGlade;
 	volumeSlider_ = 0;
 	builder->get_widget("volume_slider", volumeSlider_);
@@ -17,7 +18,6 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	settings_ = new Settings();
 	volumeValue_ = settings_->getVolume();
 	volumeSlider_->set_value(volumeValue_);
-	alsaWork_ = new AlsaWork();
 }
 
 SliderWindow::~SliderWindow()
