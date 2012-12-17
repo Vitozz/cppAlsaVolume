@@ -12,10 +12,10 @@
 class TrayIcon : public Gtk::StatusIcon
 {
 public:
-	TrayIcon(AlsaVolume *parent);
+	TrayIcon(SliderWindow *parent);
 	virtual ~TrayIcon();
-	void setIcon(int value);
-	void setTooltip(Glib::ustring message);
+	void setIcon(double value);
+	void setTooltip(const Glib::ustring &message);
 
 protected:
 	//menu actions
@@ -29,13 +29,10 @@ protected:
 	virtual void onPopup(guint button, guint32 activate_time);
 	virtual bool onScrollEvent(GdkEventScroll *event);
 	virtual bool onButtonClick(GdkEventButton *event);
-
+	void on_signal_volume_changed(double volume);
 private:
-	void getGeometry();
-
-private:
-	AlsaVolume *avWindow_;
-	int volumeValue_;
+	SliderWindow *sliderWindow_;
+	double volumeValue_;
 	Gtk::Menu *menu_;
 	Gtk::ImageMenuItem *restoreItem_, *mixerItem_, *settingsItem_, *aboutItem_, *quitItem_;
 	Gtk::CheckMenuItem* muteItem_;

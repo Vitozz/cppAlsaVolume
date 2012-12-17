@@ -5,5 +5,6 @@
 #include <glibmm/ustring.h>
 
 Glib::ustring getResPath(const char *resName);
-bool checkFileExists(const char *fileName);
+bool checkFileExists(const std::string &fileName);
+
 #endif // FILEWORK_H

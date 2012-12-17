@@ -8,13 +8,16 @@ public:
 	Settings();
 	virtual ~Settings();
 	void saveVolume(double volume);
-	double getVolume();
+	double getVolume() const;
 private:
 	void parseDefaultConfig();
-	void parseConfig(Glib::ustring keyFile);
-	void loadConfig(const char *fileName);
+	void parseConfig(const Glib::ustring& keyFile);
+	void loadConfig(const std::string& fileName);
+	void createConfigDir(const std::string& dirname);
+
 private:
 	Glib::KeyFile *configFile_;
+	std::string iniFileName_;
 };
 
 #endif // SETTINGS_H

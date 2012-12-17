@@ -11,18 +11,18 @@ PKGCONFIG += gtkmm-3.0 \
 	     alsa
 
 SOURCES += main.cpp \
-	alsawork.cc \
 	trayicon.cpp \
 	filework.cpp \
-    sliderwindow.cpp \
-    settings.cpp
+	sliderwindow.cpp \
+	settings.cpp \
+	alsawork.cpp
 
 HEADERS += \
 	alsawork.h \
 	trayicon.h \
 	filework.h \
-    sliderwindow.h \
-    settings.h
+	sliderwindow.h \
+	settings.h
 
 INCLUDEPATH += \
 	/usr/include/gtkmm-3.0 \

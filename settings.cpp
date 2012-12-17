@@ -4,14 +4,13 @@
 #include "glibmm/fileutils.h"
 #include "fstream"
 
-const std::string homeDir = std::string(getenv("HOME"));
-const std::string configDir = std::string(homeDir + "/.config/cppAlsaVolume");
-const std::string iniFileName = configDir +std::string("/config.ini");
-
 Settings::Settings()
 {
+	std::string configDir = std::string(std::string(getenv("HOME")) + "/.config/cppAlsaVolume");
+	iniFileName_ = configDir + std::string("/config.ini");
 	configFile_ = new Glib::KeyFile();
-	loadConfig(iniFileName.c_str());
+	createConfigDir(configDir);
+	loadConfig(iniFileName_.c_str());
 }
 
 Settings::~Settings()
@@ -19,10 +18,10 @@ Settings::~Settings()
 	delete configFile_;
 }
 
-void Settings::loadConfig(const char *fileName)
+void Settings::loadConfig(const std::string& fileName)
 {
 	if (!checkFileExists(fileName)) {
-		parseDefaultConfig();
+		parseConfig(std::string(""));
 	}
 	configFile_->load_from_file(fileName);
 }
@@ -33,35 +32,38 @@ void Settings::saveVolume(double volume)
 	parseConfig(configFile_->to_data());
 }
 
-double Settings::getVolume()
+double Settings::getVolume() const
 {
 	double value = 0;
 	try {
 		value = (double)configFile_->get_integer(Glib::ustring("main"),Glib::ustring("volume"));
 	}
 	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::36::KeyFileError " << ex.what() << std::endl;
+		std::cerr << "settings.cpp::40::KeyFileError " << ex.what() << std::endl;
 	}
 
 	return value;
 }
 
-void Settings::parseDefaultConfig()
+void Settings::parseConfig(const Glib::ustring& keyFile)
 {
-	gint err = g_mkdir_with_parents(configDir.c_str(), 0755);
-	if (err == 0) {
-		std::ofstream ofile(iniFileName.c_str());
-		ofile << "" << std::endl;
+	try {
+		std::ofstream ofile(iniFileName_.c_str());
+		ofile << keyFile << std::endl;
 		ofile.close();
 	}
-	else {
-		std::cerr << g_file_error_from_errno(err) << std::endl;
+	catch ( const std::exception & ex ) {
+		std::cout << "settings.cpp::57::Parsing failed:: " << ex.what() << std::endl;
 	}
 }
 
-void Settings::parseConfig(Glib::ustring keyFile)
+void Settings::createConfigDir(const std::string& dirname)
 {
-	std::ofstream ofile(iniFileName.c_str());
-	ofile << keyFile << std::endl;
-	ofile.close();
+	if (Glib::file_test(dirname, Glib::FILE_TEST_IS_DIR)) {
+		gint err = 0;
+		err = g_mkdir_with_parents(dirname.c_str(), 0755);
+		if (err < 0) {
+			std::cerr << g_file_error_from_errno(err) << std::endl;
+		}
+	}
 }

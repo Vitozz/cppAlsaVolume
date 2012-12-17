@@ -3,9 +3,9 @@
 #include <cstdlib>
 #include "glibmm/fileutils.h"
 
-bool checkFileExists(const char *fileName)
+bool checkFileExists(const std::string &fileName)
 {
-	return Glib::file_test(std::string(fileName), Glib::FILE_TEST_EXISTS);
+	return Glib::file_test(fileName, Glib::FILE_TEST_EXISTS);
 }
 
 Glib::ustring getResPath(const char *resName)

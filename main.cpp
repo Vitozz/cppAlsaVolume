@@ -13,7 +13,7 @@ int main (int argc, char *argv[])
 	try {
 		Glib::ustring ui_ = getResPath("gladefiles/SliderFrame.glade");
 		if (ui_.empty()) {
-			std::cerr << "No pySliderFrame.glade file found" << std::endl;
+			std::cerr << "No SliderFrame.glade file found" << std::endl;
 			return 1;
 		}
 		refBuilder->add_from_file(ui_);
@@ -30,7 +30,7 @@ int main (int argc, char *argv[])
 		std::cerr << "BuilderError: " << ex.what() << std::endl;
 		return 1;
 	}
-	AlsaVolume *volumechanger = 0;
+	SliderWindow *volumechanger = 0;
 	refBuilder->get_widget_derived("volumeFrame", volumechanger);
 	Glib::RefPtr<TrayIcon> trayicon = Glib::RefPtr<TrayIcon>(new TrayIcon(volumechanger));
 	app->hold();
