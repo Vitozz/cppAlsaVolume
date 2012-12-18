@@ -1,10 +1,15 @@
 #include "alsawork.h"
-#include <sstream>
 
 AlsaWork::AlsaWork()
 {
 	getSndCardCtlName();
-	getSndCardHCtl(getSndCardCtl(cardName_));
+}
+
+AlsaWork::~AlsaWork()
+{
+	snd_hctl_close(alsaControls_->hctl);
+	snd_ctl_close(alsaControls_->ctl);
+	snd_config_update_free_global();
 }
 
 void AlsaWork::checkError (int errorIndex)
@@ -47,34 +52,72 @@ double AlsaWork::getAlsaVolume()
 
 snd_mixer_t *AlsaWork::getMixerHanlde()
 {
-	snd_hctl_t *hctl = getSndCardHCtl(getSndCardCtl(cardName_));
+	updateControls();
 	snd_mixer_t *handle;
 	checkError(snd_mixer_open(&handle, 0));
-	checkError(snd_mixer_attach_hctl(handle, hctl));
+	checkError(snd_mixer_attach_hctl(handle, alsaControls_->hctl));
 	checkError(snd_mixer_selem_register(handle, NULL, NULL));
 	checkError(snd_mixer_load(handle));
 	return handle;
 }
 
-snd_hctl_t *AlsaWork::getSndCardHCtl(snd_ctl_t *ctl)
+void AlsaWork::getSndCardHCtl()
 {
-	snd_hctl_t *hctl;
-	checkError(snd_hctl_open_ctl(&hctl, ctl));
-	return hctl;
+	checkError(snd_hctl_open_ctl(&alsaControls_->hctl, alsaControls_->ctl));
 }
 
-snd_ctl_t *AlsaWork::getSndCardCtl(const std::string &cardCtlName)
+void AlsaWork::getSndCardCtl(const char *cardCtlName)
 {
-	snd_ctl_t *ctl;
-	checkError(snd_ctl_open(&ctl, cardCtlName.c_str(), 0));
-	return ctl;
+	checkError(snd_ctl_open(&alsaControls_->ctl, cardCtlName, 0));
+}
+
+void AlsaWork::updateControls()
+{
+	getSndCardCtl(alsaControls_->name);
+	getSndCardHCtl();
 }
 
 void AlsaWork::getSndCardCtlName()
 {
-	int cardIndex = -1;
-	checkError(snd_card_next(&cardIndex));
-	std::stringstream ss;
-	ss << "hw:" << cardIndex;
-	cardName_ = ss.str();
+	if (getTotalCards() >= 1) {
+		formatCardName(0);
+	}
+	else {
+		std::cerr << "alsawork.cpp::86 No sound cards found" << std::endl;
+		exit(1);
+	}
+}
+
+void AlsaWork::formatCardName(int id)
+{
+	size_t size = 64;
+	char *name = (char*)malloc(size);
+	alsaControls_->name = (char*)malloc(size+1);
+	sprintf(name, "hw:%d", id);
+	strcpy(alsaControls_->name, name);
+	free (name);
+}
+
+int AlsaWork::getTotalCards()
+{
+	int cards = 0;
+	int index = -1;
+	for (;;) {
+		checkError(snd_card_next(&index));
+		if (index < 0) {
+			break;
+		}
+		++cards;
+	}
+	return cards;
+}
+
+std::string AlsaWork::getCardName()
+{
+	updateControls();
+	snd_ctl_card_info_t *cardInfo;
+	snd_ctl_card_info_alloca(&cardInfo);
+	checkError(snd_ctl_card_info(alsaControls_->ctl, cardInfo));
+	const char *cardName = snd_ctl_card_info_get_name(cardInfo);
+	return std::string(cardName);
 }

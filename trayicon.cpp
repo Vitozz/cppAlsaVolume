@@ -1,6 +1,5 @@
 #include "trayicon.h"
 #include "filework.h"
-#include "settings.h"
 #include "gtkmm/separatormenuitem.h"
 #include "gtkmm/stock.h"
 #include "glibmm.h"
@@ -142,7 +141,7 @@ void TrayIcon::setIcon(double value)
 	}
 	if (!iconPath.empty()) {
 		try {
-			set_from_file(getResPath(iconPath.c_str()));
+			set_from_file(FileWork::getResPath(iconPath.c_str()));
 		}
 		catch (Glib::FileError &err) {
 			std::cerr << "FileError::trayicon.cpp::138:: " << err.what() << std::endl;
@@ -187,5 +186,10 @@ void TrayIcon::on_signal_volume_changed(double volume)
 {
 	volumeValue_ = volume;
 	setIcon(volumeValue_);
-	setTooltip(Glib::ustring("Master volume: ") + Glib::ustring::format(volumeValue_,"%"));
+	Glib::ustring tip = Glib::ustring("Card: ")
+			  + Glib::ustring(sliderWindow_->getSoundCardName())
+			  + Glib::ustring("\n")
+			  + Glib::ustring("Master - ")
+			  + Glib::ustring::format(volumeValue_,"%");
+	setTooltip(tip);
 }

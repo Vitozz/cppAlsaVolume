@@ -10,10 +10,8 @@ public:
 	void saveVolume(double volume);
 	double getVolume() const;
 private:
-	void parseDefaultConfig();
-	void parseConfig(const Glib::ustring& keyFile);
+	void parseConfig(const Glib::ustring& keyFileData);
 	void loadConfig(const std::string& fileName);
-	void createConfigDir(const std::string& dirname);
 
 private:
 	Glib::KeyFile *configFile_;

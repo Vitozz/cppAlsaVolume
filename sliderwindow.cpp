@@ -37,8 +37,8 @@ void SliderWindow::runAboutDialog()
 	dialog->set_copyright("2012 (c) Vitaly Tonkacheyev (thetvg@gmail.com)");
 	dialog->set_website("http://sites.google.com/site/thesomeprojects/");
 	dialog->set_website_label("Program Website");
-	Glib::RefPtr<Gdk::Pixbuf> logo = Gdk::Pixbuf::create_from_file(getResPath("icons/volume.png"));
-	dialog->set_icon_from_file(getResPath("icons/tb_icon100.png"));
+	Glib::RefPtr<Gdk::Pixbuf> logo = Gdk::Pixbuf::create_from_file(FileWork::getResPath("icons/volume.png"));
+	dialog->set_icon_from_file(FileWork::getResPath("icons/tb_icon100.png"));
 	dialog->set_logo(logo);
 	dialog->run();
 	delete dialog;
@@ -120,4 +120,9 @@ void SliderWindow::saveSettings()
 SliderWindow::type_sliderwindow_signal SliderWindow::signal_volume_changed()
 {
 	return m_signal_volume_changed;
+}
+
+std::string SliderWindow::getSoundCardName() const
+{
+	return alsaWork_->getCardName();
 }

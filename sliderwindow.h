@@ -22,6 +22,7 @@ public:
 	int getWidth() const;
 	void setVolumeValue(double value);
 	double getVolumeValue() const;
+	std::string getSoundCardName() const;
 	void saveSettings();
 	//my signal
 	typedef sigc::signal<void, double> type_sliderwindow_signal;

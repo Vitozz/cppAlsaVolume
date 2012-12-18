@@ -9,25 +9,26 @@ int main (int argc, char *argv[])
 {
 	Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "org.gtkmm.alsavolume");
 
+	Glib::ustring ui_ = FileWork::getResPath("gladefiles/SliderFrame.glade");
+	if (ui_.empty()) {
+		std::cerr << "No SliderFrame.glade file found" << std::endl;
+		return 1;
+	}
 	Glib::RefPtr<Gtk::Builder> refBuilder = Gtk::Builder::create();
 	try {
-		Glib::ustring ui_ = getResPath("gladefiles/SliderFrame.glade");
-		if (ui_.empty()) {
-			std::cerr << "No SliderFrame.glade file found" << std::endl;
-			return 1;
-		}
+		//refBuilder->create_from_file(ui_);
 		refBuilder->add_from_file(ui_);
 	}
-	catch(const Glib::FileError& ex) {
-		std::cerr << "FileError: " << ex.what() << std::endl;
+	catch(const Gtk::BuilderError& ex) {
+		std::cerr << "BuilderError::main.cpp::19 " << ex.what() << std::endl;
 		return 1;
 	}
 	catch(const Glib::MarkupError& ex) {
-		std::cerr << "MarkupError: " << ex.what() << std::endl;
+		std::cerr << "MarkupError::main.cpp::19 " << ex.what() << std::endl;
 		return 1;
 	}
-	catch(const Gtk::BuilderError& ex) {
-		std::cerr << "BuilderError: " << ex.what() << std::endl;
+	catch(const Glib::FileError& ex) {
+		std::cerr << "FileError::main.cpp::19 " << ex.what() << std::endl;
 		return 1;
 	}
 	SliderWindow *volumechanger = 0;

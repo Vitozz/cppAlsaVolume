@@ -9,7 +9,7 @@ Settings::Settings()
 	std::string configDir = std::string(std::string(getenv("HOME")) + "/.config/cppAlsaVolume");
 	iniFileName_ = configDir + std::string("/config.ini");
 	configFile_ = new Glib::KeyFile();
-	createConfigDir(configDir);
+	FileWork::createDirectory(configDir);
 	loadConfig(iniFileName_.c_str());
 }
 
@@ -20,10 +20,15 @@ Settings::~Settings()
 
 void Settings::loadConfig(const std::string& fileName)
 {
-	if (!checkFileExists(fileName)) {
+	if (!FileWork::checkFileExists(fileName)) {
 		parseConfig(std::string(""));
 	}
-	configFile_->load_from_file(fileName);
+	try {
+		configFile_->load_from_file(fileName);
+	}
+	catch (Glib::FileError &err) {
+		std::cerr << "settings.cpp::27:: " << fileName << " - " << err.what() << std::endl;
+	}
 }
 
 void Settings::saveVolume(double volume)
@@ -45,25 +50,7 @@ double Settings::getVolume() const
 	return value;
 }
 
-void Settings::parseConfig(const Glib::ustring& keyFile)
+void Settings::parseConfig(const Glib::ustring& keyFileData)
 {
-	try {
-		std::ofstream ofile(iniFileName_.c_str());
-		ofile << keyFile << std::endl;
-		ofile.close();
-	}
-	catch ( const std::exception & ex ) {
-		std::cout << "settings.cpp::57::Parsing failed:: " << ex.what() << std::endl;
-	}
-}
-
-void Settings::createConfigDir(const std::string& dirname)
-{
-	if (Glib::file_test(dirname, Glib::FILE_TEST_IS_DIR)) {
-		gint err = 0;
-		err = g_mkdir_with_parents(dirname.c_str(), 0755);
-		if (err < 0) {
-			std::cerr << g_file_error_from_errno(err) << std::endl;
-		}
-	}
+	FileWork::saveFile(iniFileName_, keyFileData);
 }
