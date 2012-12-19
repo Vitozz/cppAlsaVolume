@@ -7,6 +7,7 @@
 #include "gtkmm/scale.h"
 #include "settings.h"
 #include "alsawork.h"
+#include <vector>
 
 class SliderWindow : public Gtk::Window
 {
@@ -22,7 +23,8 @@ public:
 	int getWidth() const;
 	void setVolumeValue(double value);
 	double getVolumeValue() const;
-	std::string getSoundCardName(int index) const;
+	std::string getSoundCardName() const;
+	std::string getActiveMixer() const;
 	void saveSettings();
 	//my signal
 	typedef sigc::signal<void, double> type_sliderwindow_signal;
@@ -37,6 +39,9 @@ private:
 	double volumeValue_;
 	Settings *settings_;
 	AlsaWork *alsaWork_;
+	std::vector<std::string> cardList_;
+	std::vector<std::string> mixerList_;
+	int cardId_, mixerId_;
 };
 
 #endif // SLIDERWINDOW_H

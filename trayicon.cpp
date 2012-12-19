@@ -187,9 +187,10 @@ void TrayIcon::on_signal_volume_changed(double volume)
 	volumeValue_ = volume;
 	setIcon(volumeValue_);
 	Glib::ustring tip = Glib::ustring("Card: ")
-			  + Glib::ustring(sliderWindow_->getSoundCardName(0))
+			  + Glib::ustring(sliderWindow_->getSoundCardName())
 			  + Glib::ustring("\n")
-			  + Glib::ustring("Master - ")
+			  + Glib::ustring(sliderWindow_->getActiveMixer())
+			  + Glib::ustring(" - ")
 			  + Glib::ustring::format(volumeValue_,"%");
 	setTooltip(tip);
 }

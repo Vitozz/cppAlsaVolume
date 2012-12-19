@@ -16,6 +16,10 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	set_events(Gdk::LEAVE_NOTIFY_MASK);
 	signal_leave_notify_event().connect(sigc::mem_fun(*this, &SliderWindow::on_focus_out));
 	settings_ = new Settings();
+	cardId_ = 0;
+	mixerId_ = 0;
+	cardList_ = alsaWork_->getCardsList();
+	mixerList_ = alsaWork_->getMixersList(cardId_);
 	volumeValue_ = settings_->getVolume();
 	volumeSlider_->set_value(volumeValue_);
 }
@@ -52,9 +56,9 @@ void SliderWindow::setWindowPosition(int x_, int y_)
 void SliderWindow::on_volume_slider()
 {
 	volumeValue_ = volumeSlider_->get_value();
-	alsaWork_->setAlsaVolume("Master", volumeValue_);
+	alsaWork_->setAlsaVolume(mixerList_.at(mixerId_), volumeValue_);
 	m_signal_volume_changed.emit(volumeValue_);
-	std::cout << "Volume= " << alsaWork_->getAlsaVolume("Master") << std::endl;
+	std::cout << "Volume= " << alsaWork_->getAlsaVolume(mixerList_.at(mixerId_)) << std::endl;
 }
 
 bool SliderWindow::on_focus_out(GdkEventCrossing* event)
@@ -81,6 +85,11 @@ void SliderWindow::setVolumeValue(double value)
 		volumeValue_ = value;
 	}
 	volumeSlider_->set_value(volumeValue_);
+}
+
+std::string SliderWindow::getActiveMixer() const
+{
+	return mixerList_.at(mixerId_);
 }
 
 double SliderWindow::getVolumeValue() const
@@ -123,7 +132,7 @@ SliderWindow::type_sliderwindow_signal SliderWindow::signal_volume_changed()
 	return m_signal_volume_changed;
 }
 
-std::string SliderWindow::getSoundCardName(int index) const
+std::string SliderWindow::getSoundCardName() const
 {
-	return alsaWork_->getCardName(index);
+	return alsaWork_->getCardName(cardId_);
 }
