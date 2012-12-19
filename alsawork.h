@@ -3,6 +3,8 @@
 
 #include "alsa/asoundlib.h"
 #include <iostream>
+#include <list>
+#include <map>
 
 struct AlsaControls {
 	char *name;
@@ -16,8 +18,10 @@ public:
 	AlsaWork();
 	~AlsaWork();
 	void setAlsaVolume(const char *mixer, double volume);
-	double getAlsaVolume();
-	std::string getCardName();
+	double getAlsaVolume(const char *mixer);
+	std::string getCardName(int index);
+	std::list<std::string> getCardsMap();
+	std::list<std::string> getMixersList();
 
 private:
 	void getSndCardCtlName();
@@ -30,8 +34,13 @@ private:
 	void setVolume(snd_mixer_elem_t *element, snd_mixer_t *handle, double volume);
 	void formatCardName(int id);
 	void checkError (int errorIndex);
+	std::string getMixerName(int index);
+	void getCards();
+	void getMixers();
 private:
 	AlsaControls *alsaControls_;
 	std::string cardName_;
+	std::list<std::string> cardList_;
+	std::list<std::string> mixerList_;
 };
 #endif // ALSAWORK_H

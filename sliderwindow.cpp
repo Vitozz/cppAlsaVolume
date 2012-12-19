@@ -54,6 +54,7 @@ void SliderWindow::on_volume_slider()
 	volumeValue_ = volumeSlider_->get_value();
 	alsaWork_->setAlsaVolume("Master", volumeValue_);
 	m_signal_volume_changed.emit(volumeValue_);
+	std::cout << "Volume= " << alsaWork_->getAlsaVolume("Master") << std::endl;
 }
 
 bool SliderWindow::on_focus_out(GdkEventCrossing* event)
@@ -122,7 +123,7 @@ SliderWindow::type_sliderwindow_signal SliderWindow::signal_volume_changed()
 	return m_signal_volume_changed;
 }
 
-std::string SliderWindow::getSoundCardName() const
+std::string SliderWindow::getSoundCardName(int index) const
 {
-	return alsaWork_->getCardName();
+	return alsaWork_->getCardName(index);
 }

@@ -2,7 +2,8 @@
 
 AlsaWork::AlsaWork()
 {
-	getSndCardCtlName();
+	getCards();
+	getMixers();
 }
 
 AlsaWork::~AlsaWork()
@@ -38,16 +39,43 @@ snd_mixer_elem_t *AlsaWork::initMixerElement(snd_mixer_t *handle, const char *mi
 
 void AlsaWork::setVolume(snd_mixer_elem_t *element, snd_mixer_t *handle, double volume)
 {
-	long min, max;
-	checkError(snd_mixer_selem_get_playback_volume_range(element, &min, &max));
-	long volume_ = (long)volume;
-	checkError(snd_mixer_selem_set_playback_volume_all(element, volume_ * max / 100));
+	if (snd_mixer_selem_has_playback_volume(element) == 1) {
+		long min, max;
+		checkError(snd_mixer_selem_get_playback_volume_range(element, &min, &max));
+		long volume_ = (long)volume;
+		std::cout << "min= "<< min <<" max = " << max << std::endl;
+		checkError(snd_mixer_selem_set_playback_volume_all(element, volume_ * max / 100));
+	}
+	else{
+		std::cerr << "Selected mixer has no playback volume" << std::endl;
+	}
 	checkError(snd_mixer_close(handle));
 }
 
-double AlsaWork::getAlsaVolume()
+double AlsaWork::getAlsaVolume(const char *mixer)
 {
-	return 0;
+	snd_mixer_t *handle = getMixerHanlde();
+	snd_mixer_elem_t *elem = initMixerElement(handle, mixer);
+	if (snd_mixer_selem_has_playback_volume(elem) == 1) {
+		long minv, maxv;
+		long outvol;
+		snd_mixer_selem_get_playback_volume_range (elem, &minv, &maxv);
+		snd_mixer_selem_channel_id_t chanelid = SND_MIXER_SCHN_FRONT_CENTER;
+		std::cout << snd_mixer_selem_channel_name(chanelid) << std::endl;
+		if (snd_mixer_selem_has_playback_channel(elem, chanelid) == 1) {
+			checkError(snd_mixer_selem_get_playback_volume(elem, chanelid, &outvol));
+		}
+		else {
+			checkError(snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_MONO, &outvol));
+		}
+		outvol -= minv;
+		maxv -= minv;
+		minv = 0;
+		outvol = 100 * outvol / maxv;
+		return (double)outvol;
+	}
+	checkError(snd_mixer_close(handle));
+	return 0.0;
 }
 
 snd_mixer_t *AlsaWork::getMixerHanlde()
@@ -77,17 +105,6 @@ void AlsaWork::updateControls()
 	getSndCardHCtl();
 }
 
-void AlsaWork::getSndCardCtlName()
-{
-	if (getTotalCards() >= 1) {
-		formatCardName(0);
-	}
-	else {
-		std::cerr << "alsawork.cpp::86 No sound cards found" << std::endl;
-		exit(1);
-	}
-}
-
 void AlsaWork::formatCardName(int id)
 {
 	size_t size = 64;
@@ -112,12 +129,51 @@ int AlsaWork::getTotalCards()
 	return cards;
 }
 
-std::string AlsaWork::getCardName()
+std::string AlsaWork::getCardName(int index)
 {
 	updateControls();
+	snd_ctl_t *ctl;
+	formatCardName(index);
+	checkError(snd_ctl_open(&ctl, alsaControls_->name, 0));
 	snd_ctl_card_info_t *cardInfo;
 	snd_ctl_card_info_alloca(&cardInfo);
-	checkError(snd_ctl_card_info(alsaControls_->ctl, cardInfo));
+	checkError(snd_ctl_card_info(ctl, cardInfo));
 	const char *cardName = snd_ctl_card_info_get_name(cardInfo);
+	snd_ctl_close(ctl);
 	return std::string(cardName);
+}
+
+void AlsaWork::getMixers()
+{
+	snd_mixer_t *handle = getMixerHanlde();
+	snd_mixer_selem_id_t *smid;
+	snd_mixer_selem_id_alloca(&smid);
+	for (snd_mixer_elem_t *element = snd_mixer_first_elem(handle);
+	     element;
+	     element = snd_mixer_elem_next(element)) {
+		snd_mixer_selem_get_id(element, smid);
+		mixerList_.push_back(std::string(snd_mixer_selem_id_get_name(smid)));
+	}
+	snd_mixer_close(handle);
+}
+
+void AlsaWork::getCards()
+{
+	int total = getTotalCards();
+	if (total >= 1) {
+		for (int card = 0; card < total; card++) {
+			cardList_.push_back(getCardName(card));
+		}
+	}
+}
+
+std::list<std::string> AlsaWork::getCardsMap()
+{
+
+	return cardList_;
+}
+
+std::list<std::string> AlsaWork::getMixersList()
+{
+	return mixerList_;
 }
