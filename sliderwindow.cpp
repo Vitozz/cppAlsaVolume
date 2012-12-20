@@ -1,6 +1,5 @@
 #include "sliderwindow.h"
 #include "settingsframe.h"
-#include "tools.h"
 #include "gtkmm/aboutdialog.h"
 #include "glibmm.h"
 #include <iostream>
@@ -31,8 +30,10 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 		mixerId_ = 0;
 		mixerName_ = mixerList_.at(mixerId_);
 	}
+
 	volumeValue_ = settings_->getVolume();
 	volumeSlider_->set_value(volumeValue_);
+	orient_ = settings_->getNotebookOrientation();
 }
 
 SliderWindow::~SliderWindow()
@@ -67,9 +68,9 @@ void SliderWindow::setWindowPosition(int x_, int y_)
 void SliderWindow::on_volume_slider()
 {
 	volumeValue_ = volumeSlider_->get_value();
-	alsaWork_->setAlsaVolume(mixerList_.at(mixerId_), volumeValue_);
+	alsaWork_->setAlsaVolume(mixerName_, volumeValue_);
 	m_signal_volume_changed.emit(volumeValue_);
-	std::cout << "Volume= " << alsaWork_->getAlsaVolume(mixerList_.at(mixerId_)) << std::endl;
+	std::cout << "Volume= " << alsaWork_->getAlsaVolume(mixerName_) << std::endl;
 }
 
 bool SliderWindow::on_focus_out(GdkEventCrossing* event)
@@ -138,6 +139,8 @@ void SliderWindow::saveSettings()
 	settings_->saveVolume(volumeValue_);
 	settings_->saveSoundCard(cardId_);
 	settings_->saveMixer(std::string(mixerName_.c_str()));
+	settings_->saveNotebookOrientation(orient_);
+
 }
 
 SliderWindow::type_sliderwindow_signal SliderWindow::signal_volume_changed()
@@ -174,8 +177,16 @@ void SliderWindow::createSettingsDialog()
 	builder_->get_widget_derived("settingsDialog", settingsDialog);
 
 	if (settingsDialog) {
-		settingsDialog->runDialog(this);
-		//delete settingsDialog;
+		settingsStr str;
+		str.cardId = cardId_;
+		str.mixerId = mixerId_;
+		str.cardList = cardList_;
+		str.mixerList = mixerList_;
+		str.notebookOrientation = orient_;
+		settingsDialog->initParms(str);
+		settingsDialog->signal_ok_pressed().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogOk));
+		settingsDialog->run();
+		delete settingsDialog;
 	}
 
 }
@@ -183,4 +194,28 @@ void SliderWindow::createSettingsDialog()
 void SliderWindow::runSettings()
 {
 	createSettingsDialog();
+}
+
+std::vector<std::string> SliderWindow::getMixersList()
+{
+	return mixerList_;
+}
+
+std::vector<std::string> SliderWindow::getCardsList()
+{
+	return cardList_;
+}
+
+void SliderWindow::setActiveCard(int card)
+{
+	alsaWork_->setCardId(card);
+}
+
+void SliderWindow::onSettingsDialogOk(settingsStr str)
+{
+	cardId_ = str.cardId;
+	alsaWork_->setCardId(cardId_);
+	mixerId_ = str.mixerId;
+	mixerName_ = mixerList_.at(mixerId_);
+	orient_ = str.notebookOrientation;
 }

@@ -1,9 +1,9 @@
 #include "settingsframe.h"
 #include <iostream>
 
-SettingsFrame::SettingsFrame(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade)
+SettingsFrame::SettingsFrame(BaseObjectType* cobject,
+			     const Glib::RefPtr<Gtk::Builder>& refGlade)
  : Gtk::Dialog(cobject),
-   parent_(0),
    okButton_(0),
    cancelButton_(0),
    sndCardBox_(0),
@@ -13,7 +13,9 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Bu
    iconPacks_(0),
    isAutoRun_(0),
    tabPos_(0),
-   tabWidget_(0)
+   tabWidget_(0),
+   cards_(0),
+   mixers_(0)
 {
 	Glib::RefPtr<Gtk::Builder> builder = refGlade;
 	builder->get_widget("ok_button", okButton_);
@@ -26,6 +28,7 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Bu
 	builder->get_widget("is_autorun", isAutoRun_);
 	builder->get_widget("tabspos", tabPos_);
 	builder->get_widget("tabwidget", tabWidget_);
+	//signals
 	if (tabPos_) {
 		tabPos_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onTabPos));
 	}
@@ -54,37 +57,104 @@ SettingsFrame::~SettingsFrame()
 	delete tabWidget_;
 }
 
-void SettingsFrame::runDialog(SliderWindow *parent)
+void SettingsFrame::initParms(settingsStr str)
 {
-	parent_ = parent;
-	run();
+	settings_ = str;
+	tabPos_->set_active(settings_.notebookOrientation);
+	setupTreeModels();
 }
 
-void SettingsFrame::onTabPos()
+void SettingsFrame::setTabPos(bool orient)
 {
-	if(tabWidget_){
-		if(tabPos_->get_active()) {
+	if (tabWidget_) {
+		if(orient) {
 			tabWidget_->set_tab_pos(Gtk::POS_TOP);
 		}
 		else {
 			tabWidget_->set_tab_pos(Gtk::POS_LEFT);
 		}
+		settings_.notebookOrientation = orient;
 	}
+}
+
+void SettingsFrame::onTabPos()
+{
+	setTabPos(tabPos_->get_active());
 }
 
 void SettingsFrame::onOkButton()
 {
-	this->destroy_();
+	m_signal_ok_pressed.emit(settings_);
+	//this->destroy_();
 }
 
 void SettingsFrame::onCancelButton()
 {
-	onOkButton();
+	this->destroy_();
 }
 
 bool SettingsFrame::onDeleteEvent(GdkEventAny *event)
 {
 	if (event->type == GDK_DESTROY || event->type == GDK_DELETE)
-		onOkButton();
+		onCancelButton();
 	return true;
+}
+
+void SettingsFrame::setupTreeModels()
+{
+	//treeview setup
+	if (sndCardBox_){
+		cards_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_Columns));
+		sndCardBox_->set_model(cards_);
+		sndCardBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::sndBoxChanged));
+		Gtk::TreeModel::Row row;
+		for (int i = 0; i < (int)settings_.cardList.size(); i++) {
+			row = *(cards_->append());
+			row[m_Columns.m_col_name] = Glib::ustring(settings_.cardList.at(i));
+			if (i == settings_.cardId) {
+				sndCardBox_->set_active(row);
+			}
+		}
+		sndCardBox_->pack_start(m_Columns.m_col_name);
+	}
+	if (mixerBox_) {
+		mixers_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_Columns));
+		mixerBox_->set_model(mixers_);
+		mixerBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::mixerBoxChanged));
+		Gtk::TreeModel::Row row;
+		for (int i = 0; i < (int)settings_.mixerList.size(); i++) {
+			row = *(mixers_->append());
+			row[m_Columns.m_col_name] = Glib::ustring(settings_.mixerList.at(i));
+			if (i == settings_.mixerId) {
+				mixerBox_->set_active(row);
+			}
+		}
+		mixerBox_->pack_start(m_Columns.m_col_name);
+	}
+
+}
+
+void SettingsFrame::sndBoxChanged()
+{
+	settings_.cardId = sndCardBox_->get_active_row_number();
+	std::cout << settings_.cardId << std::endl;
+}
+
+void SettingsFrame::mixerBoxChanged()
+{
+	settings_.mixerId = mixerBox_->get_active_row_number();
+	/*Gtk::TreeModel::iterator iter = mixerBox_->get_active();
+	if(iter)
+	{
+		Gtk::TreeModel::Row row = *iter;
+		if(row) {
+			mixerName_ = row[m_Columns.m_col_name];
+			std::cout << mixerName_.c_str() << std::endl;
+		}
+	}*/
+}
+
+SettingsFrame::type_void_signal SettingsFrame::signal_ok_pressed()
+{
+	return m_signal_ok_pressed;
 }

@@ -90,3 +90,21 @@ void Settings::saveMixer(const std::string &mixerName)
 	configFile_->set_string(Glib::ustring("main"),Glib::ustring("mixer"),mixerName);
 	parseConfig(configFile_->to_data());
 }
+
+void Settings::saveNotebookOrientation(bool orient)
+{
+	configFile_->set_boolean(Glib::ustring("main"),Glib::ustring("orient"),orient);
+	parseConfig(configFile_->to_data());
+}
+
+bool Settings::getNotebookOrientation()
+{
+	bool orient = false;
+	try {
+		orient = bool(configFile_->get_boolean(Glib::ustring("main"),Glib::ustring("orient")));
+	}
+	catch (const Glib::KeyFileError& ex) {
+		std::cerr << "settings.cpp::104::KeyFileError " << ex.what() << std::endl;
+	}
+	return orient;
+}

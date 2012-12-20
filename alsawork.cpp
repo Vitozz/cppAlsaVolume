@@ -1,4 +1,5 @@
 #include "alsawork.h"
+#include <stdexcept>
 
 AlsaWork::AlsaWork()
 {
@@ -164,4 +165,16 @@ std::vector<std::string> AlsaWork::getMixersList(int cardIndex)
 {
 	getMixers(cardIndex);
 	return mixerList_;
+}
+
+void AlsaWork::setCardId(int cardId)
+{
+	try {
+		if (!cardList_.at(cardId).empty()) {
+			cardId_ = cardId;
+		}
+	}
+	catch (std::out_of_range &ex) {
+		std::cerr << "alsawork.cpp::173:: Item out of Range" << ex.what() << std::endl;
+	}
 }

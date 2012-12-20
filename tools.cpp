@@ -66,7 +66,8 @@ std::pair<bool, int> FileWork::itemExists(std::vector<std::string> vector, Glib:
 	std::vector<std::string>::iterator it = vector.begin();
 	for (int i=0; i < (int)vector.size(); i++) {
 		std::advance(it, i);
-		if (it->c_str() == item.c_str()) {
+		const std::string answ(*it);
+		if (Glib::ustring(answ) == item) {
 			index = i;
 			exists = true;
 			break;

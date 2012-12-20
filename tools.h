@@ -6,6 +6,14 @@
 #include <vector>
 #include <map>
 
+struct settingsStr {
+	int cardId;
+	int mixerId;
+	bool notebookOrientation;
+	std::vector<std::string> cardList;
+	std::vector<std::string> mixerList;
+};
+
 namespace FileWork {
 	Glib::ustring getResPath(const char *resName);
 	bool checkFileExists(const std::string &fileName);

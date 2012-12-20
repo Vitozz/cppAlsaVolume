@@ -15,6 +15,7 @@ public:
 	std::string getCardName(int index);
 	std::vector<std::string> getCardsList();
 	std::vector<std::string> getMixersList(int cardIndex);
+	void setCardId(int cardId);
 
 private:
 	int getTotalCards();

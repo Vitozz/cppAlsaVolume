@@ -13,6 +13,8 @@ public:
 	void saveSoundCard(int soundCard);
 	Glib::ustring getMixer();
 	void saveMixer(const std::string& mixerName);
+	void saveNotebookOrientation(bool orient);
+	bool getNotebookOrientation();
 private:
 	void parseConfig(const Glib::ustring& keyFileData);
 	void loadConfig(const std::string& fileName);
