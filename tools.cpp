@@ -1,8 +1,10 @@
-#include "filework.h"
+#include "tools.h"
 #include "glibmm/fileutils.h"
 #include <fstream>
 #include <list>
 #include <cstdlib>
+#include <vector>
+#include <map>
 
 bool FileWork::checkFileExists(const std::string &fileName)
 {
@@ -55,4 +57,22 @@ void FileWork::saveFile(const std::string &fileName, const Glib::ustring &fileDa
 	catch ( const std::exception & ex ) {
 		std::cout << "settings.cpp::57::Parsing failed:: " << ex.what() << std::endl;
 	}
+}
+
+std::pair<bool, int> FileWork::itemExists(std::vector<std::string> vector, Glib::ustring item)
+{
+	int index = 0;
+	bool exists = false;
+	std::vector<std::string>::iterator it = vector.begin();
+	for (int i=0; i < (int)vector.size(); i++) {
+		std::advance(it, i);
+		if (it->c_str() == item.c_str()) {
+			index = i;
+			exists = true;
+			break;
+		}
+	}
+	std::pair<bool, int> result(exists, index);
+	return result;
+
 }

@@ -1,13 +1,16 @@
 #include "sliderwindow.h"
-#include "filework.h"
+#include "settingsframe.h"
+#include "tools.h"
 #include "gtkmm/aboutdialog.h"
+#include "glibmm.h"
 #include <iostream>
+#include <map>
 
 SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade)
 : Gtk::Window(cobject)
 {
 	alsaWork_ = new AlsaWork();
-	Glib::RefPtr<Gtk::Builder>builder = refGlade;
+	Glib::RefPtr<Gtk::Builder> builder = refGlade;
 	volumeSlider_ = 0;
 	builder->get_widget("volume_slider", volumeSlider_);
 	if (volumeSlider_) {
@@ -16,10 +19,18 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	set_events(Gdk::LEAVE_NOTIFY_MASK);
 	signal_leave_notify_event().connect(sigc::mem_fun(*this, &SliderWindow::on_focus_out));
 	settings_ = new Settings();
-	cardId_ = 0;
-	mixerId_ = 0;
 	cardList_ = alsaWork_->getCardsList();
+	cardId_ = settings_->getSoundCard();
 	mixerList_ = alsaWork_->getMixersList(cardId_);
+	mixerName_ = settings_->getMixer();
+	std::pair<bool, int> isMixer = FileWork::itemExists(mixerList_, mixerName_);
+	if (isMixer.first) {
+		mixerId_ = isMixer.second;
+	}
+	else {
+		mixerId_ = 0;
+		mixerName_ = mixerList_.at(mixerId_);
+	}
 	volumeValue_ = settings_->getVolume();
 	volumeSlider_->set_value(volumeValue_);
 }
@@ -125,6 +136,8 @@ int SliderWindow::getWidth() const
 void SliderWindow::saveSettings()
 {
 	settings_->saveVolume(volumeValue_);
+	settings_->saveSoundCard(cardId_);
+	settings_->saveMixer(std::string(mixerName_.c_str()));
 }
 
 SliderWindow::type_sliderwindow_signal SliderWindow::signal_volume_changed()
@@ -135,4 +148,39 @@ SliderWindow::type_sliderwindow_signal SliderWindow::signal_volume_changed()
 std::string SliderWindow::getSoundCardName() const
 {
 	return alsaWork_->getCardName(cardId_);
+}
+
+void SliderWindow::createSettingsDialog()
+{
+	SettingsFrame *settingsDialog = 0;
+	Glib::ustring ui_ = FileWork::getResPath("gladefiles/SettingsFrame.glade");
+	if (ui_.empty()) {
+		std::cerr << "No SliderFrame.glade file found" << std::endl;
+	}
+	builder_ = Gtk::Builder::create();
+	try {
+		//refBuilder->create_from_file(ui_);
+		builder_->add_from_file(ui_);
+	}
+	catch(const Gtk::BuilderError& ex) {
+		std::cerr << "BuilderError::main.cpp::19 " << ex.what() << std::endl;
+	}
+	catch(const Glib::MarkupError& ex) {
+		std::cerr << "MarkupError::main.cpp::19 " << ex.what() << std::endl;
+	}
+	catch(const Glib::FileError& ex) {
+		std::cerr << "FileError::main.cpp::19 " << ex.what() << std::endl;
+	}
+	builder_->get_widget_derived("settingsDialog", settingsDialog);
+
+	if (settingsDialog) {
+		settingsDialog->runDialog(this);
+		//delete settingsDialog;
+	}
+
+}
+
+void SliderWindow::runSettings()
+{
+	createSettingsDialog();
 }

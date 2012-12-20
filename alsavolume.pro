@@ -1,6 +1,6 @@
 ### eqmake4 was here ###
-CONFIG -= release debug
-CONFIG += debug_and_release
+CONFIG -= debug_and_release debug
+CONFIG += release
 
 TEMPLATE = app
 CONFIG += console
@@ -12,17 +12,19 @@ PKGCONFIG += gtkmm-3.0 \
 
 SOURCES += main.cpp \
 	trayicon.cpp \
-	filework.cpp \
 	sliderwindow.cpp \
 	settings.cpp \
-	alsawork.cpp
+	alsawork.cpp \
+	tools.cpp \
+    settingsframe.cpp
 
 HEADERS += \
 	alsawork.h \
 	trayicon.h \
-	filework.h \
 	sliderwindow.h \
-	settings.h
+	settings.h \
+	tools.h \
+    settingsframe.h
 
 INCLUDEPATH += \
 	/usr/include/gtkmm-3.0 \

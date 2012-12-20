@@ -2,12 +2,12 @@
 #define TRAYICON_H
 
 #include "sliderwindow.h"
-#include <gtkmm/statusicon.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/imagemenuitem.h>
-#include <gtkmm/checkmenuitem.h>
-#include <gtkmm/aboutdialog.h>
+#include "gtkmm/statusicon.h"
+#include "gtkmm/menu.h"
+#include "gtkmm/menuitem.h"
+#include "gtkmm/imagemenuitem.h"
+#include "gtkmm/checkmenuitem.h"
+#include "gtkmm/aboutdialog.h"
 
 class TrayIcon : public Gtk::StatusIcon
 {

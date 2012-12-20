@@ -1,5 +1,5 @@
 #include "settings.h"
-#include "filework.h"
+#include "tools.h"
 #include "glibmm/keyfile.h"
 #include "glibmm/fileutils.h"
 #include "fstream"
@@ -53,4 +53,40 @@ double Settings::getVolume() const
 void Settings::parseConfig(const Glib::ustring& keyFileData)
 {
 	FileWork::saveFile(iniFileName_, keyFileData);
+}
+
+int Settings::getSoundCard()
+{
+	int card = 0;
+	try {
+		card = (int)configFile_->get_integer(Glib::ustring("main"),Glib::ustring("card"));
+	}
+	catch (const Glib::KeyFileError& ex) {
+		std::cerr << "settings.cpp::62::KeyFileError " << ex.what() << std::endl;
+	}
+	return card;
+}
+
+void Settings::saveSoundCard(int soundCard)
+{
+	configFile_->set_integer(Glib::ustring("main"),Glib::ustring("card"),soundCard);
+	parseConfig(configFile_->to_data());
+}
+
+Glib::ustring Settings::getMixer()
+{
+	Glib::ustring mixer("");
+	try {
+		mixer = Glib::ustring(configFile_->get_string(Glib::ustring("main"),Glib::ustring("mixer")));
+	}
+	catch (const Glib::KeyFileError& ex) {
+		std::cerr << "settings.cpp::80::KeyFileError " << ex.what() << std::endl;
+	}
+	return mixer;
+}
+
+void Settings::saveMixer(const std::string &mixerName)
+{
+	configFile_->set_string(Glib::ustring("main"),Glib::ustring("mixer"),mixerName);
+	parseConfig(configFile_->to_data());
 }

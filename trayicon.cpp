@@ -1,5 +1,5 @@
 #include "trayicon.h"
-#include "filework.h"
+#include "tools.h"
 #include "gtkmm/separatormenuitem.h"
 #include "gtkmm/stock.h"
 #include "glibmm.h"
@@ -51,6 +51,7 @@ TrayIcon::TrayIcon(SliderWindow *parent)
 
 TrayIcon::~TrayIcon()
 {
+	delete sliderWindow_;
 }
 
 void TrayIcon::onHideRestore()
@@ -101,6 +102,7 @@ void TrayIcon::runMixerApp()
 
 void TrayIcon::runSettings()
 {
+	sliderWindow_->runSettings();
 }
 
 void TrayIcon::onAbout()

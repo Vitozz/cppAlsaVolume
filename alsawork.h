@@ -23,7 +23,6 @@ private:
 	void setVolume(snd_mixer_elem_t *element, snd_mixer_t *handle, double volume);
 	std::string formatCardName(int id);
 	void checkError (int errorIndex);
-	std::string getMixerName(int index);
 	void getCards();
 	void getMixers(int cardIndex);
 private:
