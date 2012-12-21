@@ -22,15 +22,16 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	cardId_ = settings_->getSoundCard();
 	mixerList_ = alsaWork_->getMixersList(cardId_);
 	mixerName_ = settings_->getMixer();
-	std::pair<bool, int> isMixer = Tools::itemExists(mixerList_, mixerName_);
-	if (isMixer.first) {
-		mixerId_ = isMixer.second;
+	if (!mixerName_.empty()) {
+		std::pair<bool, int> isMixer = Tools::itemExists(mixerList_, mixerName_);
+		if (isMixer.first) {
+			mixerId_ = isMixer.second;
+		}
 	}
 	else {
 		mixerId_ = 0;
 		mixerName_ = mixerList_.at(mixerId_);
 	}
-
 	volumeValue_ = settings_->getVolume();
 	volumeSlider_->set_value(volumeValue_);
 	orient_ = settings_->getNotebookOrientation();
