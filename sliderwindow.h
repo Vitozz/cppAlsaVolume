@@ -16,7 +16,7 @@ public:
 	SliderWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>&refGlade);
 	virtual ~SliderWindow();
 	void runAboutDialog();
-	void setWindowPosition(int x_, int y_);
+	void setWindowPosition(int x_, int y_, int height_, int width_);
 	bool getVisible();
 	void showWindow();
 	void hideWindow();
@@ -33,7 +33,7 @@ public:
 	std::vector<std::string> getMixersList();
 	std::vector<std::string> getCardsList();
 	//my signal
-	typedef sigc::signal<void, double> type_sliderwindow_signal;
+	typedef sigc::signal<void, double, std::string, std::string> type_sliderwindow_signal;
 	type_sliderwindow_signal signal_volume_changed();
 	//
 protected:
@@ -51,6 +51,8 @@ private:
 	AlsaWork *alsaWork_;
 	std::vector<std::string> cardList_;
 	std::vector<std::string> mixerList_;
+	std::vector<std::string> switchList_;
+	std::vector<std::string> captureList_;
 	int cardId_, mixerId_;
 	Glib::ustring mixerName_;
 	bool orient_;

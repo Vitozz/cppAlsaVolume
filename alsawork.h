@@ -15,6 +15,8 @@ public:
 	std::string getCardName(int index);
 	std::vector<std::string> getCardsList();
 	std::vector<std::string> getMixersList(int cardIndex);
+	std::vector<std::string> getSwitchList(int cardIndex);
+	std::vector<std::string> getCaptureList(int cardIndex);
 	void setCardId(int cardId);
 
 private:
@@ -29,6 +31,8 @@ private:
 private:
 	std::vector<std::string> cardList_;
 	std::vector<std::string> mixerList_;
+	std::vector<std::string> switchList_;
+	std::vector<std::string> captureList_;
 	int cardId_;
 };
 #endif // ALSAWORK_H

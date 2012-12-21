@@ -14,7 +14,7 @@ struct settingsStr {
 	std::vector<std::string> mixerList;
 };
 
-namespace FileWork {
+namespace Tools {
 	Glib::ustring getResPath(const char *resName);
 	bool checkFileExists(const std::string &fileName);
 	void createDirectory(const std::string &dirName);

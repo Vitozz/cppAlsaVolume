@@ -133,9 +133,19 @@ void AlsaWork::getMixers(int cardIndex)
 	     element;
 	     element = snd_mixer_elem_next(element)) {
 		snd_mixer_selem_get_id(element, smid);
-		if (snd_mixer_selem_has_playback_volume(element) == 1) {
+		if (bool(snd_mixer_selem_has_playback_volume(element))) {
 			std::string name(snd_mixer_selem_id_get_name(smid));
 			mixerList_.push_back(name);
+		}
+		if (bool(snd_mixer_selem_has_common_switch(element))
+		    || bool(snd_mixer_selem_has_capture_switch(element))
+		    || bool(snd_mixer_selem_has_playback_switch(element))) {
+			std::string name(snd_mixer_selem_id_get_name(smid));
+			switchList_.push_back(name);
+		}
+		if (snd_mixer_selem_has_capture_volume(element) == 1) {
+			std::string name(snd_mixer_selem_id_get_name(smid));
+			captureList_.push_back(name);
 		}
 	}
 	snd_mixer_close(handle);
@@ -165,6 +175,18 @@ std::vector<std::string> AlsaWork::getMixersList(int cardIndex)
 {
 	getMixers(cardIndex);
 	return mixerList_;
+}
+
+std::vector<std::string> AlsaWork::getSwitchList(int cardIndex)
+{
+	getMixers(cardIndex);
+	return switchList_;
+}
+
+std::vector<std::string> AlsaWork::getCaptureList(int cardIndex)
+{
+	getMixers(cardIndex);
+	return captureList_;
 }
 
 void AlsaWork::setCardId(int cardId)

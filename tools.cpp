@@ -6,12 +6,12 @@
 #include <vector>
 #include <map>
 
-bool FileWork::checkFileExists(const std::string &fileName)
+bool Tools::checkFileExists(const std::string &fileName)
 {
 	return Glib::file_test(fileName, Glib::FILE_TEST_EXISTS);
 }
 
-Glib::ustring FileWork::getResPath(const char *resName)
+Glib::ustring Tools::getResPath(const char *resName)
 {
 	const Glib::ustring pathSuffix("/share/alsavolume/");
 	const Glib::ustring resName_(resName);
@@ -35,7 +35,7 @@ Glib::ustring FileWork::getResPath(const char *resName)
 	return "";
 }
 
-void FileWork::createDirectory(const std::string &dirName)
+void Tools::createDirectory(const std::string &dirName)
 {
 	if (!Glib::file_test(dirName, Glib::FILE_TEST_IS_DIR)) {
 		std::cout << "Directory " << dirName << " not found. Attempting to create it.." << std::endl;
@@ -47,7 +47,7 @@ void FileWork::createDirectory(const std::string &dirName)
 	}
 }
 
-void FileWork::saveFile(const std::string &fileName, const Glib::ustring &fileData)
+void Tools::saveFile(const std::string &fileName, const Glib::ustring &fileData)
 {
 	try {
 		std::ofstream ofile(fileName.c_str());
@@ -59,7 +59,7 @@ void FileWork::saveFile(const std::string &fileName, const Glib::ustring &fileDa
 	}
 }
 
-std::pair<bool, int> FileWork::itemExists(std::vector<std::string> vector, Glib::ustring item)
+std::pair<bool, int> Tools::itemExists(std::vector<std::string> vector, Glib::ustring item)
 {
 	int index = 0;
 	bool exists = false;

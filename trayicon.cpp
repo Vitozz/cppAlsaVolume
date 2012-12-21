@@ -8,10 +8,9 @@
 const uint MIDDLE_BUTTON = 2;
 const int OFFSET = 2;
 
-TrayIcon::TrayIcon(SliderWindow *parent)
-: sliderWindow_(parent)
+TrayIcon::TrayIcon(double volume, std::string cardName, std::string mixerName)
+: volumeValue_(volume)
 {
-	sliderWindow_->hideWindow();
 	menu_ = Gtk::manage(new Gtk::Menu());
 	//menu creation
 	restoreItem_ = Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::GO_UP));
@@ -44,74 +43,51 @@ TrayIcon::TrayIcon(SliderWindow *parent)
 	signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onHideRestore));
 	signal_scroll_event().connect(sigc::mem_fun(*this, &TrayIcon::onScrollEvent));
 	signal_button_press_event().connect(sigc::mem_fun(*this, &TrayIcon::onButtonClick));
-	sliderWindow_->signal_volume_changed().connect(sigc::mem_fun(*this, &TrayIcon::on_signal_volume_changed));
 	//
-	on_signal_volume_changed(sliderWindow_->getVolumeValue());
+	on_signal_volume_changed(volumeValue_, cardName, mixerName);
 }
 
 TrayIcon::~TrayIcon()
-{
-	delete sliderWindow_;
-}
+{}
 
 void TrayIcon::onHideRestore()
 {
-	if (!sliderWindow_->getVisible()) {
-		Glib::RefPtr<Gdk::Screen> screen;
-		Gdk::Rectangle area;
-		Gtk::Orientation orientation;
-		int x_ = 0;
-		int y_ = 0;
-		int winHeight = sliderWindow_->getHeight();
-		int winWidth = sliderWindow_->getWidth();
-		if (get_geometry(screen, area, orientation)) {
-			int aY = area.get_y();
-			int aX = area.get_x();
-			int aH = area.get_height();
-			int aW = area.get_width();
-			if (aY <= 200) { //check tray up/down position
-				y_ = aY + aH + 2;
-			}
-			else {
-				y_ = aY - winHeight - 4;
-			}
-			if (winWidth > 1) {//on first run window widht = 1
-				x_ = (aX + aW/2) - winWidth/2;
-			}
-			else {
-				x_ = aX;
-			}
-		}
-		sliderWindow_->setWindowPosition(x_, y_);
-		sliderWindow_->showWindow();
-	}
-	else {
-		sliderWindow_->hideWindow();
+	Glib::RefPtr<Gdk::Screen> screen;
+	Gdk::Rectangle area;
+	Gtk::Orientation orientation;
+	if (get_geometry(screen, area, orientation)) {
+		int aY = area.get_y();
+		int aX = area.get_x();
+		int aH = area.get_height();
+		int aW = area.get_width();
+		m_signal_on_restore.emit(aX, aY, aH, aW);
 	}
 }
 
 void TrayIcon::onQuit()
 {
-	sliderWindow_->saveSettings();
+	m_signal_save_settings.emit();
 	exit(0);
 }
 
 void TrayIcon::runMixerApp()
 {
+	//not implemented yet
 }
 
 void TrayIcon::runSettings()
 {
-	sliderWindow_->runSettings();
+	m_signal_ask_settings.emit();
 }
 
 void TrayIcon::onAbout()
 {
-	sliderWindow_->runAboutDialog();
+	m_signal_ask_dialog.emit();
 }
 
 void TrayIcon::onMute()
 {
+	//no real mute
 	if (muteItem_->get_active()) {
 		setIcon(0);
 	}
@@ -143,7 +119,7 @@ void TrayIcon::setIcon(double value)
 	}
 	if (!iconPath.empty()) {
 		try {
-			set_from_file(FileWork::getResPath(iconPath.c_str()));
+			set_from_file(Tools::getResPath(iconPath.c_str()));
 		}
 		catch (Glib::FileError &err) {
 			std::cerr << "FileError::trayicon.cpp::138:: " << err.what() << std::endl;
@@ -164,14 +140,14 @@ void TrayIcon::onPopup(guint button, guint32 activate_time)
 
 bool TrayIcon::onScrollEvent(GdkEventScroll* event)
 {
-	double value = sliderWindow_->getVolumeValue();
+	double value = 0.0;
 	if (event->direction == GDK_SCROLL_UP) {
 		value+=OFFSET;
 	}
 	else if(event->direction == GDK_SCROLL_DOWN) {
 		value-=OFFSET;
 	}
-	sliderWindow_->setVolumeValue(value);
+	m_signal_value_changed(value);
 	return false;
 }
 
@@ -184,15 +160,42 @@ bool TrayIcon::onButtonClick(GdkEventButton* event)
 	return false;
 }
 
-void TrayIcon::on_signal_volume_changed(double volume)
+void TrayIcon::on_signal_volume_changed(double volume, std::string cardName, std::string mixerName)
 {
 	volumeValue_ = volume;
+	cardName_ = cardName;
+	mixerName_ = mixerName;
 	setIcon(volumeValue_);
 	Glib::ustring tip = Glib::ustring("Card: ")
-			  + Glib::ustring(sliderWindow_->getSoundCardName())
+			  + Glib::ustring(cardName_)
 			  + Glib::ustring("\n")
-			  + Glib::ustring(sliderWindow_->getActiveMixer())
+			  + Glib::ustring(mixerName_)
 			  + Glib::ustring(" - ")
 			  + Glib::ustring::format(volumeValue_,"%");
 	setTooltip(tip);
+}
+
+TrayIcon::type_trayicon_simple_signal TrayIcon::signal_ask_dialog()
+{
+	return m_signal_ask_dialog;
+}
+
+TrayIcon::type_trayicon_simple_signal TrayIcon::signal_ask_settings()
+{
+	return m_signal_ask_settings;
+}
+
+TrayIcon::type_trayicon_simple_signal TrayIcon::signal_save_settings()
+{
+	return m_signal_save_settings;
+}
+
+TrayIcon::type_trayicon_4int_signal TrayIcon::signal_on_restore()
+{
+	return m_signal_on_restore;
+}
+
+TrayIcon::type_trayicon_double_signal TrayIcon::signal_value_changed()
+{
+	return m_signal_value_changed;
 }

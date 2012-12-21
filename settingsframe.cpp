@@ -85,7 +85,6 @@ void SettingsFrame::onTabPos()
 void SettingsFrame::onOkButton()
 {
 	m_signal_ok_pressed.emit(settings_);
-	//this->destroy_();
 }
 
 void SettingsFrame::onCancelButton()

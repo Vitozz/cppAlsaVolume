@@ -9,7 +9,7 @@ Settings::Settings()
 	std::string configDir = std::string(std::string(getenv("HOME")) + "/.config/cppAlsaVolume");
 	iniFileName_ = configDir + std::string("/config.ini");
 	configFile_ = new Glib::KeyFile();
-	FileWork::createDirectory(configDir);
+	Tools::createDirectory(configDir);
 	loadConfig(iniFileName_.c_str());
 }
 
@@ -20,7 +20,7 @@ Settings::~Settings()
 
 void Settings::loadConfig(const std::string& fileName)
 {
-	if (!FileWork::checkFileExists(fileName)) {
+	if (!Tools::checkFileExists(fileName)) {
 		parseConfig(std::string(""));
 	}
 	try {
@@ -52,7 +52,7 @@ double Settings::getVolume() const
 
 void Settings::parseConfig(const Glib::ustring& keyFileData)
 {
-	FileWork::saveFile(iniFileName_, keyFileData);
+	Tools::saveFile(iniFileName_, keyFileData);
 }
 
 int Settings::getSoundCard()
