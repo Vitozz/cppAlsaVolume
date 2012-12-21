@@ -10,12 +10,12 @@ Howto build application:
 
 if You have Qt installed:
 
->qmake
+>qmake &&
 >make
 
 else:
 
->g++ -W -o alsavolume *.cpp `pkg-config --cflags gtkmm-3.0 alsa` `pkg-config --libs gtkmm-3.0 alsa`
+>g++ -W -o alsavolume *.cpp \`pkg-config --cflags gtkmm-3.0 alsa\` \`pkg-config --libs gtkmm-3.0 alsa\`
 
 What features available:
 	- sound card selection
