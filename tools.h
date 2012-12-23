@@ -12,6 +12,7 @@ struct settingsStr {
 	bool notebookOrientation;
 	std::vector<std::string> cardList;
 	std::vector<std::string> mixerList;
+	std::vector<std::string> switchList;
 };
 
 namespace Tools {

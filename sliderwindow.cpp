@@ -35,6 +35,7 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	volumeValue_ = settings_->getVolume();
 	volumeSlider_->set_value(volumeValue_);
 	orient_ = settings_->getNotebookOrientation();
+	switchList_ = alsaWork_->getSwitchList(cardId_);
 }
 
 SliderWindow::~SliderWindow()
@@ -205,6 +206,7 @@ void SliderWindow::createSettingsDialog()
 		str.mixerId = mixerId_;
 		str.cardList = cardList_;
 		str.mixerList = mixerList_;
+		str.switchList = switchList_;
 		str.notebookOrientation = orient_;
 		settingsDialog->initParms(str);
 		settingsDialog->signal_ok_pressed().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogOk));

@@ -1,6 +1,5 @@
 #ifndef SETTINGSFRAME_H
 #define SETTINGSFRAME_H
-#include "sliderwindow.h"
 #include "tools.h"
 #include "gtkmm/dialog.h"
 #include "gtkmm/builder.h"
@@ -24,21 +23,28 @@ public:
 	typedef sigc::signal<void, settingsStr> type_void_signal;
 	type_void_signal signal_ok_pressed();
 protected:
-	class ModelColumns : public Gtk::TreeModel::ColumnRecord
+	class ModelCheckBox : public Gtk::TreeModel::ColumnRecord
 	{
-		public:
-			ModelColumns() { add(m_col_name); }
-			Gtk::TreeModelColumn<Glib::ustring> m_col_name;
+	public:
+		inline ModelCheckBox() { add(m_col_name); }
+		Gtk::TreeModelColumn<Glib::ustring> m_col_name;
 	};
-
-	ModelColumns m_Columns;
-
+	ModelCheckBox m_Columns;
+	class ModelTreeView : public Gtk::TreeModel::ColumnRecord
+	{
+	public:
+		inline ModelTreeView() { add(m_col_toggle); add(m_col_name); }
+		Gtk::TreeModelColumn<bool> m_col_toggle;
+		Gtk::TreeModelColumn<Glib::ustring> m_col_name;
+	};
+	ModelTreeView m_TColumns;
 	void onTabPos();
 	void onOkButton();
 	void onCancelButton();
 	bool onDeleteEvent(GdkEventAny* event);
 	void sndBoxChanged();
 	void mixerBoxChanged();
+	void onCellToggled(const Glib::ustring &path);
 	type_void_signal m_signal_ok_pressed;
 private:
 	void setupTreeModels();
@@ -56,6 +62,7 @@ private:
 	Gtk::Notebook *tabWidget_;
 	Glib::RefPtr<Gtk::ListStore> cards_;
 	Glib::RefPtr<Gtk::ListStore> mixers_;
+	Glib::RefPtr<Gtk::ListStore> switches_;
 	settingsStr settings_;
 };
 

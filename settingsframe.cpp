@@ -107,7 +107,7 @@ void SettingsFrame::setupTreeModels()
 		sndCardBox_->set_model(cards_);
 		sndCardBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::sndBoxChanged));
 		Gtk::TreeModel::Row row;
-		for (int i = 0; i < (int)settings_.cardList.size(); i++) {
+		for (int i = 0; i < static_cast<int>(settings_.cardList.size()); i++) {
 			row = *(cards_->append());
 			row[m_Columns.m_col_name] = Glib::ustring(settings_.cardList.at(i));
 			if (i == settings_.cardId) {
@@ -130,7 +130,25 @@ void SettingsFrame::setupTreeModels()
 		}
 		mixerBox_->pack_start(m_Columns.m_col_name);
 	}
-
+	if (switchTree_) {
+		switches_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_TColumns));
+		switchTree_->set_model(switches_);
+		Gtk::TreeModel::Row row;
+		Gtk::CellRendererToggle *cell = Gtk::manage(new Gtk::CellRendererToggle);
+		int colsCount = switchTree_->append_column("Status", *cell);
+		cell->set_activatable(true);
+		Gtk::TreeViewColumn* pColumn = switchTree_->get_column(colsCount -1);
+		if (colsCount) {
+			pColumn->add_attribute(cell->property_active(), m_TColumns.m_col_toggle);
+		}
+		cell->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onCellToggled));
+		for (int i =0; i < (int)settings_.switchList.size(); i++) {
+			row = *(switches_->append());
+			row[m_TColumns.m_col_name] = Glib::ustring(settings_.switchList.at(i));
+		}
+		switchTree_->append_column("Switch", m_TColumns.m_col_name);
+		switchTree_->show_all_children();
+	}
 }
 
 void SettingsFrame::sndBoxChanged()
@@ -142,6 +160,7 @@ void SettingsFrame::sndBoxChanged()
 void SettingsFrame::mixerBoxChanged()
 {
 	settings_.mixerId = mixerBox_->get_active_row_number();
+	//example howto get name from TreeModel
 	/*Gtk::TreeModel::iterator iter = mixerBox_->get_active();
 	if(iter)
 	{
@@ -156,4 +175,18 @@ void SettingsFrame::mixerBoxChanged()
 SettingsFrame::type_void_signal SettingsFrame::signal_ok_pressed()
 {
 	return m_signal_ok_pressed;
+}
+
+void SettingsFrame::onCellToggled(const Glib::ustring& path)
+{
+	std::cout << path << std::endl;
+	Gtk::TreeModel::iterator it = switches_->get_iter(path);
+	Gtk::TreeModel::Row row = *it;
+	if (bool(row.get_value(m_TColumns.m_col_toggle))) {
+		row[m_TColumns.m_col_toggle] = false;
+	}
+	else {
+		row[m_TColumns.m_col_toggle] = true;
+	}
+	std::cout << bool(row.get_value(m_TColumns.m_col_toggle)) << std::endl;
 }
