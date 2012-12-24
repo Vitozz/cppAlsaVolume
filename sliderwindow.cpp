@@ -35,7 +35,7 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	volumeValue_ = settings_->getVolume();
 	volumeSlider_->set_value(volumeValue_);
 	orient_ = settings_->getNotebookOrientation();
-	switchList_ = alsaWork_->getSwitchList(cardId_);
+	switches_ = alsaWork_->getSwitchList(cardId_);
 }
 
 SliderWindow::~SliderWindow()
@@ -206,10 +206,11 @@ void SliderWindow::createSettingsDialog()
 		str.mixerId = mixerId_;
 		str.cardList = cardList_;
 		str.mixerList = mixerList_;
-		str.switchList = switchList_;
+		str.switchList = switches_;
 		str.notebookOrientation = orient_;
 		settingsDialog->initParms(str);
 		settingsDialog->signal_ok_pressed().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogOk));
+		settingsDialog->signal_switches_toggled().connect(sigc::mem_fun(*this, &SliderWindow::switchChanged));
 		settingsDialog->run();
 		delete settingsDialog;
 	}
@@ -243,4 +244,21 @@ void SliderWindow::onSettingsDialogOk(settingsStr str)
 	mixerId_ = str.mixerId;
 	mixerName_ = mixerList_.at(mixerId_);
 	orient_ = str.notebookOrientation;
+}
+
+void SliderWindow::switchChanged(std::string name, int id, bool enabled)
+{
+	alsaWork_->setSwitch(cardId_, name, id, enabled);
+}
+
+void SliderWindow::soundMuted(bool mute)
+{
+	alsaWork_->setMute(cardId_, mixerName_, mute);
+}
+
+bool SliderWindow::getMuted()
+{
+	bool muted = alsaWork_->getMute(cardId_, mixerName_);
+	std::cout << "Mixer= " << mixerName_ << " is " << muted << std::endl;
+	return !muted;
 }

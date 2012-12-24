@@ -11,7 +11,7 @@
 class TrayIcon : public Gtk::StatusIcon
 {
 public:
-	TrayIcon(double volume, std::string cardName, std::string mixerName);
+	TrayIcon(double volume, std::string cardName, std::string mixerName, bool muted);
 	virtual ~TrayIcon();
 	void on_signal_volume_changed(double volume, std::string cardName, std::string mixerName);
 	//signals
@@ -23,6 +23,8 @@ public:
 	type_trayicon_4int_signal signal_on_restore();
 	typedef sigc::signal<void, double> type_trayicon_double_signal;
 	type_trayicon_double_signal signal_value_changed();
+	typedef sigc::signal<void, double> type_trayicon_bool_signal;
+	type_trayicon_bool_signal signal_on_mute();
 
 protected:
 	//menu actions
@@ -42,6 +44,7 @@ protected:
 	type_trayicon_simple_signal m_signal_save_settings;
 	type_trayicon_4int_signal m_signal_on_restore;
 	type_trayicon_double_signal m_signal_value_changed;
+	type_trayicon_bool_signal m_signal_on_mute;
 
 private:
 	void setIcon(double value);
@@ -51,9 +54,11 @@ private:
 	double volumeValue_;
 	std::string cardName_;
 	std::string mixerName_;
+	bool muted_;
 	Gtk::Menu *menu_;
 	Gtk::ImageMenuItem *restoreItem_, *mixerItem_, *settingsItem_, *aboutItem_, *quitItem_;
 	Gtk::CheckMenuItem* muteItem_;
+
 };
 
 #endif // TRAYICON_H

@@ -32,6 +32,9 @@ public:
 	void runSettings();
 	std::vector<std::string> getMixersList();
 	std::vector<std::string> getCardsList();
+	void switchChanged (std::string name, int id, bool enabled);
+	void soundMuted(bool mute);
+	bool getMuted();
 	//my signal
 	typedef sigc::signal<void, double, std::string, std::string> type_sliderwindow_signal;
 	type_sliderwindow_signal signal_volume_changed();
@@ -51,7 +54,7 @@ private:
 	AlsaWork *alsaWork_;
 	std::vector<std::string> cardList_;
 	std::vector<std::string> mixerList_;
-	std::vector<std::string> switchList_;
+	MixerSwitches switches_;
 	std::vector<std::string> captureList_;
 	int cardId_, mixerId_;
 	Glib::ustring mixerName_;

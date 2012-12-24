@@ -8,7 +8,7 @@
 const uint MIDDLE_BUTTON = 2;
 const int OFFSET = 2;
 
-TrayIcon::TrayIcon(double volume, std::string cardName, std::string mixerName)
+TrayIcon::TrayIcon(double volume, std::string cardName, std::string mixerName, bool muted)
 : volumeValue_(volume)
 {
 	menu_ = Gtk::manage(new Gtk::Menu());
@@ -45,6 +45,9 @@ TrayIcon::TrayIcon(double volume, std::string cardName, std::string mixerName)
 	signal_button_press_event().connect(sigc::mem_fun(*this, &TrayIcon::onButtonClick));
 	//
 	on_signal_volume_changed(volumeValue_, cardName, mixerName);
+	muted_ = muted;
+	std::cout << muted << std::endl;
+	muteItem_->set_active(muted_);
 }
 
 TrayIcon::~TrayIcon()
@@ -87,13 +90,14 @@ void TrayIcon::onAbout()
 
 void TrayIcon::onMute()
 {
-	//no real mute
-	if (muteItem_->get_active()) {
+	muted_ = muteItem_->get_active();
+	if (muted_) {
 		setIcon(0);
 	}
 	else {
 		setIcon(volumeValue_);
 	}
+	m_signal_on_mute.emit(!muted_);
 }
 
 void TrayIcon::setIcon(double value)
@@ -198,4 +202,9 @@ TrayIcon::type_trayicon_4int_signal TrayIcon::signal_on_restore()
 TrayIcon::type_trayicon_double_signal TrayIcon::signal_value_changed()
 {
 	return m_signal_value_changed;
+}
+
+TrayIcon::type_trayicon_bool_signal TrayIcon::signal_on_mute()
+{
+	return m_signal_on_mute;
 }

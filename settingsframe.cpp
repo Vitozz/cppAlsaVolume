@@ -1,6 +1,13 @@
 #include "settingsframe.h"
 #include <iostream>
 
+const std::string playback_ = "PB";
+const std::string playbackJoined_ = "PJ";
+const std::string capture_ = "REC";
+const std::string captureJoined_ = "RJ";
+const std::string captureExclusive_ = "RE";
+const std::string common_ = "C";
+
 SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 			     const Glib::RefPtr<Gtk::Builder>& refGlade)
  : Gtk::Dialog(cobject),
@@ -107,7 +114,7 @@ void SettingsFrame::setupTreeModels()
 		sndCardBox_->set_model(cards_);
 		sndCardBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::sndBoxChanged));
 		Gtk::TreeModel::Row row;
-		for (int i = 0; i < static_cast<int>(settings_.cardList.size()); i++) {
+		for (uint i = 0; i < settings_.cardList.size(); i++) {
 			row = *(cards_->append());
 			row[m_Columns.m_col_name] = Glib::ustring(settings_.cardList.at(i));
 			if (i == settings_.cardId) {
@@ -121,7 +128,7 @@ void SettingsFrame::setupTreeModels()
 		mixerBox_->set_model(mixers_);
 		mixerBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::mixerBoxChanged));
 		Gtk::TreeModel::Row row;
-		for (int i = 0; i < (int)settings_.mixerList.size(); i++) {
+		for (uint i = 0; i < settings_.mixerList.size(); i++) {
 			row = *(mixers_->append());
 			row[m_Columns.m_col_name] = Glib::ustring(settings_.mixerList.at(i));
 			if (i == settings_.mixerId) {
@@ -142,10 +149,42 @@ void SettingsFrame::setupTreeModels()
 			pColumn->add_attribute(cell->property_active(), m_TColumns.m_col_toggle);
 		}
 		cell->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onCellToggled));
-		for (int i =0; i < (int)settings_.switchList.size(); i++) {
+		for (uint i =0; i < settings_.switchList.playbackSwitchList_.size()/2; i++) {
 			row = *(switches_->append());
-			row[m_TColumns.m_col_name] = Glib::ustring(settings_.switchList.at(i));
+			row[m_TColumns.m_col_toggle] = settings_.switchList.playbackSwitchList_.at(i).enabled;
+			row[m_TColumns.m_col_id] = playback_;
+			row[m_TColumns.m_col_name] = Glib::ustring(settings_.switchList.playbackSwitchList_.at(i).name);
 		}
+		for (uint i =0; i < settings_.switchList.playbackJoinedSwitchList_.size()/2; i++) {
+			row = *(switches_->append());
+			row[m_TColumns.m_col_toggle] = settings_.switchList.playbackJoinedSwitchList_.at(i).enabled;
+			row[m_TColumns.m_col_id] = playbackJoined_;
+			row[m_TColumns.m_col_name] = Glib::ustring(settings_.switchList.playbackJoinedSwitchList_.at(i).name);
+		}
+		for (uint i =0; i < settings_.switchList.captureSwitchList_.size(); i++) {
+			row = *(switches_->append());
+			row[m_TColumns.m_col_toggle] = settings_.switchList.captureSwitchList_.at(i).enabled;
+			row[m_TColumns.m_col_id] = capture_;
+			row[m_TColumns.m_col_name] = Glib::ustring(settings_.switchList.captureSwitchList_.at(i).name);
+		}
+		for (uint i =0; i < settings_.switchList.captureJoinedSwitchList_.size()/2; i++) {
+			row = *(switches_->append());
+			row[m_TColumns.m_col_toggle] = settings_.switchList.captureJoinedSwitchList_.at(i).enabled;
+			row[m_TColumns.m_col_id] = captureJoined_;
+			row[m_TColumns.m_col_name] = Glib::ustring(settings_.switchList.captureJoinedSwitchList_.at(i).name);
+		}
+		for (uint i =0; i < settings_.switchList.captureExsclusiveSwitchList_.size()/2; i++) {
+			row = *(switches_->append());
+			row[m_TColumns.m_col_toggle] = settings_.switchList.captureExsclusiveSwitchList_.at(i).enabled;
+			row[m_TColumns.m_col_id] = captureExclusive_;
+			row[m_TColumns.m_col_name] = Glib::ustring(settings_.switchList.captureExsclusiveSwitchList_.at(i).name);
+		}
+		/*for (uint i =0; i < settings_.switchList.commonSwitchList_.size(); i++) {
+			row = *(switches_->append());
+			row[m_TColumns.m_col_id] = std::string("C");
+			row[m_TColumns.m_col_name] = Glib::ustring(settings_.switchList.commonSwitchList_.at(i));
+		}*/
+		switchTree_->append_column("ID", m_TColumns.m_col_id);
 		switchTree_->append_column("Switch", m_TColumns.m_col_name);
 		switchTree_->show_all_children();
 	}
@@ -179,7 +218,6 @@ SettingsFrame::type_void_signal SettingsFrame::signal_ok_pressed()
 
 void SettingsFrame::onCellToggled(const Glib::ustring& path)
 {
-	std::cout << path << std::endl;
 	Gtk::TreeModel::iterator it = switches_->get_iter(path);
 	Gtk::TreeModel::Row row = *it;
 	if (bool(row.get_value(m_TColumns.m_col_toggle))) {
@@ -188,5 +226,30 @@ void SettingsFrame::onCellToggled(const Glib::ustring& path)
 	else {
 		row[m_TColumns.m_col_toggle] = true;
 	}
-	std::cout << bool(row.get_value(m_TColumns.m_col_toggle)) << std::endl;
+	int switchId = 0;
+	if (row.get_value(m_TColumns.m_col_id) == playback_) {
+		switchId = PLAYBACK;
+	}
+	if (row.get_value(m_TColumns.m_col_id) == playbackJoined_) {
+		switchId = PLAYBACK_JOINED;
+	}
+	if (row.get_value(m_TColumns.m_col_id) == capture_) {
+		switchId = CAPTURE;
+	}
+	if (row.get_value(m_TColumns.m_col_id) == captureJoined_) {
+		switchId = CAPTURE_JOINED;
+	}
+	if (row.get_value(m_TColumns.m_col_id) == captureExclusive_) {
+		switchId = CAPTURE_EXCLUSIVE;
+	}
+	if (row.get_value(m_TColumns.m_col_id) == common_) {
+		switchId = COMMON;
+	}
+
+	m_type_toggled_signal.emit(row.get_value(m_TColumns.m_col_name), switchId, bool(row.get_value(m_TColumns.m_col_toggle)));
+}
+
+SettingsFrame::type_toggled_signal SettingsFrame::signal_switches_toggled()
+{
+	return m_type_toggled_signal;
 }

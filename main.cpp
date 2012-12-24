@@ -34,7 +34,8 @@ int main (int argc, char *argv[])
 	refBuilder->get_widget_derived("volumeFrame", sliderWindow);
 	TrayIcon *trayIcon = new TrayIcon(sliderWindow->getVolumeValue(),
 					  sliderWindow->getSoundCardName(),
-					  sliderWindow->getActiveMixer());
+					  sliderWindow->getActiveMixer(),
+					  sliderWindow->getMuted());
 	if (sliderWindow && trayIcon) {
 		sliderWindow->signal_volume_changed().connect(sigc::mem_fun(*trayIcon, &TrayIcon::on_signal_volume_changed));
 		trayIcon->signal_ask_dialog().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::runAboutDialog));
@@ -42,6 +43,7 @@ int main (int argc, char *argv[])
 		trayIcon->signal_on_restore().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::setWindowPosition));
 		trayIcon->signal_save_settings().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::saveSettings));
 		trayIcon->signal_value_changed().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::setVolumeValue));
+		trayIcon->signal_on_mute().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::soundMuted));
 	}
 	app->hold();
 	sliderWindow->set_visible(false);

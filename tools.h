@@ -6,13 +6,37 @@
 #include <vector>
 #include <map>
 
+struct switchcap {
+	bool enabled;
+	std::string name;
+};
+
+struct MixerSwitches{
+	std::vector<switchcap> commonSwitchList_;
+	std::vector<switchcap> captureSwitchList_;
+	std::vector<switchcap> captureJoinedSwitchList_;
+	std::vector<switchcap> captureExsclusiveSwitchList_;
+	std::vector<switchcap> playbackSwitchList_;
+	std::vector<switchcap> playbackJoinedSwitchList_;
+};
+
 struct settingsStr {
-	int cardId;
-	int mixerId;
+	unsigned int cardId;
+	unsigned int mixerId;
 	bool notebookOrientation;
 	std::vector<std::string> cardList;
 	std::vector<std::string> mixerList;
-	std::vector<std::string> switchList;
+	MixerSwitches switchList;
+};
+
+enum SwitchType {
+	COMMON =0,
+	PLAYBACK = 1,
+	PLAYBACK_JOINED = 2,
+	CAPTURE = 3,
+	CAPTURE_JOINED = 4,
+	CAPTURE_EXCLUSIVE = 5
+
 };
 
 namespace Tools {

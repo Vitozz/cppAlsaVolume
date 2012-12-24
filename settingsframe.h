@@ -22,6 +22,8 @@ public:
 	//
 	typedef sigc::signal<void, settingsStr> type_void_signal;
 	type_void_signal signal_ok_pressed();
+	typedef sigc::signal<void, std::string, int ,bool> type_toggled_signal;
+	type_toggled_signal signal_switches_toggled();
 protected:
 	class ModelCheckBox : public Gtk::TreeModel::ColumnRecord
 	{
@@ -33,8 +35,9 @@ protected:
 	class ModelTreeView : public Gtk::TreeModel::ColumnRecord
 	{
 	public:
-		inline ModelTreeView() { add(m_col_toggle); add(m_col_name); }
+		inline ModelTreeView() { add(m_col_toggle); add(m_col_id); add(m_col_name); }
 		Gtk::TreeModelColumn<bool> m_col_toggle;
+		Gtk::TreeModelColumn<Glib::ustring> m_col_id;
 		Gtk::TreeModelColumn<Glib::ustring> m_col_name;
 	};
 	ModelTreeView m_TColumns;
@@ -46,6 +49,7 @@ protected:
 	void mixerBoxChanged();
 	void onCellToggled(const Glib::ustring &path);
 	type_void_signal m_signal_ok_pressed;
+	type_toggled_signal m_type_toggled_signal;
 private:
 	void setupTreeModels();
 	void setTabPos(bool orient);
