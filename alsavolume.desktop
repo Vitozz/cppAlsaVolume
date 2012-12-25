@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Icon=/usr/share/alsavolume/icons/volume_ico.png
+Name=AlsaVolume
+Comment=Changes the volume of ALSA from the system tray
+Exec=alsavolume
+Terminal=false
+Type=Application
+Categories=Audio;AudioVideo;GTK;
+StartupNotify=false
+
+Comment[ru]=Регулятор громкости ALSA
