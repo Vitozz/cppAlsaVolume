@@ -94,6 +94,9 @@ void SettingsFrame::onTabPos()
 
 void SettingsFrame::onOkButton()
 {
+	if (!settings_.mixerId) {
+		settings_.mixerId = 0;
+	}
 	m_signal_ok_pressed.emit(settings_);
 }
 
@@ -198,11 +201,6 @@ void SettingsFrame::mixerBoxChanged()
 	settings_.mixerId = mixerBox_->get_active_row_number();
 }
 
-SettingsFrame::type_void_signal SettingsFrame::signal_ok_pressed()
-{
-	return m_signal_ok_pressed;
-}
-
 void SettingsFrame::onCellToggled(const Glib::ustring& path)
 {
 	Gtk::TreeModel::iterator it = switches_->get_iter(path);
@@ -237,4 +235,9 @@ void SettingsFrame::onCellToggled(const Glib::ustring& path)
 SettingsFrame::type_toggled_signal SettingsFrame::signal_switches_toggled()
 {
 	return m_type_toggled_signal;
+}
+
+SettingsFrame::type_void_signal SettingsFrame::signal_ok_pressed()
+{
+	return m_signal_ok_pressed;
 }

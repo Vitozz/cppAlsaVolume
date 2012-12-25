@@ -48,10 +48,10 @@ void SliderWindow::runAboutDialog()
 {
 	Gtk::AboutDialog *dialog = new Gtk::AboutDialog();
 	dialog->set_transient_for(*this);
-	dialog->set_title("About cppAlsaVolume");
+	dialog->set_title("About AlsaVolume");
 	dialog->set_program_name("Alsa Volume Changer");
 	dialog->set_comments("Tray Alsa Volume Changer written using gtkmm");
-	dialog->set_version("0.0.3");
+	dialog->set_version("0.0.4");
 	dialog->set_copyright("2012 (c) Vitaly Tonkacheyev (thetvg@gmail.com)");
 	dialog->set_website("http://sites.google.com/site/thesomeprojects/");
 	dialog->set_website_label("Program Website");
@@ -190,13 +190,13 @@ void SliderWindow::createSettingsDialog()
 		builder_->add_from_file(ui_);
 	}
 	catch(const Gtk::BuilderError& ex) {
-		std::cerr << "BuilderError::sliderwindow.cpp::166 " << ex.what() << std::endl;
+		std::cerr << "BuilderError::sliderwindow.cpp::190 " << ex.what() << std::endl;
 	}
 	catch(const Glib::MarkupError& ex) {
-		std::cerr << "MarkupError::sliderwindow.cpp::166 " << ex.what() << std::endl;
+		std::cerr << "MarkupError::sliderwindow.cpp::190 " << ex.what() << std::endl;
 	}
 	catch(const Glib::FileError& ex) {
-		std::cerr << "FileError::sliderwindow.cpp::166 " << ex.what() << std::endl;
+		std::cerr << "FileError::sliderwindow.cpp::190 " << ex.what() << std::endl;
 	}
 	builder_->get_widget_derived("settingsDialog", settingsDialog);
 
@@ -242,7 +242,14 @@ void SliderWindow::onSettingsDialogOk(settingsStr str)
 	cardId_ = str.cardId;
 	alsaWork_->setCardId(cardId_);
 	mixerId_ = str.mixerId;
-	mixerName_ = mixerList_.at(mixerId_);
+	mixerList_ = alsaWork_->getVolumeMixers(cardId_);
+	if (mixerList_.size() > 0 ) {
+		mixerName_ = mixerList_.at(mixerId_);
+	}
+	else {
+		mixerName_ = "N/A";
+	}
+
 	orient_ = str.notebookOrientation;
 }
 

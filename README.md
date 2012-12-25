@@ -26,11 +26,10 @@ What features available:
 	- sound card mixer selection
 	- volume control by "scroll" on tray icon
 	- volume control using popup window with slider
+	- mute sound on middleclick and by checkbox selection
+	- enable or disable sound card switches in settings dialog
 
 TODO LIST:
 
-	- mute sound on middleclick and by checkbox selection
-	- fix app crash on card selection when card has no playback mixers
-	- add switches to switchlist with full functionality
-	- app capture mixers to control volume
-	- add support of joined mixers
+	- add iconpacks support
+	- add autostart option
