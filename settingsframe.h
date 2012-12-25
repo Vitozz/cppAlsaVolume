@@ -48,6 +48,7 @@ protected:
 	void sndBoxChanged();
 	void mixerBoxChanged();
 	void onCellToggled(const Glib::ustring &path);
+	//signals
 	type_void_signal m_signal_ok_pressed;
 	type_toggled_signal m_type_toggled_signal;
 private:

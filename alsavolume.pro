@@ -1,7 +1,10 @@
 ### eqmake4 was here ###
+include(conf.pri)
+
 CONFIG -= debug_and_release debug
 CONFIG += release
 
+TARGET = alsavolume
 TEMPLATE = app
 CONFIG += console
 CONFIG -= qt
@@ -16,7 +19,7 @@ SOURCES += main.cpp \
 	settings.cpp \
 	alsawork.cpp \
 	tools.cpp \
-    settingsframe.cpp
+	settingsframe.cpp
 
 HEADERS += \
 	alsawork.h \
@@ -24,7 +27,7 @@ HEADERS += \
 	sliderwindow.h \
 	settings.h \
 	tools.h \
-    settingsframe.h
+	settingsframe.h
 
 INCLUDEPATH += \
 	/usr/include/gtkmm-3.0 \
@@ -58,3 +61,27 @@ INCLUDEPATH += \
 	/usr/include/libdrm \
 	/usr/include/qt4/QtCore \
 	/usr/include/gio-unix-2.0
+
+unix{
+	target.path = $$BINDIR
+	INSTALLS += target
+	dt.path = $$PREFIX/share/applications/
+	dt.files = AlsaVolume.desktop
+	gf1.path = $$PREFIX/share/alsavolume/gladefiles/
+	gf1.files = gladefiles/SliderFrame.glade SettingsFrame.glade
+	gf2.path = $$PREFIX/share/alsavolume/gladefiles/
+	gf2.files = gladefiles/SettingsFrame.glade
+	icon.path = $$PREFIX/share/alsavolume/icons/
+	icon.files = icons/tb_icon0.png \
+		      icons/tb_icon20.png \
+		      icons/tb_icon40.png \
+		      icons/tb_icon60.png \
+		      icons/tb_icon80.png \
+		      icons/tb_icon100.png \
+		      icons/volume.png \
+		      icons/volume_ico.png
+	INSTALLS += dt \
+		    gf1 \
+		    gf2 \
+		    icon
+}

@@ -59,7 +59,7 @@ void Tools::saveFile(const std::string &fileName, const Glib::ustring &fileData)
 	}
 }
 
-std::pair<bool, int> Tools::itemExists(std::vector<std::string> vector, Glib::ustring item)
+std::pair<bool, int> Tools::itemExists(std::vector<std::string> vector, const Glib::ustring& item)
 {
 	int index = 0;
 	bool exists = false;
@@ -75,5 +75,14 @@ std::pair<bool, int> Tools::itemExists(std::vector<std::string> vector, Glib::us
 	}
 	std::pair<bool, int> result(exists, index);
 	return result;
+}
 
+std::vector<std::string> Tools::getFileList(const std::string &dir)
+{
+	uint pos = dir.find_last_of("/");
+	std::string dirname = dir.substr(0, pos);
+	std::cout << dirname << std::endl;
+	Glib::Dir dir_ (dirname);
+	std::vector<std::string> entries (dir_.begin(), dir_.end());
+	return entries;
 }

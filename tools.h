@@ -11,6 +11,11 @@ struct switchcap {
 	std::string name;
 };
 
+struct VolumeMixers{
+	std::vector<std::string> playback;
+	std::vector<std::string> capture;
+};
+
 struct MixerSwitches{
 	std::vector<switchcap> commonSwitchList_;
 	std::vector<switchcap> captureSwitchList_;
@@ -44,7 +49,8 @@ namespace Tools {
 	bool checkFileExists(const std::string &fileName);
 	void createDirectory(const std::string &dirName);
 	void saveFile(const std::string &fileName, const Glib::ustring &fileData);
-	std::pair<bool, int> itemExists(std::vector<std::string> vector, Glib::ustring item);
+	std::pair<bool, int> itemExists(std::vector<std::string> vector, const Glib::ustring& item);
+	std::vector<std::string> getFileList(const std::string& dir);
 }
 
 #endif // FILEWORK_H

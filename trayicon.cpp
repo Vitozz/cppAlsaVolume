@@ -46,7 +46,6 @@ TrayIcon::TrayIcon(double volume, std::string cardName, std::string mixerName, b
 	//
 	on_signal_volume_changed(volumeValue_, cardName, mixerName);
 	muted_ = muted;
-	std::cout << muted << std::endl;
 	muteItem_->set_active(muted_);
 }
 

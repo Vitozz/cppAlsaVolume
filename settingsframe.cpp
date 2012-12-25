@@ -48,6 +48,9 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 		cancelButton_->signal_pressed().connect(sigc::mem_fun(*this, &SettingsFrame::onCancelButton));
 	}
 	this->signal_delete_event().connect(sigc::mem_fun(*this, &SettingsFrame::onDeleteEvent));
+	extMixer_->set_sensitive(false);
+	iconPacks_->set_sensitive(false);
+	isAutoRun_->set_sensitive(false);
 }
 
 SettingsFrame::~SettingsFrame()
@@ -141,6 +144,7 @@ void SettingsFrame::setupTreeModels()
 		switches_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_TColumns));
 		switchTree_->set_model(switches_);
 		Gtk::TreeModel::Row row;
+		switchTree_->append_column("ID", m_TColumns.m_col_id);
 		Gtk::CellRendererToggle *cell = Gtk::manage(new Gtk::CellRendererToggle);
 		int colsCount = switchTree_->append_column("Status", *cell);
 		cell->set_activatable(true);
@@ -179,12 +183,6 @@ void SettingsFrame::setupTreeModels()
 			row[m_TColumns.m_col_id] = captureExclusive_;
 			row[m_TColumns.m_col_name] = Glib::ustring(settings_.switchList.captureExsclusiveSwitchList_.at(i).name);
 		}
-		/*for (uint i =0; i < settings_.switchList.commonSwitchList_.size(); i++) {
-			row = *(switches_->append());
-			row[m_TColumns.m_col_id] = std::string("C");
-			row[m_TColumns.m_col_name] = Glib::ustring(settings_.switchList.commonSwitchList_.at(i));
-		}*/
-		switchTree_->append_column("ID", m_TColumns.m_col_id);
 		switchTree_->append_column("Switch", m_TColumns.m_col_name);
 		switchTree_->show_all_children();
 	}
@@ -193,22 +191,11 @@ void SettingsFrame::setupTreeModels()
 void SettingsFrame::sndBoxChanged()
 {
 	settings_.cardId = sndCardBox_->get_active_row_number();
-	std::cout << settings_.cardId << std::endl;
 }
 
 void SettingsFrame::mixerBoxChanged()
 {
 	settings_.mixerId = mixerBox_->get_active_row_number();
-	//example howto get name from TreeModel
-	/*Gtk::TreeModel::iterator iter = mixerBox_->get_active();
-	if(iter)
-	{
-		Gtk::TreeModel::Row row = *iter;
-		if(row) {
-			mixerName_ = row[m_Columns.m_col_name];
-			std::cout << mixerName_.c_str() << std::endl;
-		}
-	}*/
 }
 
 SettingsFrame::type_void_signal SettingsFrame::signal_ok_pressed()
@@ -242,11 +229,9 @@ void SettingsFrame::onCellToggled(const Glib::ustring& path)
 	if (row.get_value(m_TColumns.m_col_id) == captureExclusive_) {
 		switchId = CAPTURE_EXCLUSIVE;
 	}
-	if (row.get_value(m_TColumns.m_col_id) == common_) {
-		switchId = COMMON;
-	}
-
-	m_type_toggled_signal.emit(row.get_value(m_TColumns.m_col_name), switchId, bool(row.get_value(m_TColumns.m_col_toggle)));
+	m_type_toggled_signal.emit(row.get_value(m_TColumns.m_col_name),
+				   switchId,
+				   bool(row.get_value(m_TColumns.m_col_toggle)));
 }
 
 SettingsFrame::type_toggled_signal SettingsFrame::signal_switches_toggled()
