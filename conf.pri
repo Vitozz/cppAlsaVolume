@@ -1,2 +1,2 @@
-PREFIX = /usr/local
-BINDIR = /usr/local/bin
+PREFIX = /usr
+BINDIR = /usr/bin
