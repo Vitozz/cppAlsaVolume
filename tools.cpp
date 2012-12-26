@@ -15,6 +15,7 @@ Glib::ustring Tools::getResPath(const char *resName)
 	const Glib::ustring pathSuffix("/share/alsavolume/");
 	const Glib::ustring resName_(resName);
 	std::vector<Glib::ustring> list;
+	list.reserve(list.size()+4);
 	Glib::ustring homepath(Glib::ustring(getenv("HOME")) + "/.local" + pathSuffix);
 	size_t cwdSize = 255;
 	char cwdBuffer[cwdSize];
@@ -59,11 +60,9 @@ std::pair<bool, int> Tools::itemExists(std::vector<std::string> vector, const Gl
 {
 	int index = 0;
 	bool exists = false;
-	std::vector<std::string>::iterator it = vector.begin();
-	for (int i=0; i < (int)vector.size(); i++) {
-		std::advance(it, i);
-		const std::string answ(*it);
-		if (Glib::ustring(answ) == item) {
+	for (uint i=0; i < vector.size(); i++) {
+		Glib::ustring answ(vector.at(i));
+		if (answ == item) {
 			index = i;
 			exists = true;
 			break;

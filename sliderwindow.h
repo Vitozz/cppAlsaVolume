@@ -23,7 +23,7 @@ public:
 	int getHeight() const;
 	int getWidth() const;
 	void setVolumeValue(double value);
-	double getVolumeValue() const;
+	double getVolumeValue();
 	std::string getSoundCardName() const;
 	std::string getActiveMixer() const;
 	void setActiveCard(int card);
@@ -47,6 +47,7 @@ protected:
 	type_sliderwindow_signal m_signal_volume_changed;
 
 private:
+	void updateControls(int cardId);
 	void createSettingsDialog();
 
 private:

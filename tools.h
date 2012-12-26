@@ -17,12 +17,8 @@ struct VolumeMixers{
 };
 
 struct MixerSwitches{
-	std::vector<switchcap> commonSwitchList_;
 	std::vector<switchcap> captureSwitchList_;
-	std::vector<switchcap> captureJoinedSwitchList_;
-	std::vector<switchcap> captureExsclusiveSwitchList_;
 	std::vector<switchcap> playbackSwitchList_;
-	std::vector<switchcap> playbackJoinedSwitchList_;
 };
 
 struct settingsStr {
@@ -35,13 +31,8 @@ struct settingsStr {
 };
 
 enum SwitchType {
-	COMMON =0,
-	PLAYBACK = 1,
-	PLAYBACK_JOINED = 2,
-	CAPTURE = 3,
-	CAPTURE_JOINED = 4,
-	CAPTURE_EXCLUSIVE = 5
-
+	PLAYBACK = 0,
+	CAPTURE = 1
 };
 
 namespace Tools {

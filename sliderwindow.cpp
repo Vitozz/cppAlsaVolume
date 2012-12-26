@@ -8,6 +8,10 @@
 SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade)
 : Gtk::Window(cobject)
 {
+	mixerList_.reserve(mixerList_.size());
+	cardList_.reserve(cardList_.size());
+	switches_.captureSwitchList_.reserve(switches_.captureSwitchList_.size());
+	switches_.playbackSwitchList_.reserve(switches_.playbackSwitchList_.size());
 	alsaWork_ = new AlsaWork();
 	Glib::RefPtr<Gtk::Builder> builder = refGlade;
 	volumeSlider_ = 0;
@@ -129,7 +133,7 @@ std::string SliderWindow::getActiveMixer() const
 	return mixerList_.at(mixerId_);
 }
 
-double SliderWindow::getVolumeValue() const
+double SliderWindow::getVolumeValue()
 {
 	return volumeValue_;
 }
@@ -199,7 +203,7 @@ void SliderWindow::createSettingsDialog()
 		std::cerr << "FileError::sliderwindow.cpp::190 " << ex.what() << std::endl;
 	}
 	builder_->get_widget_derived("settingsDialog", settingsDialog);
-
+	updateControls(cardId_);
 	if (settingsDialog) {
 		settingsStr str;
 		str.cardId = cardId_;
@@ -235,22 +239,23 @@ std::vector<std::string> SliderWindow::getCardsList()
 void SliderWindow::setActiveCard(int card)
 {
 	alsaWork_->setCardId(card);
+	updateControls(card);
 }
 
 void SliderWindow::onSettingsDialogOk(settingsStr str)
 {
 	cardId_ = str.cardId;
-	alsaWork_->setCardId(cardId_);
 	mixerId_ = str.mixerId;
-	mixerList_ = alsaWork_->getVolumeMixers(cardId_);
+	updateControls(cardId_);
 	if (mixerList_.size() > 0 ) {
 		mixerName_ = mixerList_.at(mixerId_);
 	}
 	else {
 		mixerName_ = "N/A";
 	}
-
 	orient_ = str.notebookOrientation;
+	volumeValue_ = alsaWork_->getAlsaVolume(mixerName_);
+	volumeSlider_->set_value(volumeValue_);
 }
 
 void SliderWindow::switchChanged(const std::string &name, int id, bool enabled)
@@ -267,4 +272,20 @@ bool SliderWindow::getMuted()
 {
 	bool muted = alsaWork_->getMute(cardId_, mixerName_);
 	return !muted;
+}
+
+void SliderWindow::updateControls(int cardId)
+{
+	if (!mixerList_.empty())
+		mixerList_.clear();
+	if (!cardList_.empty())
+		cardList_.clear();
+	if (!switches_.captureSwitchList_.empty())
+		switches_.captureSwitchList_.clear();
+	if (!switches_.playbackSwitchList_.empty())
+		switches_.playbackSwitchList_.clear();
+	cardList_ = alsaWork_->getCardsList();
+	alsaWork_->setCardId(cardId);
+	mixerList_ = alsaWork_->getVolumeMixers(cardId);
+	switches_ = alsaWork_->getSwitchList(cardId);
 }
