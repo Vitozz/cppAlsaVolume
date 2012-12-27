@@ -24,10 +24,12 @@ Glib::ustring Tools::getResPath(const char *resName)
 	list.push_back(cwd + "/" + resName_);
 	list.push_back("/usr"+ pathSuffix + resName_);
 	list.push_back("/usr/local" + pathSuffix + resName_);
-	for (uint i = 0; i < list.size(); i++) {
-		if (checkFileExists(list.at(i))) {
-			return Glib::ustring(list.at(i));
+	std::vector<Glib::ustring>::iterator it = list.begin();
+	while (it != list.end()) {
+		if (checkFileExists(*it)) {
+			return Glib::ustring(*it);
 		}
+		it++;
 	}
 	return "";
 }
@@ -59,14 +61,18 @@ void Tools::saveFile(const std::string &fileName, const Glib::ustring &fileData)
 std::pair<bool, int> Tools::itemExists(std::vector<std::string> vector, const Glib::ustring& item)
 {
 	int index = 0;
+	int i = 0;
 	bool exists = false;
-	for (uint i=0; i < vector.size(); i++) {
-		Glib::ustring answ(vector.at(i));
+	std::vector<std::string>::iterator it = vector.begin();
+	while (it != vector.end()) {
+		Glib::ustring answ(*it);
 		if (answ == item) {
 			index = i;
 			exists = true;
 			break;
 		}
+		it++;
+		i++;
 	}
 	std::pair<bool, int> result(exists, index);
 	return result;

@@ -35,9 +35,8 @@ protected:
 	class ModelTreeView : public Gtk::TreeModel::ColumnRecord
 	{
 	public:
-		inline ModelTreeView() { add(m_col_toggle); add(m_col_id); add(m_col_name); }
+		inline ModelTreeView() { add(m_col_toggle); add(m_col_name); }
 		Gtk::TreeModelColumn<bool> m_col_toggle;
-		Gtk::TreeModelColumn<Glib::ustring> m_col_id;
 		Gtk::TreeModelColumn<Glib::ustring> m_col_name;
 	};
 	ModelTreeView m_TColumns;
@@ -47,7 +46,9 @@ protected:
 	bool onDeleteEvent(GdkEventAny* event);
 	void sndBoxChanged();
 	void mixerBoxChanged();
-	void onCellToggled(const Glib::ustring &path);
+	void onPlaybackCellToggled(const Glib::ustring &path);
+	void onCaptureCellToggled(const Glib::ustring &path);
+	void onEnumCellToggled(const Glib::ustring &path);
 	//signals
 	type_void_signal m_signal_ok_pressed;
 	type_toggled_signal m_type_toggled_signal;
@@ -60,14 +61,18 @@ private:
 	Gtk::ComboBox *sndCardBox_;
 	Gtk::ComboBox *mixerBox_;
 	Gtk::Entry *extMixer_;
-	Gtk::TreeView *switchTree_;
+	Gtk::TreeView *playbackSwitchTree_;
+	Gtk::TreeView *captureSwitchTree_;
+	Gtk::TreeView *otherSwitchTree_;
 	Gtk::ComboBox *iconPacks_;
 	Gtk::CheckButton *isAutoRun_;
 	Gtk::CheckButton *tabPos_;
 	Gtk::Notebook *tabWidget_;
 	Glib::RefPtr<Gtk::ListStore> cards_;
 	Glib::RefPtr<Gtk::ListStore> mixers_;
-	Glib::RefPtr<Gtk::ListStore> switches_;
+	Glib::RefPtr<Gtk::ListStore> pbSwitches_;
+	Glib::RefPtr<Gtk::ListStore> capSwitches_;
+	Glib::RefPtr<Gtk::ListStore> enumSwitches_;
 	settingsStr settings_;
 };
 

@@ -19,6 +19,7 @@ struct VolumeMixers{
 struct MixerSwitches{
 	std::vector<switchcap> captureSwitchList_;
 	std::vector<switchcap> playbackSwitchList_;
+	std::vector<switchcap> enumSwitchList_;
 };
 
 struct settingsStr {
@@ -32,7 +33,8 @@ struct settingsStr {
 
 enum SwitchType {
 	PLAYBACK = 0,
-	CAPTURE = 1
+	CAPTURE = 1,
+	ENUM = 2
 };
 
 namespace Tools {

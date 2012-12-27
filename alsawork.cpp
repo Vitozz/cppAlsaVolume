@@ -40,20 +40,14 @@ double AlsaWork::getAlsaVolume(const std::string& mixer)
 			if (snd_mixer_selem_has_playback_channel(elem, chanelid)) {
 				checkError(snd_mixer_selem_get_playback_volume(elem, chanelid, &outvol));
 			}
-			outvol -= minv;
-			maxv -= minv;
-			outvol = 100 * outvol / maxv;
-			return double(outvol);
+			return double(100*(outvol - minv)/(maxv-minv));
 		}
 		if (snd_mixer_selem_has_capture_volume(elem) || snd_mixer_selem_has_capture_volume_joined(elem)) {
 			checkError(snd_mixer_selem_get_capture_volume_range(elem, &minv, &maxv));
 			if (snd_mixer_selem_has_capture_channel(elem, chanelid)) {
 				checkError(snd_mixer_selem_get_capture_volume(elem, chanelid, &outvol));
 			}
-			outvol -= minv;
-			maxv -= minv;
-			outvol = 100 * outvol / maxv;
-			return double(outvol);
+			return double(100*(outvol - minv)/(maxv-minv));
 		}
 		checkError(snd_mixer_close(handle));
 	}
@@ -116,6 +110,10 @@ void AlsaWork::setSwitch(int cardId, const std::string &mixer, int id, bool enab
 	}
 	if (id == CAPTURE) {
 		checkError(snd_mixer_selem_set_capture_switch_all(elem, int(enabled)));
+	}
+	if (id == ENUM) {
+		snd_mixer_selem_channel_id_t channel = checkMixerChannels(elem);
+		checkError(snd_mixer_selem_set_enum_item(elem, channel, uint(enabled)));
 	}
 	checkError(snd_mixer_close(handle));
 }
@@ -251,6 +249,8 @@ void AlsaWork::updateMixers(int cardIndex)
 		switches_.captureSwitchList_.clear();
 	if (!switches_.playbackSwitchList_.empty())
 		switches_.playbackSwitchList_.clear();
+	if (!switches_.enumSwitchList_.empty())
+		switches_.enumSwitchList_.clear();
 	//
 	snd_mixer_t *handle = getMixerHanlde(cardIndex);
 	snd_mixer_selem_id_t *smid;
@@ -292,13 +292,12 @@ void AlsaWork::updateMixers(int cardIndex)
 			switches_.playbackSwitchList_.push_back(item);
 		}
 		if (snd_mixer_selem_is_enumerated(element)) {
-			std::cout << ">> " << snd_mixer_selem_get_name(element) << std::endl;
-		}
-		if (snd_mixer_selem_is_enum_playback(element)) {
-			std::cout << "Playback: "<<snd_mixer_selem_get_name(element) << std::endl;
-		}
-		if (snd_mixer_selem_is_enum_capture(element)) {
-			std::cout << "Capture: "<<snd_mixer_selem_get_name(element) << std::endl;
+			uint value = 0;
+			switchcap item;
+			checkError(snd_mixer_selem_get_enum_item(element, channel, &value));
+			item.enabled = bool(value);
+			item.name = name;
+			switches_.enumSwitchList_.push_back(item);
 		}
 	}
 	checkError(snd_mixer_close(handle));

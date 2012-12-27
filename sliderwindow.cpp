@@ -55,7 +55,7 @@ void SliderWindow::runAboutDialog()
 	dialog->set_title("About AlsaVolume");
 	dialog->set_program_name("Alsa Volume Changer");
 	dialog->set_comments("Tray Alsa Volume Changer written using gtkmm");
-	dialog->set_version("0.0.4");
+	dialog->set_version("0.0.5");
 	dialog->set_copyright("2012 (c) Vitaly Tonkacheyev (thetvg@gmail.com)");
 	dialog->set_website("http://sites.google.com/site/thesomeprojects/");
 	dialog->set_website_label("Program Website");
