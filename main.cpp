@@ -30,6 +30,7 @@ int main (int argc, char *argv[])
 		std::cerr << "FileError::main.cpp::19 " << ex.what() << std::endl;
 		return 1;
 	}
+	app->hold();
 	SliderWindow *sliderWindow = 0;
 	refBuilder->get_widget_derived("volumeFrame", sliderWindow);
 	TrayIcon *trayIcon = new TrayIcon(sliderWindow->getVolumeValue(),
@@ -44,14 +45,10 @@ int main (int argc, char *argv[])
 		trayIcon->signal_save_settings().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::saveSettings));
 		trayIcon->signal_value_changed().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::setVolumeValue));
 		trayIcon->signal_on_mute().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::soundMuted));
+		sliderWindow->set_visible(false);
+		return app->run();
 	}
-	app->hold();
-	sliderWindow->set_visible(false);
-	app->add_window(*sliderWindow);
-	return app->run();
-	if (sliderWindow && trayIcon) {
-		delete sliderWindow;
-		delete trayIcon;
-	}
+	delete sliderWindow;
+	delete trayIcon;
 	return 0;
 }
