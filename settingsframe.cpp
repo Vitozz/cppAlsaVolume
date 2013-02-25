@@ -1,23 +1,43 @@
+/*
+ * settingsframe.cpp
+ * Copyright (C) 2012 Vitaly Tonkacheyev
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
 #include "settingsframe.h"
 #include <iostream>
 
 SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 			     const Glib::RefPtr<Gtk::Builder>& refGlade)
- : Gtk::Dialog(cobject),
-   okButton_(0),
-   cancelButton_(0),
-   sndCardBox_(0),
-   mixerBox_(0),
-   extMixer_(0),
-   playbackSwitchTree_(0),
-   captureSwitchTree_(0),
-   otherSwitchTree_(0),
-   iconPacks_(0),
-   isAutoRun_(0),
-   tabPos_(0),
-   tabWidget_(0),
-   cards_(0),
-   mixers_(0)
+: Gtk::Dialog(cobject),
+  okButton_(0),
+  cancelButton_(0),
+  sndCardBox_(0),
+  mixerBox_(0),
+  extMixer_(0),
+  playbackSwitchTree_(0),
+  captureSwitchTree_(0),
+  otherSwitchTree_(0),
+  iconPacks_(0),
+  isAutoRun_(0),
+  tabPos_(0),
+  tabWidget_(0),
+  cards_(0),
+  mixers_(0)
 {
 	//init all lists
 	settings_.cardList.reserve(settings_.cardList.size());
@@ -54,8 +74,12 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 		isAutoRun_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onAutorunToggled));
 	}
 	this->signal_delete_event().connect(sigc::mem_fun(*this, &SettingsFrame::onDeleteEvent));
-	extMixer_->set_sensitive(false);
-	iconPacks_->set_sensitive(false);
+	if (extMixer_) {
+		extMixer_->set_sensitive(false);
+	}
+	if (iconPacks_) {
+		iconPacks_->set_sensitive(false);
+	}
 }
 
 SettingsFrame::~SettingsFrame()
@@ -74,11 +98,15 @@ SettingsFrame::~SettingsFrame()
 	delete tabWidget_;
 }
 
-void SettingsFrame::initParms(settingsStr str)
+void SettingsFrame::initParms(settingsStr *str)
 {
-	settings_ = str;
-	tabPos_->set_active(settings_.notebookOrientation);
-	isAutoRun_->set_active(settings_.isAutorun);
+	settings_ = *str;
+	if (tabPos_) {
+		tabPos_->set_active(settings_.notebookOrientation);
+	}
+	if (isAutoRun_) {
+		isAutoRun_->set_active(settings_.isAutorun);
+	}
 	setupTreeModels();
 }
 

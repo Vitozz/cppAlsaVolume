@@ -1,20 +1,39 @@
+/*
+ * settings.cpp
+ * Copyright (C) 2012 Vitaly Tonkacheyev
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
 #include "settings.h"
 #include "tools.h"
 #include "glibmm/keyfile.h"
 #include "glibmm/fileutils.h"
 #include "fstream"
 
-const std::string configDir = std::string(std::string(getenv("HOME")) + "/.config/cppAlsaVolume");
-const std::string iniFileName = configDir + std::string("/config.ini");
-const std::string DesktopFilePath = std::string(std::string(getenv("HOME")) + "/.config/autostart/alsavolume.desktop");
-
 Settings::Settings()
 {
 	configFile_ = new Glib::KeyFile();
 	desktopFile_ = new Glib::KeyFile();
+	const std::string configDir = std::string(std::string(getenv("HOME")) + "/.config/cppAlsaVolume");
+	iniFileName_ = configDir + std::string("/config.ini");
+	desktopFilePath_ = std::string(std::string(getenv("HOME")) + "/.config/autostart/alsavolume.desktop");
 	Tools::createDirectory(configDir);
-	loadConfig(iniFileName.c_str());
-	loadDesktopFile(DesktopFilePath.c_str());
+	loadConfig(iniFileName_.c_str());
+	loadDesktopFile(desktopFilePath_.c_str());
 }
 
 Settings::~Settings()
@@ -26,20 +45,20 @@ Settings::~Settings()
 void Settings::loadConfig(const std::string& fileName)
 {
 	if (!Tools::checkFileExists(fileName)) {
-		parseConfig(iniFileName, std::string(""));
+		parseConfig(iniFileName_, std::string(""));
 	}
 	try {
 		configFile_->load_from_file(fileName);
 	}
 	catch (Glib::FileError &err) {
-		std::cerr << "settings.cpp::34:: " << fileName << " - " << err.what() << std::endl;
+		std::cerr << "settings.cpp::54:: " << fileName << " - " << err.what() << std::endl;
 	}
 }
 
 void Settings::saveVolume(double volume)
 {
 	configFile_->set_double(Glib::ustring("main"),Glib::ustring("volume"), volume);
-	parseConfig(iniFileName, configFile_->to_data());
+	parseConfig(iniFileName_, configFile_->to_data());
 }
 
 double Settings::getVolume() const
@@ -49,7 +68,7 @@ double Settings::getVolume() const
 		value = (double)configFile_->get_integer(Glib::ustring("main"),Glib::ustring("volume"));
 	}
 	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::51::KeyFileError " << ex.what() << std::endl;
+		std::cerr << "settings.cpp::71::KeyFileError " << ex.what() << std::endl;
 	}
 
 	return value;
@@ -67,7 +86,7 @@ int Settings::getSoundCard()
 		card = (int)configFile_->get_integer(Glib::ustring("main"),Glib::ustring("card"));
 	}
 	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::69::KeyFileError " << ex.what() << std::endl;
+		std::cerr << "settings.cpp::89::KeyFileError " << ex.what() << std::endl;
 	}
 	return card;
 }
@@ -75,7 +94,7 @@ int Settings::getSoundCard()
 void Settings::saveSoundCard(int soundCard)
 {
 	configFile_->set_integer(Glib::ustring("main"),Glib::ustring("card"),soundCard);
-	parseConfig(iniFileName, configFile_->to_data());
+	parseConfig(iniFileName_, configFile_->to_data());
 }
 
 Glib::ustring Settings::getMixer()
@@ -85,7 +104,7 @@ Glib::ustring Settings::getMixer()
 		mixer = Glib::ustring(configFile_->get_string(Glib::ustring("main"),Glib::ustring("mixer")));
 	}
 	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::87::KeyFileError " << ex.what() << std::endl;
+		std::cerr << "settings.cpp::107::KeyFileError " << ex.what() << std::endl;
 	}
 	return mixer;
 }
@@ -93,13 +112,13 @@ Glib::ustring Settings::getMixer()
 void Settings::saveMixer(const std::string &mixerName)
 {
 	configFile_->set_string(Glib::ustring("main"),Glib::ustring("mixer"),mixerName);
-	parseConfig(iniFileName, configFile_->to_data());
+	parseConfig(iniFileName_, configFile_->to_data());
 }
 
 void Settings::saveNotebookOrientation(bool orient)
 {
 	configFile_->set_boolean(Glib::ustring("main"),Glib::ustring("orient"),orient);
-	parseConfig(iniFileName, configFile_->to_data());
+	parseConfig(iniFileName_, configFile_->to_data());
 }
 
 bool Settings::getNotebookOrientation()
@@ -109,7 +128,7 @@ bool Settings::getNotebookOrientation()
 		orient = bool(configFile_->get_boolean(Glib::ustring("main"),Glib::ustring("orient")));
 	}
 	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::111::KeyFileError " << ex.what() << std::endl;
+		std::cerr << "settings.cpp::131::KeyFileError " << ex.what() << std::endl;
 	}
 	return orient;
 }
@@ -118,32 +137,33 @@ void Settings::loadDesktopFile(const std::string &fileName)
 {
 	if (!Tools::checkFileExists(fileName)) {
 		initDesktopFileData();
-		parseConfig(DesktopFilePath, desktopFile_->to_data());
+		parseConfig(desktopFilePath_, desktopFile_->to_data());
 	}
 	try {
 		desktopFile_->load_from_file(fileName);
 	}
 	catch (Glib::FileError &err) {
-		std::cerr << "settings.cpp::126:: " << fileName << " - " << err.what() << std::endl;
+		std::cerr << "settings.cpp::146:: " << fileName << " - " << err.what() << std::endl;
 	}
 }
 
 void Settings::initDesktopFileData()
 {
-	desktopFile_->set_string(Glib::ustring("Desktop Entry"),Glib::ustring("Encoding"),Glib::ustring("UTF-8"));
-	desktopFile_->set_string(Glib::ustring("Desktop Entry"),Glib::ustring("Name"),Glib::ustring("AlsaVolume"));
-	desktopFile_->set_string(Glib::ustring("Desktop Entry"),Glib::ustring("Comment"),Glib::ustring("Changes the volume of ALSA from the system tray"));
-	desktopFile_->set_string(Glib::ustring("Desktop Entry"),Glib::ustring("Exec"),Glib::ustring("alsavolume"));
-	desktopFile_->set_string(Glib::ustring("Desktop Entry"),Glib::ustring("Type"),Glib::ustring("Application"));
-	desktopFile_->set_string(Glib::ustring("Desktop Entry"),Glib::ustring("Version"),Glib::ustring("0.0.6"));
-	desktopFile_->set_boolean(Glib::ustring("Desktop Entry"),Glib::ustring("X-GNOME-Autostart-enabled"),false);
-	desktopFile_->set_string(Glib::ustring("Desktop Entry"),Glib::ustring("Comment[ru]"),Glib::ustring("Регулятор громкости ALSA"));
+	const Glib::ustring entry = Glib::ustring("Desktop Entry");
+	desktopFile_->set_string(entry, Glib::ustring("Encoding"),Glib::ustring("UTF-8"));
+	desktopFile_->set_string(entry,Glib::ustring("Name"),Glib::ustring("AlsaVolume"));
+	desktopFile_->set_string(entry,Glib::ustring("Comment"),Glib::ustring("Changes the volume of ALSA from the system tray"));
+	desktopFile_->set_string(entry,Glib::ustring("Exec"),Glib::ustring("alsavolume"));
+	desktopFile_->set_string(entry,Glib::ustring("Type"),Glib::ustring("Application"));
+	desktopFile_->set_string(entry,Glib::ustring("Version"),Glib::ustring(Tools::version));
+	desktopFile_->set_boolean(entry,Glib::ustring("X-GNOME-Autostart-enabled"),false);
+	desktopFile_->set_string(entry,Glib::ustring("Comment[ru]"),Glib::ustring("Регулятор громкости ALSA"));
 }
 
 void Settings::setAutorun(bool isAutorun)
 {
 	desktopFile_->set_boolean(Glib::ustring("Desktop Entry"),Glib::ustring("X-GNOME-Autostart-enabled"),isAutorun);
-	parseConfig(DesktopFilePath, desktopFile_->to_data());
+	parseConfig(desktopFilePath_, desktopFile_->to_data());
 }
 
 bool Settings::getAutorun()
@@ -153,13 +173,13 @@ bool Settings::getAutorun()
 		isAutorun = bool(desktopFile_->get_boolean(Glib::ustring("Desktop Entry"),Glib::ustring("X-GNOME-Autostart-enabled")));
 	}
 	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::153::KeyFileError " << ex.what() << std::endl;
+		std::cerr << "settings.cpp::176::KeyFileError " << ex.what() << std::endl;
 	}
 	return isAutorun;
 }
 
-void Settings::setVersion(Glib::ustring &version)
+void Settings::setVersion(const Glib::ustring &version)
 {
 	desktopFile_->set_string(Glib::ustring("Desktop Entry"),Glib::ustring("Version"), version);
-	parseConfig(DesktopFilePath, desktopFile_->to_data());
+	parseConfig(desktopFilePath_, desktopFile_->to_data());
 }

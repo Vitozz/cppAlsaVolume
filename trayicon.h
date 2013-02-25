@@ -1,3 +1,23 @@
+/*
+ * trayicon.h
+ * Copyright (C) 2012 Vitaly Tonkacheyev
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
 #ifndef TRAYICON_H
 #define TRAYICON_H
 
@@ -11,9 +31,9 @@
 class TrayIcon : public Gtk::StatusIcon
 {
 public:
-	TrayIcon(double volume, std::string cardName, std::string mixerName, bool muted);
+	TrayIcon(double volume, const std::string &cardName, const std::string &mixerName, bool muted);
 	virtual ~TrayIcon();
-	void on_signal_volume_changed(double volume, std::string cardName, std::string mixerName);
+	void on_signal_volume_changed(double volume, const std::string &cardName, const std::string &mixerName);
 	//signals
 	typedef sigc::signal<void> type_trayicon_simple_signal;
 	type_trayicon_simple_signal signal_ask_dialog();

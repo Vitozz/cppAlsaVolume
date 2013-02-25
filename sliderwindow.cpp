@@ -1,3 +1,23 @@
+/*
+ * sliderwindow.cpp
+ * Copyright (C) 2012 Vitaly Tonkacheyev
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
 #include "sliderwindow.h"
 #include "settingsframe.h"
 #include "gtkmm/aboutdialog.h"
@@ -40,8 +60,7 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	volumeSlider_->set_value(volumeValue_);
 	orient_ = settings_->getNotebookOrientation();
 	switches_ = alsaWork_->getSwitchList(cardId_);
-	version_ = Glib::ustring("0.0.6");
-	settings_->setVersion(version_);
+	settings_->setVersion(Tools::version);
 }
 
 SliderWindow::~SliderWindow()
@@ -57,7 +76,7 @@ void SliderWindow::runAboutDialog()
 	dialog->set_title("About AlsaVolume");
 	dialog->set_program_name("Alsa Volume Changer");
 	dialog->set_comments("Tray Alsa Volume Changer written using gtkmm");
-	dialog->set_version(version_);
+	dialog->set_version(Tools::version);
 	dialog->set_copyright("2012 (c) Vitaly Tonkacheyev (thetvg@gmail.com)");
 	dialog->set_website("http://sites.google.com/site/thesomeprojects/");
 	dialog->set_website_label("Program Website");
@@ -207,20 +226,21 @@ void SliderWindow::createSettingsDialog()
 	builder_->get_widget_derived("settingsDialog", settingsDialog);
 	updateControls(cardId_);
 	if (settingsDialog) {
-		settingsStr str;
-		str.cardId = cardId_;
-		str.mixerId = mixerId_;
-		str.cardList = cardList_;
-		str.mixerList = mixerList_;
-		str.switchList = switches_;
-		str.notebookOrientation = orient_;
-		str.isAutorun = settings_->getAutorun();
+		settingsStr *str = new settingsStr();
+		str->cardId = cardId_;
+		str->mixerId = mixerId_;
+		str->cardList = cardList_;
+		str->mixerList = mixerList_;
+		str->switchList = switches_;
+		str->notebookOrientation = orient_;
+		str->isAutorun = settings_->getAutorun();
 		settingsDialog->initParms(str);
 		settingsDialog->signal_ok_pressed().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogOk));
 		settingsDialog->signal_switches_toggled().connect(sigc::mem_fun(*this, &SliderWindow::switchChanged));
 		settingsDialog->signal_autorun_toggled().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogAutostart));
 		settingsDialog->run();
 		delete settingsDialog;
+		delete str;
 	}
 
 }

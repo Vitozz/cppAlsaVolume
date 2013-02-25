@@ -1,3 +1,23 @@
+/*
+ * main.cpp
+ * Copyright (C) 2012 Vitaly Tonkacheyev
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
 #include "sliderwindow.h"
 #include "trayicon.h"
 #include "tools.h"
@@ -19,15 +39,15 @@ int main (int argc, char *argv[])
 		refBuilder->add_from_file(ui_);
 	}
 	catch(const Gtk::BuilderError& ex) {
-		std::cerr << "BuilderError::main.cpp::19 " << ex.what() << std::endl;
+		std::cerr << "BuilderError::main.cpp::39 " << ex.what() << std::endl;
 		return 1;
 	}
 	catch(const Glib::MarkupError& ex) {
-		std::cerr << "MarkupError::main.cpp::19 " << ex.what() << std::endl;
+		std::cerr << "MarkupError::main.cpp::39 " << ex.what() << std::endl;
 		return 1;
 	}
 	catch(const Glib::FileError& ex) {
-		std::cerr << "FileError::main.cpp::19 " << ex.what() << std::endl;
+		std::cerr << "FileError::main.cpp::39 " << ex.what() << std::endl;
 		return 1;
 	}
 	app->hold();

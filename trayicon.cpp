@@ -1,3 +1,23 @@
+/*
+ * trayicon.cpp
+ * Copyright (C) 2012 Vitaly Tonkacheyev
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
 #include "trayicon.h"
 #include "tools.h"
 #include "gtkmm/separatormenuitem.h"
@@ -8,7 +28,7 @@
 const uint MIDDLE_BUTTON = 2;
 const int OFFSET = 2;
 
-TrayIcon::TrayIcon(double volume, std::string cardName, std::string mixerName, bool muted)
+TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string &mixerName, bool muted)
 : volumeValue_(volume)
 {
 	menu_ = Gtk::manage(new Gtk::Menu());
@@ -164,7 +184,7 @@ bool TrayIcon::onButtonClick(GdkEventButton* event)
 	return false;
 }
 
-void TrayIcon::on_signal_volume_changed(double volume, std::string cardName, std::string mixerName)
+void TrayIcon::on_signal_volume_changed(double volume, const std::string &cardName, const std::string &mixerName)
 {
 	volumeValue_ = volume;
 	cardName_ = cardName;
