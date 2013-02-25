@@ -32,4 +32,3 @@ What features available:
 TODO LIST:
 
 	- add iconpacks support
-	- add autostart option
