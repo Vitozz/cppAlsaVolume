@@ -1,5 +1,6 @@
 #include "tools.h"
 #include "glibmm/fileutils.h"
+#include "glibmm/keyfile.h"
 #include <fstream>
 #include <cstdlib>
 #include <vector>

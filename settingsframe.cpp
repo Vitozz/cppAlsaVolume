@@ -49,10 +49,13 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	{
 		cancelButton_->signal_pressed().connect(sigc::mem_fun(*this, &SettingsFrame::onCancelButton));
 	}
+	if (isAutoRun_)
+	{
+		isAutoRun_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onAutorunToggled));
+	}
 	this->signal_delete_event().connect(sigc::mem_fun(*this, &SettingsFrame::onDeleteEvent));
 	extMixer_->set_sensitive(false);
 	iconPacks_->set_sensitive(false);
-	isAutoRun_->set_sensitive(false);
 }
 
 SettingsFrame::~SettingsFrame()
@@ -75,6 +78,7 @@ void SettingsFrame::initParms(settingsStr str)
 {
 	settings_ = str;
 	tabPos_->set_active(settings_.notebookOrientation);
+	isAutoRun_->set_active(settings_.isAutorun);
 	setupTreeModels();
 }
 
@@ -287,6 +291,11 @@ void SettingsFrame::onEnumCellToggled(const Glib::ustring& path)
 				   bool(row.get_value(m_TColumns.m_col_toggle)));
 }
 
+void SettingsFrame::onAutorunToggled()
+{
+	m_signal_autorun_toggled.emit(isAutoRun_->get_active());
+}
+
 SettingsFrame::type_toggled_signal SettingsFrame::signal_switches_toggled()
 {
 	return m_type_toggled_signal;
@@ -295,4 +304,9 @@ SettingsFrame::type_toggled_signal SettingsFrame::signal_switches_toggled()
 SettingsFrame::type_void_signal SettingsFrame::signal_ok_pressed()
 {
 	return m_signal_ok_pressed;
+}
+
+SettingsFrame::type_bool_signal SettingsFrame::signal_autorun_toggled()
+{
+	return m_signal_autorun_toggled;
 }

@@ -26,6 +26,7 @@ struct settingsStr {
 	unsigned int cardId;
 	unsigned int mixerId;
 	bool notebookOrientation;
+	bool isAutorun;
 	std::vector<std::string> cardList;
 	std::vector<std::string> mixerList;
 	MixerSwitches switchList;

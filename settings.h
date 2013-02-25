@@ -15,13 +15,18 @@ public:
 	void saveMixer(const std::string& mixerName);
 	void saveNotebookOrientation(bool orient);
 	bool getNotebookOrientation();
+	void setAutorun(bool isAutorun);
+	bool getAutorun();
+	void setVersion(Glib::ustring& version);
 private:
-	void parseConfig(const Glib::ustring& keyFileData);
+	void parseConfig(const Glib::ustring& keyFileName, const Glib::ustring& keyFileData);
 	void loadConfig(const std::string& fileName);
+	void loadDesktopFile(const std::string& fileName);
+	void initDesktopFileData();
 
 private:
 	Glib::KeyFile *configFile_;
-	std::string iniFileName_;
+	Glib::KeyFile *desktopFile_;
 };
 
 #endif // SETTINGS_H

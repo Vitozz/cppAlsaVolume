@@ -40,6 +40,8 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	volumeSlider_->set_value(volumeValue_);
 	orient_ = settings_->getNotebookOrientation();
 	switches_ = alsaWork_->getSwitchList(cardId_);
+	version_ = Glib::ustring("0.0.6");
+	settings_->setVersion(version_);
 }
 
 SliderWindow::~SliderWindow()
@@ -55,7 +57,7 @@ void SliderWindow::runAboutDialog()
 	dialog->set_title("About AlsaVolume");
 	dialog->set_program_name("Alsa Volume Changer");
 	dialog->set_comments("Tray Alsa Volume Changer written using gtkmm");
-	dialog->set_version("0.0.5");
+	dialog->set_version(version_);
 	dialog->set_copyright("2012 (c) Vitaly Tonkacheyev (thetvg@gmail.com)");
 	dialog->set_website("http://sites.google.com/site/thesomeprojects/");
 	dialog->set_website_label("Program Website");
@@ -212,9 +214,11 @@ void SliderWindow::createSettingsDialog()
 		str.mixerList = mixerList_;
 		str.switchList = switches_;
 		str.notebookOrientation = orient_;
+		str.isAutorun = settings_->getAutorun();
 		settingsDialog->initParms(str);
 		settingsDialog->signal_ok_pressed().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogOk));
 		settingsDialog->signal_switches_toggled().connect(sigc::mem_fun(*this, &SliderWindow::switchChanged));
+		settingsDialog->signal_autorun_toggled().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogAutostart));
 		settingsDialog->run();
 		delete settingsDialog;
 	}
@@ -256,6 +260,11 @@ void SliderWindow::onSettingsDialogOk(settingsStr str)
 	orient_ = str.notebookOrientation;
 	volumeValue_ = alsaWork_->getAlsaVolume(mixerName_);
 	volumeSlider_->set_value(volumeValue_);
+}
+
+void SliderWindow::onSettingsDialogAutostart(bool isAutorun)
+{
+	settings_->setAutorun(isAutorun);
 }
 
 void SliderWindow::switchChanged(const std::string &name, int id, bool enabled)

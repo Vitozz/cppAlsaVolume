@@ -43,6 +43,7 @@ protected:
 	void on_volume_slider();
 	bool on_focus_out(GdkEventCrossing* event);
 	void onSettingsDialogOk(settingsStr str);
+	void onSettingsDialogAutostart(bool isAutorun);
 	//signal
 	type_sliderwindow_signal m_signal_volume_changed;
 
@@ -62,6 +63,7 @@ private:
 	int cardId_, mixerId_;
 	Glib::ustring mixerName_;
 	bool orient_;
+	Glib::ustring version_;
 };
 
 #endif // SLIDERWINDOW_H
