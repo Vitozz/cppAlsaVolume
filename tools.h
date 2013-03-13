@@ -22,6 +22,7 @@
 #define FILEWORK_H
 
 #include "glibmm/ustring.h"
+#include "archive.h"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -47,8 +48,10 @@ struct settingsStr {
 	unsigned int mixerId;
 	bool notebookOrientation;
 	bool isAutorun;
+	std::string currIconPack;
 	std::vector<std::string> cardList;
 	std::vector<std::string> mixerList;
+	std::vector<std::string> iconPacks;
 	MixerSwitches switchList;
 };
 
@@ -59,14 +62,24 @@ enum SwitchType {
 };
 
 namespace Tools {
+	Glib::ustring getCWD();
+	Glib::ustring getHomePath();
 	Glib::ustring getResPath(const char *resName);
 	bool checkFileExists(const std::string &fileName);
+	bool checkDirExists(const std::string &fileName);
 	void createDirectory(const std::string &dirName);
 	void saveFile(const std::string &fileName, const Glib::ustring &fileData);
 	std::pair<bool, int> itemExists(std::vector<std::string> vector, const Glib::ustring& item);
 	std::vector<std::string> getFileList(const std::string& dir);
+	std::string getTmpDir();
+	void clearTempDir(const std::string &path);
+	void extractArchive(const std::string &archiveFileName, std::string outPath);
+	int copyData(struct archive *in, struct archive *out);
+	std::string checkIconPacks();
+	std::vector<std::string> getIconPacks();
+	std::string pathToFileName(const std::string &path);
 	//Program version
-	const std::string version = "0.0.7";
+	const std::string version = "0.0.8";
 }
 
 #endif // FILEWORK_H

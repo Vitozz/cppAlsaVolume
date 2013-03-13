@@ -11,7 +11,8 @@ CONFIG -= qt
 
 CONFIG += link_pkgconfig
 PKGCONFIG += gtkmm-3.0 \
-	     alsa
+	     alsa \
+	     libarchive
 
 SOURCES += main.cpp \
 	trayicon.cpp \

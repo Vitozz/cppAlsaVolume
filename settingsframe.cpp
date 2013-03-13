@@ -77,9 +77,9 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	if (extMixer_) {
 		extMixer_->set_sensitive(false);
 	}
-	if (iconPacks_) {
+	/*if (iconPacks_) {
 		iconPacks_->set_sensitive(false);
-	}
+	}*/
 }
 
 SettingsFrame::~SettingsFrame()
@@ -258,11 +258,35 @@ void SettingsFrame::setupTreeModels()
 		otherSwitchTree_->append_column("Enumerated Control", m_TColumns.m_col_name);
 		otherSwitchTree_->show_all_children();
 	}
+	if (iconPacks_){
+		Glib::RefPtr<Gtk::ListStore> packs = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_Columns));
+		iconPacks_->set_model(packs);
+		iconPacks_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::iconPackChanged));
+		Gtk::TreeModel::Row row;
+		std::vector<std::string>::iterator it = settings_.iconPacks.begin();
+		while (it != settings_.iconPacks.end()) {
+			row = *(packs->append());
+			Glib::ustring item = Glib::ustring(Tools::pathToFileName(*it));
+			row[m_Columns.m_col_name] = item;
+			if (item == settings_.currIconPack) {
+				iconPacks_->set_active(row);
+			}
+			it++;
+		}
+		iconPacks_->pack_start(m_Columns.m_col_name);
+	}
 }
 
 void SettingsFrame::sndBoxChanged()
 {
 	settings_.cardId = sndCardBox_->get_active_row_number();
+}
+
+void SettingsFrame::iconPackChanged()
+{
+	int id = iconPacks_->get_active_row_number();
+	std::string path = settings_.iconPacks.at(id);
+	m_signal_iconpack_changed.emit(path, id, false);
 }
 
 void SettingsFrame::mixerBoxChanged()
@@ -337,4 +361,9 @@ SettingsFrame::type_void_signal SettingsFrame::signal_ok_pressed()
 SettingsFrame::type_bool_signal SettingsFrame::signal_autorun_toggled()
 {
 	return m_signal_autorun_toggled;
+}
+
+SettingsFrame::type_toggled_signal SettingsFrame::signal_iconpack_changed()
+{
+	return m_signal_iconpack_changed;
 }

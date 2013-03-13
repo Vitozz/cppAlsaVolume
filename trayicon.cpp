@@ -90,6 +90,7 @@ void TrayIcon::onHideRestore()
 void TrayIcon::onQuit()
 {
 	m_signal_save_settings.emit();
+	Tools::clearTempDir(Tools::getTmpDir()+"/");
 	exit(0);
 }
 
@@ -120,30 +121,44 @@ void TrayIcon::onMute()
 	m_signal_on_mute.emit(!muted_);
 }
 
-void TrayIcon::setIcon(double value)
+Glib::ustring TrayIcon::getIconName(double value)
 {
 	Glib::ustring iconPath;
 	if (value <= 0) {
-		iconPath = Glib::ustring("icons/tb_icon0.png");
+		iconPath = Glib::ustring("tb_icon0.png");
 	}
 	if (value >0 && (value < 40)) {
-		iconPath = Glib::ustring("icons/tb_icon20.png");
+		iconPath = Glib::ustring("tb_icon20.png");
 	}
 	if (value >=40 && (value < 60)) {
-		iconPath = Glib::ustring("icons/tb_icon40.png");
+		iconPath = Glib::ustring("tb_icon40.png");
 	}
 	if (value >=60 && (value < 80)) {
-		iconPath = Glib::ustring("icons/tb_icon60.png");
+		iconPath = Glib::ustring("tb_icon60.png");
 	}
 	if (value >=80 && (value < 100)) {
-		iconPath = Glib::ustring("icons/tb_icon80.png");
+		iconPath = Glib::ustring("tb_icon80.png");
 	}
 	if (value >= 100) {
-		iconPath = Glib::ustring("icons/tb_icon100.png");
+		iconPath = Glib::ustring("tb_icon100.png");
+	}
+	return iconPath;
+}
+
+void TrayIcon::setIcon(double value)
+{
+	Glib::ustring iconPath;
+	const std::string tmpDir = Tools::getTmpDir();
+	if (Tools::checkDirExists(tmpDir)) {
+		iconPath = Glib::ustring(tmpDir + "/") + getIconName(value);
+	}
+	else {
+		const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(value);
+		iconPath = Tools::getResPath(searchPath.c_str());
 	}
 	if (!iconPath.empty()) {
 		try {
-			set_from_file(Tools::getResPath(iconPath.c_str()));
+			set_from_file(iconPath);
 		}
 		catch (Glib::FileError &err) {
 			std::cerr << "FileError::trayicon.cpp::138:: " << err.what() << std::endl;

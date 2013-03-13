@@ -69,6 +69,7 @@ protected:
 private:
 	void setIcon(double value);
 	void setTooltip(const Glib::ustring &message);
+	Glib::ustring getIconName(double value);
 
 private:
 	double volumeValue_;

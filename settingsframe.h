@@ -44,6 +44,7 @@ public:
 	type_void_signal signal_ok_pressed();
 	typedef sigc::signal<void, std::string, int ,bool> type_toggled_signal;
 	type_toggled_signal signal_switches_toggled();
+	type_toggled_signal signal_iconpack_changed();
 	typedef sigc::signal<void, bool> type_bool_signal;
 	type_bool_signal signal_autorun_toggled();
 protected:
@@ -72,10 +73,12 @@ protected:
 	void onCaptureCellToggled(const Glib::ustring &path);
 	void onEnumCellToggled(const Glib::ustring &path);
 	void onAutorunToggled();
+	void iconPackChanged();
 	//signals
 	type_void_signal m_signal_ok_pressed;
 	type_toggled_signal m_type_toggled_signal;
 	type_bool_signal m_signal_autorun_toggled;
+	type_toggled_signal m_signal_iconpack_changed;
 private:
 	void setupTreeModels();
 	void setTabPos(bool orient);

@@ -61,6 +61,10 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	orient_ = settings_->getNotebookOrientation();
 	switches_ = alsaWork_->getSwitchList(cardId_);
 	settings_->setVersion(Tools::version);
+	const std::string iPack = settings_->getCurrIconPack();
+	if (!iPack.empty() && iPack != "default") {
+		Tools::extractArchive(iPack, Tools::getTmpDir());
+	}
 }
 
 SliderWindow::~SliderWindow()
@@ -119,7 +123,6 @@ void SliderWindow::on_volume_slider()
 	volumeValue_ = volumeSlider_->get_value();
 	alsaWork_->setAlsaVolume(mixerName_, volumeValue_);
 	m_signal_volume_changed.emit(volumeValue_, getSoundCardName(), mixerName_);
-	//std::cout << "Volume= " << alsaWork_->getAlsaVolume(mixerName_) << std::endl;
 }
 
 bool SliderWindow::on_focus_out(GdkEventCrossing* event)
@@ -233,11 +236,14 @@ void SliderWindow::createSettingsDialog()
 		str->mixerList = mixerList_;
 		str->switchList = switches_;
 		str->notebookOrientation = orient_;
+		str->iconPacks = Tools::getIconPacks();
+		str->currIconPack = settings_->getCurrIconPack();
 		str->isAutorun = settings_->getAutorun();
 		settingsDialog->initParms(str);
 		settingsDialog->signal_ok_pressed().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogOk));
 		settingsDialog->signal_switches_toggled().connect(sigc::mem_fun(*this, &SliderWindow::switchChanged));
 		settingsDialog->signal_autorun_toggled().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogAutostart));
+		settingsDialog->signal_iconpack_changed().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogIconpack));
 		settingsDialog->run();
 		delete settingsDialog;
 		delete str;
@@ -285,6 +291,20 @@ void SliderWindow::onSettingsDialogOk(settingsStr str)
 void SliderWindow::onSettingsDialogAutostart(bool isAutorun)
 {
 	settings_->setAutorun(isAutorun);
+}
+
+void SliderWindow::onSettingsDialogIconpack(const std::string &path, int id, bool value = false)
+{
+	(void)id;
+	(void)value;
+	const std::string tmpDir = Tools::getTmpDir();
+	settings_->setCurrIconPack(path);
+	if (path != "default") {
+		Tools::extractArchive(path, tmpDir);
+	}
+	else {
+		Tools::clearTempDir(tmpDir+"/");
+	}
 }
 
 void SliderWindow::switchChanged(const std::string &name, int id, bool enabled)

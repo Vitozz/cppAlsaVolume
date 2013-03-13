@@ -64,6 +64,7 @@ protected:
 	bool on_focus_out(GdkEventCrossing* event);
 	void onSettingsDialogOk(settingsStr str);
 	void onSettingsDialogAutostart(bool isAutorun);
+	void onSettingsDialogIconpack(const std::string &path, int id, bool value);
 	//signal
 	type_sliderwindow_signal m_signal_volume_changed;
 

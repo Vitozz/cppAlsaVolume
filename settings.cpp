@@ -183,3 +183,24 @@ void Settings::setVersion(const Glib::ustring &version)
 	desktopFile_->set_string(Glib::ustring("Desktop Entry"),Glib::ustring("Version"), version);
 	parseConfig(desktopFilePath_, desktopFile_->to_data());
 }
+
+void Settings::setCurrIconPack(const std::string &packName)
+{
+	configFile_->set_string(Glib::ustring("main"),Glib::ustring("iconpack"),packName);
+	parseConfig(iniFileName_, configFile_->to_data());
+}
+
+std::string Settings::getCurrIconPack()
+{
+	std::string iconPack("");
+	try {
+		iconPack = std::string(configFile_->get_string(Glib::ustring("main"),Glib::ustring("iconpack")));
+		if (iconPack.empty()){
+			iconPack = "default";
+		}
+	}
+	catch (const Glib::KeyFileError& ex) {
+		std::cerr << "settings.cpp::197::KeyFileError " << ex.what() << std::endl;
+	}
+	return iconPack;
+}
