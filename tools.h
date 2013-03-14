@@ -73,7 +73,7 @@ namespace Tools {
 	std::vector<std::string> getFileList(const std::string& dir);
 	std::string getTmpDir();
 	void clearTempDir(const std::string &path);
-	void extractArchive(const std::string &archiveFileName, std::string outPath);
+	void extractArchive(const std::string &archiveFileName, const std::string &outPath);
 	int copyData(struct archive *in, struct archive *out);
 	std::string checkIconPacks();
 	std::vector<std::string> getIconPacks();

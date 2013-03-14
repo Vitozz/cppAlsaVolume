@@ -192,12 +192,9 @@ void Settings::setCurrIconPack(const std::string &packName)
 
 std::string Settings::getCurrIconPack()
 {
-	std::string iconPack("");
+	std::string iconPack = "default";
 	try {
 		iconPack = std::string(configFile_->get_string(Glib::ustring("main"),Glib::ustring("iconpack")));
-		if (iconPack.empty()){
-			iconPack = "default";
-		}
 	}
 	catch (const Glib::KeyFileError& ex) {
 		std::cerr << "settings.cpp::197::KeyFileError " << ex.what() << std::endl;

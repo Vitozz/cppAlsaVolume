@@ -75,6 +75,7 @@ SliderWindow::~SliderWindow()
 
 void SliderWindow::runAboutDialog()
 {
+	const std::string tmpDir = Tools::getTmpDir();
 	Gtk::AboutDialog *dialog = new Gtk::AboutDialog();
 	dialog->set_transient_for(*this);
 	dialog->set_title("About AlsaVolume");
@@ -84,8 +85,17 @@ void SliderWindow::runAboutDialog()
 	dialog->set_copyright("2012 (c) Vitaly Tonkacheyev (thetvg@gmail.com)");
 	dialog->set_website("http://sites.google.com/site/thesomeprojects/");
 	dialog->set_website_label("Program Website");
-	Glib::RefPtr<Gdk::Pixbuf> logo = Gdk::Pixbuf::create_from_file(Tools::getResPath("icons/volume.png"));
-	dialog->set_icon_from_file(Tools::getResPath("icons/tb_icon100.png"));
+	Glib::RefPtr<Gdk::Pixbuf> logo;
+	std::string iconName;
+	if (!Tools::checkDirExists(tmpDir)) {
+		logo = Gdk::Pixbuf::create_from_file(Tools::getResPath("icons/volume.png"));
+		iconName = Tools::getResPath("icons/tb_icon100.png");
+	}
+	else {
+		logo = Gdk::Pixbuf::create_from_file(Glib::ustring(tmpDir + "/volume.png"));
+		iconName = tmpDir + "/tb_icon100.png";
+	}
+	dialog->set_icon_from_file(iconName);
 	dialog->set_logo(logo);
 	dialog->run();
 	delete dialog;

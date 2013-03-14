@@ -277,11 +277,12 @@ void AlsaWork::updateMixers(int cardIndex)
 	snd_mixer_t *handle = getMixerHanlde(cardIndex);
 	snd_mixer_selem_id_t *smid;
 	snd_mixer_selem_id_alloca(&smid);
+	std::string name;
 	for (snd_mixer_elem_t *element = snd_mixer_first_elem(handle);
 	     element;
 	     element = snd_mixer_elem_next(element)) {
 		snd_mixer_selem_get_id(element, smid);
-		std::string name(snd_mixer_selem_id_get_name(smid));
+		name = snd_mixer_selem_id_get_name(smid);
 		snd_mixer_selem_channel_id_t channel = checkMixerChannels(element);
 
 		if (snd_mixer_selem_has_playback_volume(element)

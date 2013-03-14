@@ -21,7 +21,6 @@
 #include "tools.h"
 #include "glibmm/fileutils.h"
 #include "glibmm/keyfile.h"
-#include "glibmm.h"
 #include "glib.h"
 #include "glib/gstdio.h"
 #include "archive.h"
@@ -44,12 +43,12 @@ void checkArchiveError(int err, int lineNumber, const std::string &text) {
 
 bool Tools::checkFileExists(const std::string &fileName)
 {
-	return Glib::file_test(fileName, Glib::FILE_TEST_EXISTS);
+	return g_file_test(fileName.c_str(), G_FILE_TEST_EXISTS);
 }
 
 bool Tools::checkDirExists(const std::string &fileName)
 {
-	return Glib::file_test(fileName, Glib::FILE_TEST_IS_DIR);
+	return g_file_test(fileName.c_str(), G_FILE_TEST_IS_DIR);
 }
 
 Glib::ustring Tools::getCWD()
@@ -88,7 +87,7 @@ Glib::ustring Tools::getResPath(const char *resName)
 
 void Tools::createDirectory(const std::string &dirName)
 {
-	if (!Glib::file_test(dirName, Glib::FILE_TEST_IS_DIR)) {
+	if (!g_file_test(dirName.c_str(), G_FILE_TEST_IS_DIR)) {
 		std::cout << "Directory " << dirName << " not found. Attempting to create it.." << std::endl;
 		gint err = 0;
 		err = g_mkdir_with_parents(dirName.c_str(), 0755);
@@ -133,7 +132,7 @@ std::pair<bool, int> Tools::itemExists(std::vector<std::string> vector, const Gl
 std::vector<std::string> Tools::getFileList(const std::string &dir)
 {
 	if (checkDirExists(dir)) {
-		std::string dirname = Glib::path_get_dirname(dir);
+		std::string dirname = g_path_get_dirname(dir.c_str());
 		Glib::Dir dir_ (dirname);
 		std::vector<std::string> entries (dir_.begin(), dir_.end());
 		return entries;
@@ -143,10 +142,10 @@ std::vector<std::string> Tools::getFileList(const std::string &dir)
 
 std::string Tools::getTmpDir()
 {
-	return (Glib::get_tmp_dir() + "/.alsavolume");
+	return (std::string(g_get_user_cache_dir()) + std::string("/alsavolume"));
 }
 
-void Tools::extractArchive(const std::string &archiveFileName, std::string outPath)
+void Tools::extractArchive(const std::string &archiveFileName, const std::string &outPath)
 {
 	const std::string tmpDirPath = Tools::getTmpDir();
 	Tools::clearTempDir(tmpDirPath);
@@ -165,6 +164,7 @@ void Tools::extractArchive(const std::string &archiveFileName, std::string outPa
 	try {
 		err = archive_read_open_file(ar, archiveFileName.c_str(), 10240);
 		checkArchiveError(err, 153, "Error reading archive");
+		std::string entryPath;
 		while (1) {
 			err = archive_read_next_header(ar, &entry);
 			if (err == ARCHIVE_EOF) {
@@ -172,7 +172,7 @@ void Tools::extractArchive(const std::string &archiveFileName, std::string outPa
 			}
 			checkArchiveError(err, 156, "Reading header error");
 			if (!outPath.empty()) {
-				const std::string entryPath = outPath + "/" + archive_entry_pathname(entry);
+				entryPath = outPath + "/" + archive_entry_pathname(entry);
 				archive_entry_set_pathname(entry, entryPath.c_str());
 			}
 			err = archive_write_header(ext, entry);
@@ -229,8 +229,9 @@ void Tools::clearTempDir(const std::string &path)
 			int err;
 			std::vector<std::string> filelist = getFileList(path);
 			std::vector<std::string>::iterator it = filelist.begin();
+			std::string filename;
 			while (it != filelist.end()) {
-				const std::string filename = path + std::string(*it);
+				filename = path + std::string(*it);
 				if (checkFileExists(filename)) {
 					err = g_unlink(filename.c_str());
 					if (err != 0)
@@ -243,7 +244,7 @@ void Tools::clearTempDir(const std::string &path)
 		}
 	}
 	catch (const std::exception &ex) {
-		std::cout << ex.what() << std::endl;
+		std::cerr << ex.what() << std::endl;
 	}
 }
 
@@ -260,12 +261,14 @@ std::string Tools::checkIconPacks()
 	checkList.push_back(homePath);
 	checkList.push_back(cwd);
 	std::vector<std::string>::iterator it = checkList.begin();
+	std::vector<std::string> list;
+	std::string item;
 	while (it != checkList.end()) {
-		std::vector<std::string> list = getFileList(*it);
+		list = getFileList(*it);
 		if (list.size() > 0) {
 			std::vector<std::string>::iterator i = list.begin();
 			while (i != list.end()) {
-				std::string item = std::string(*i);
+				item = std::string(*i);
 				if (item.find("tar.gz") != std::string::npos) {
 					return std::string(*it);
 				}
@@ -285,8 +288,9 @@ std::vector<std::string> Tools::getIconPacks()
 	std::vector<std::string> result;
 	result.push_back("default");
 	std::vector<std::string>::iterator it = packs.begin();
+	std::string item;
 	while (it != packs.end()) {
-		std::string item = path + *it;
+		item = path + *it;
 		result.push_back(item);
 		it++;
 	}

@@ -77,9 +77,6 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	if (extMixer_) {
 		extMixer_->set_sensitive(false);
 	}
-	/*if (iconPacks_) {
-		iconPacks_->set_sensitive(false);
-	}*/
 }
 
 SettingsFrame::~SettingsFrame()
@@ -201,9 +198,10 @@ void SettingsFrame::setupTreeModels()
 		}
 		pcell->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onPlaybackCellToggled));
 		std::vector<switchcap>::iterator it = settings_.switchList.playbackSwitchList_.begin();
+		switchcap sc;
 		while (it != settings_.switchList.playbackSwitchList_.end()) {
 			row = *(pbSwitches_->append());
-			switchcap sc = *it;
+			sc = *it;
 			row[m_TColumns.m_col_toggle] = sc.enabled;
 			row[m_TColumns.m_col_name] = sc.name;
 			it++;
@@ -225,9 +223,10 @@ void SettingsFrame::setupTreeModels()
 		}
 		rcell->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onCaptureCellToggled));
 		std::vector<switchcap>::iterator it = settings_.switchList.captureSwitchList_.begin();
+		switchcap sc;
 		while (it != settings_.switchList.captureSwitchList_.end()) {
 			row = *(capSwitches_->append());
-			switchcap sc = *it;
+			sc = *it;
 			row[m_TColumns.m_col_toggle] = sc.enabled;
 			row[m_TColumns.m_col_name] = sc.name;
 			it++;
@@ -248,9 +247,10 @@ void SettingsFrame::setupTreeModels()
 		}
 		ecell->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onEnumCellToggled));
 		std::vector<switchcap>::iterator it = settings_.switchList.enumSwitchList_.begin();
+		switchcap sc;
 		while (it != settings_.switchList.enumSwitchList_.end()) {
 			row = *(enumSwitches_->append());
-			switchcap sc = *it;
+			sc = *it;
 			row[m_TColumns.m_col_toggle] = sc.enabled;
 			row[m_TColumns.m_col_name] = sc.name;
 			it++;
@@ -264,11 +264,15 @@ void SettingsFrame::setupTreeModels()
 		iconPacks_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::iconPackChanged));
 		Gtk::TreeModel::Row row;
 		std::vector<std::string>::iterator it = settings_.iconPacks.begin();
+		std::string item;
 		while (it != settings_.iconPacks.end()) {
 			row = *(packs->append());
-			Glib::ustring item = Glib::ustring(Tools::pathToFileName(*it));
-			row[m_Columns.m_col_name] = item;
-			if (item == settings_.currIconPack) {
+			item  = Tools::pathToFileName(*it);
+			row[m_Columns.m_col_name] = Glib::ustring(item);
+			if (settings_.currIconPack.empty() && (item == "default")) {
+				iconPacks_->set_active(row);
+			}
+			else if (item == Tools::pathToFileName(settings_.currIconPack)) {
 				iconPacks_->set_active(row);
 			}
 			it++;
@@ -313,13 +317,14 @@ void SettingsFrame::onCaptureCellToggled(const Glib::ustring& path)
 {
 	Gtk::TreeModel::iterator iter = capSwitches_->children().begin();
 	std::cout << capSwitches_->children().size() << std::endl;
+	Gtk::TreeModel::Row row;
 	while (iter != capSwitches_->children().end()) {
-		Gtk::TreeModel::Row row = *iter;
+		row = *iter;
 		row[m_TColumns.m_col_toggle] = false;
 		iter++;
 	}
 	iter = capSwitches_->get_iter(path);
-	Gtk::TreeModel::Row row = *iter;
+	row = *iter;
 	if (!bool(row.get_value(m_TColumns.m_col_toggle))) {
 		row[m_TColumns.m_col_toggle] = true;
 	}
