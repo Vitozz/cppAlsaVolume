@@ -62,7 +62,7 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	switches_ = alsaWork_->getSwitchList(cardId_);
 	settings_->setVersion(Tools::version);
 	const std::string iPack = settings_->getCurrIconPack();
-	if (!iPack.empty() && iPack != "default") {
+	if (!iPack.empty() && iPack != Tools::defaultIconPack) {
 		Tools::extractArchive(iPack, Tools::getTmpDir());
 	}
 }
@@ -309,7 +309,7 @@ void SliderWindow::onSettingsDialogIconpack(const std::string &path, int id, boo
 	(void)value;
 	const std::string tmpDir = Tools::getTmpDir();
 	settings_->setCurrIconPack(path);
-	if (path != "default") {
+	if (path != Tools::defaultIconPack) {
 		Tools::extractArchive(path, tmpDir);
 	}
 	else {

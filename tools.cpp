@@ -286,7 +286,7 @@ std::vector<std::string> Tools::getIconPacks()
 	const std::string path = checkIconPacks();
 	std::vector<std::string> packs = getFileList(path);
 	std::vector<std::string> result;
-	result.push_back("default");
+	result.push_back(Tools::defaultIconPack);
 	std::vector<std::string>::iterator it = packs.begin();
 	std::string item;
 	while (it != packs.end()) {

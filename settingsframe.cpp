@@ -269,7 +269,7 @@ void SettingsFrame::setupTreeModels()
 			row = *(packs->append());
 			item  = Tools::pathToFileName(*it);
 			row[m_Columns.m_col_name] = Glib::ustring(item);
-			if (settings_.currIconPack.empty() && (item == "default")) {
+			if (settings_.currIconPack.empty() && (item == Tools::defaultIconPack)) {
 				iconPacks_->set_active(row);
 			}
 			else if (item == Tools::pathToFileName(settings_.currIconPack)) {

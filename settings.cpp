@@ -192,7 +192,7 @@ void Settings::setCurrIconPack(const std::string &packName)
 
 std::string Settings::getCurrIconPack()
 {
-	std::string iconPack = "default";
+	std::string iconPack = Tools::defaultIconPack;
 	try {
 		iconPack = std::string(configFile_->get_string(Glib::ustring("main"),Glib::ustring("iconpack")));
 	}

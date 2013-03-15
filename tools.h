@@ -78,6 +78,8 @@ namespace Tools {
 	std::string checkIconPacks();
 	std::vector<std::string> getIconPacks();
 	std::string pathToFileName(const std::string &path);
+	//Constatnts
+	const std::string defaultIconPack = "default";
 	//Program version
 	const std::string version = "0.0.8";
 }
