@@ -40,7 +40,7 @@ public:
 	virtual ~SettingsFrame();
 	void initParms(settingsStr *str);
 	//
-	typedef sigc::signal<void, settingsStr> type_void_signal;
+	typedef sigc::signal<void, settingsStr&> type_void_signal;
 	type_void_signal signal_ok_pressed();
 	typedef sigc::signal<void, std::string, int ,bool> type_toggled_signal;
 	type_toggled_signal signal_switches_toggled();
@@ -101,7 +101,7 @@ private:
 	Glib::RefPtr<Gtk::ListStore> pbSwitches_;
 	Glib::RefPtr<Gtk::ListStore> capSwitches_;
 	Glib::RefPtr<Gtk::ListStore> enumSwitches_;
-	settingsStr settings_;
+	settingsStr *settings_;
 };
 
 #endif // SETTINGSFRAME_H

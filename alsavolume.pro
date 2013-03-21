@@ -1,8 +1,8 @@
 ### eqmake4 was here ###
 include(conf.pri)
 
-CONFIG -= debug_and_release debug
-CONFIG += release
+#CONFIG -= debug_and_release debug
+CONFIG += debug_and_release
 
 TARGET = alsavolume
 TEMPLATE = app
@@ -20,7 +20,10 @@ SOURCES += main.cpp \
 	settings.cpp \
 	alsawork.cpp \
 	tools.cpp \
-	settingsframe.cpp
+	settingsframe.cpp \
+    switchcap.cpp \
+    volumemixers.cpp \
+    mixerswitches.cpp
 
 HEADERS += \
 	alsawork.h \
@@ -28,7 +31,10 @@ HEADERS += \
 	sliderwindow.h \
 	settings.h \
 	tools.h \
-	settingsframe.h
+	settingsframe.h \
+    switchcap.h \
+    volumemixers.h \
+    mixerswitches.h
 
 INCLUDEPATH += \
 	/usr/include/gtkmm-3.0 \

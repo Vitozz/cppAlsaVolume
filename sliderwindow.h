@@ -50,8 +50,8 @@ public:
 	void setActiveMixer(int index);
 	void saveSettings();
 	void runSettings();
-	std::vector<std::string> getMixers();
-	std::vector<std::string> getCardsList();
+	std::vector<std::string> &getMixers();
+	std::vector<std::string> &getCardsList();
 	void switchChanged (const std::string& name, int id, bool enabled);
 	void soundMuted(bool mute);
 	bool getMuted();
@@ -62,7 +62,7 @@ public:
 protected:
 	void on_volume_slider();
 	bool on_focus_out(GdkEventCrossing* event);
-	void onSettingsDialogOk(settingsStr str);
+	void onSettingsDialogOk(const settingsStr &str);
 	void onSettingsDialogAutostart(bool isAutorun);
 	void onSettingsDialogIconpack(const std::string &path, int id, bool value);
 	//signal
@@ -80,7 +80,7 @@ private:
 	AlsaWork *alsaWork_;
 	std::vector<std::string> cardList_;
 	std::vector<std::string> mixerList_;
-	MixerSwitches switches_;
+	MixerSwitches *switches_;
 	int cardId_, mixerId_;
 	Glib::ustring mixerName_;
 	bool orient_;

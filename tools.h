@@ -23,25 +23,11 @@
 
 #include "glibmm/ustring.h"
 #include "archive.h"
+#include "switchcap.h"
+#include "volumemixers.h"
 #include <iostream>
 #include <vector>
 #include <map>
-
-struct switchcap {
-	bool enabled;
-	std::string name;
-};
-
-struct VolumeMixers{
-	std::vector<std::string> playback;
-	std::vector<std::string> capture;
-};
-
-struct MixerSwitches{
-	std::vector<switchcap> captureSwitchList_;
-	std::vector<switchcap> playbackSwitchList_;
-	std::vector<switchcap> enumSwitchList_;
-};
 
 struct settingsStr {
 	unsigned int cardId;
@@ -69,7 +55,7 @@ namespace Tools {
 	bool checkDirExists(const std::string &fileName);
 	void createDirectory(const std::string &dirName);
 	void saveFile(const std::string &fileName, const Glib::ustring &fileData);
-	std::pair<bool, int> itemExists(std::vector<std::string> vector, const Glib::ustring& item);
+	std::pair<bool, int> itemExists(std::vector<std::string> &vector_, const Glib::ustring& item);
 	std::vector<std::string> getFileList(const std::string& dir);
 	std::string getTmpDir();
 	void clearTempDir(const std::string &path);

@@ -109,13 +109,13 @@ void Tools::saveFile(const std::string &fileName, const Glib::ustring &fileData)
 	}
 }
 
-std::pair<bool, int> Tools::itemExists(std::vector<std::string> vector, const Glib::ustring& item)
+std::pair<bool, int> Tools::itemExists(std::vector<std::string> &vector_, const Glib::ustring& item)
 {
 	int index = 0;
 	int i = 0;
 	bool exists = false;
-	std::vector<std::string>::iterator it = vector.begin();
-	while (it != vector.end()) {
+	std::vector<std::string>::iterator it = vector_.begin();
+	while (it != vector_.end()) {
 		Glib::ustring answ(*it);
 		if (answ == item) {
 			index = i;
