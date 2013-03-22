@@ -3,24 +3,26 @@
 
 #include "switchcap.h"
 #include "glibmm/refptr.h"
-#include <vector>
-
-typedef Glib::RefPtr<switchcap> switchSmartPtr;
+#include "tools.h"
+#include "boost/ptr_container/ptr_vector.hpp"
 
 class MixerSwitches
 {
 public:
 	MixerSwitches();
-	~MixerSwitches();
-	void push_back(switchSmartPtr item);
-	void setCaptureSwitchList(std::vector<switchSmartPtr> &list);
-	void setPlaybackSwitchList(std::vector<switchSmartPtr> &list);
-	void setEnumSwitchList(std::vector<switchSmartPtr> &list);
+	void pushBack(SwitchType sType, switchcap *item);
+	void setCaptureSwitchList(boost::ptr_vector<switchcap> list);
+	void setPlaybackSwitchList(boost::ptr_vector<switchcap> list);
+	void setEnumSwitchList(boost::ptr_vector<switchcap> list);
+	void clear(SwitchType sType);
+	boost::ptr_vector<switchcap> captureSwitchList();
+	boost::ptr_vector<switchcap> playbackSwitchList();
+	boost::ptr_vector<switchcap> enumSwitchList();
 
 private:
-	std::vector<switchSmartPtr> captureSwitchList_;
-	std::vector<switchSmartPtr> playbackSwitchList_;
-	std::vector<switchSmartPtr> enumSwitchList_;
+	boost::ptr_vector<switchcap> captureSwitchList_;
+	boost::ptr_vector<switchcap> playbackSwitchList_;
+	boost::ptr_vector<switchcap> enumSwitchList_;
 };
 
 #endif // MIXERSWITCHES_H

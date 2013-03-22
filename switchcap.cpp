@@ -1,23 +1,24 @@
 #include "switchcap.h"
 
-switchcap::switchcap()
+switchcap::switchcap(bool Enabled, const std::string &Name)
+: isEnabled_(Enabled),
+  name_(Name)
 {
-	name_="";
 }
 
-bool switchcap::enabled()
+bool switchcap::isEnabled()
 {
-	return enabled_;
+	return isEnabled_;
 }
 
-std::string switchcap::name()
+std::string &switchcap::name()
 {
-	return *name_;
+	return name_;
 }
 
 void switchcap::setEnabled(bool isEnabled)
 {
-	enabled_ = isEnabled;
+	isEnabled_ = isEnabled;
 }
 
 void switchcap::setName(const std::string &Name)

@@ -28,6 +28,7 @@
 #include "settings.h"
 #include "alsawork.h"
 #include "tools.h"
+#include "settingsstr.h"
 #include <vector>
 
 class SliderWindow : public Gtk::Window
@@ -62,7 +63,7 @@ public:
 protected:
 	void on_volume_slider();
 	bool on_focus_out(GdkEventCrossing* event);
-	void onSettingsDialogOk(const settingsStr &str);
+	void onSettingsDialogOk(settingsStr &str);
 	void onSettingsDialogAutostart(bool isAutorun);
 	void onSettingsDialogIconpack(const std::string &path, int id, bool value);
 	//signal

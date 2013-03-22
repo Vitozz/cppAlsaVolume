@@ -21,9 +21,10 @@ SOURCES += main.cpp \
 	alsawork.cpp \
 	tools.cpp \
 	settingsframe.cpp \
-    switchcap.cpp \
-    volumemixers.cpp \
-    mixerswitches.cpp
+	switchcap.cpp \
+	volumemixers.cpp \
+	mixerswitches.cpp \
+	settingsstr.cpp
 
 HEADERS += \
 	alsawork.h \
@@ -32,9 +33,10 @@ HEADERS += \
 	settings.h \
 	tools.h \
 	settingsframe.h \
-    switchcap.h \
-    volumemixers.h \
-    mixerswitches.h
+	switchcap.h \
+	volumemixers.h \
+	mixerswitches.h \
+	settingsstr.h
 
 INCLUDEPATH += \
 	/usr/include/gtkmm-3.0 \

@@ -18,6 +18,8 @@
  *
  */
 
+#include "mixerswitches.h"
+#include "volumemixers.h"
 #include "alsawork.h"
 #include <stdexcept>
 
@@ -97,12 +99,14 @@ std::vector<std::string> &AlsaWork::getCardsList()
 
 std::vector<std::string> &AlsaWork::getVolumeMixers(int cardIndex)
 {
+	std::vector<std::string> cmixers = volumeMixers_->capture();
+	std::vector<std::string> pmixers = volumeMixers_->playback();
 	updateMixers(cardIndex);
 	if (!mixerList_->empty())
 		mixerList_->clear();
-	mixerList_->reserve(volumeMixers_->playback.size() + volumeMixers_->capture.size());
-	mixerList_->insert(mixerList_->end(), volumeMixers_->playback.begin(), volumeMixers_->playback.end());
-	mixerList_->insert(mixerList_->end(), volumeMixers_->capture.begin(), volumeMixers_->capture.end());
+	mixerList_->reserve(pmixers.size() + cmixers.size());
+	mixerList_->insert(mixerList_->end(), pmixers.begin(), pmixers.end());
+	mixerList_->insert(mixerList_->end(), cmixers.begin(), cmixers.end());
 	return *mixerList_;
 }
 
@@ -264,16 +268,11 @@ int AlsaWork::getTotalCards()
 void AlsaWork::updateMixers(int cardIndex)
 {
 	//clearing lists
-	if (!volumeMixers_->playback.empty())
-		volumeMixers_->playback.clear();
-	if (!volumeMixers_->capture.empty())
-		volumeMixers_->capture.clear();
-	if (!switches_->captureSwitchList_.empty())
-		switches_->captureSwitchList_.clear();
-	if (!switches_->playbackSwitchList_.empty())
-		switches_->playbackSwitchList_.clear();
-	if (!switches_->enumSwitchList_.empty())
-		switches_->enumSwitchList_.clear();
+	volumeMixers_->playBackClear();
+	volumeMixers_->captureClear();
+	switches_->clear(CAPTURE);
+	switches_->clear(PLAYBACK);
+	switches_->clear(ENUM);
 	//
 	snd_mixer_t *handle = getMixerHanlde(cardIndex);
 	snd_mixer_selem_id_t *smid;
@@ -289,39 +288,30 @@ void AlsaWork::updateMixers(int cardIndex)
 		if (snd_mixer_selem_has_playback_volume(element)
 		    || snd_mixer_selem_has_playback_volume_joined(element)
 		    || snd_mixer_selem_has_common_volume(element)) {
-			volumeMixers_->playback.push_back(name);
+			volumeMixers_->pushBack(PLAYBACK, name);
 		}
 		if (snd_mixer_selem_has_capture_volume(element)
 		    || snd_mixer_selem_has_capture_volume_joined(element)) {
-			volumeMixers_->capture.push_back(name);
+			volumeMixers_->pushBack(CAPTURE, name);
 		}
 		if (snd_mixer_selem_has_capture_switch(element)
 		    || snd_mixer_selem_has_common_switch(element)
 		    || snd_mixer_selem_has_capture_switch_joined(element)
 		    || snd_mixer_selem_has_capture_switch_exclusive(element)){
 			int value = 0;
-			switchcap item;
 			checkError(snd_mixer_selem_get_capture_switch(element, channel, &value));
-			item.enabled = bool(value);
-			item.name = name;
-			switches_->captureSwitchList_.push_back(item);
+			switches_->pushBack(CAPTURE, new switchcap(bool(value),name));
 		}
 		if (snd_mixer_selem_has_playback_switch(element)
 		    || snd_mixer_selem_has_playback_switch_joined(element)){
 			int value = 0;
-			switchcap item;
 			checkError(snd_mixer_selem_get_playback_switch(element, channel, &value));
-			item.enabled = bool(value);
-			item.name = name;
-			switches_->playbackSwitchList_.push_back(item);
+			switches_->pushBack(PLAYBACK, new switchcap(bool(value),name));
 		}
 		if (snd_mixer_selem_is_enumerated(element)) {
 			uint value = 0;
-			switchcap item;
 			checkError(snd_mixer_selem_get_enum_item(element, channel, &value));
-			item.enabled = bool(value);
-			item.name = name;
-			switches_->enumSwitchList_.push_back(item);
+			switches_->pushBack(ENUM, new switchcap(bool(value),name));
 		}
 	}
 	checkError(snd_mixer_close(handle));

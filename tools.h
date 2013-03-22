@@ -23,28 +23,22 @@
 
 #include "glibmm/ustring.h"
 #include "archive.h"
-#include "switchcap.h"
-#include "volumemixers.h"
+//#include "switchcap.h"
+//#include "volumemixers.h"
 #include <iostream>
 #include <vector>
 #include <map>
-
-struct settingsStr {
-	unsigned int cardId;
-	unsigned int mixerId;
-	bool notebookOrientation;
-	bool isAutorun;
-	std::string currIconPack;
-	std::vector<std::string> cardList;
-	std::vector<std::string> mixerList;
-	std::vector<std::string> iconPacks;
-	MixerSwitches switchList;
-};
 
 enum SwitchType {
 	PLAYBACK = 0,
 	CAPTURE = 1,
 	ENUM = 2
+};
+
+enum ListType {
+	CARDS = 0,
+	MIXERS = 1,
+	ICONS = 2
 };
 
 namespace Tools {
@@ -62,7 +56,7 @@ namespace Tools {
 	void extractArchive(const std::string &archiveFileName, const std::string &outPath);
 	int copyData(struct archive *in, struct archive *out);
 	std::string checkIconPacks();
-	std::vector<std::string> getIconPacks();
+	std::vector<std::string> &getIconPacks();
 	std::string pathToFileName(const std::string &path);
 	//Constatnts
 	const std::string defaultIconPack = "default";

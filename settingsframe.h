@@ -21,6 +21,7 @@
 #ifndef SETTINGSFRAME_H
 #define SETTINGSFRAME_H
 #include "tools.h"
+#include "settingsstr.h"
 #include "gtkmm/dialog.h"
 #include "gtkmm/builder.h"
 #include "gtkmm/button.h"
@@ -38,7 +39,7 @@ public:
 	SettingsFrame(BaseObjectType* cobject,
 		      const Glib::RefPtr<Gtk::Builder>& refGlade);
 	virtual ~SettingsFrame();
-	void initParms(settingsStr *str);
+	void initParms(settingsStr &str);
 	//
 	typedef sigc::signal<void, settingsStr&> type_void_signal;
 	type_void_signal signal_ok_pressed();

@@ -6,14 +6,14 @@
 class switchcap
 {
 public:
-	switchcap();
-	bool enabled();
-	std::string name();
+	switchcap(bool Enabled, const std::string &Name);
+	bool isEnabled();
+	std::string &name();
 	void setEnabled(bool isEnabled);
 	void setName(const std::string &Name);
 private:
-	bool enabled_;
-	std::string *name_;
+	bool isEnabled_;
+	std::string name_;
 };
 
 #endif // SWITCHCAP_H

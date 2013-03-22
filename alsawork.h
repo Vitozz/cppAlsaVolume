@@ -23,8 +23,14 @@
 
 #include "alsa/asoundlib.h"
 #include "tools.h"
+#include "switchcap.h"
+#include "mixerswitches.h"
+#include "volumemixers.h"
+#include "glibmm/refptr.h"
 #include <iostream>
 #include <vector>
+
+typedef Glib::RefPtr<switchcap> switchSmartPtr;
 
 class AlsaWork
 {

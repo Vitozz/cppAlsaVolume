@@ -281,7 +281,7 @@ std::string Tools::checkIconPacks()
 	return "";
 }
 
-std::vector<std::string> Tools::getIconPacks()
+std::vector<std::string> &Tools::getIconPacks()
 {
 	const std::string path = checkIconPacks();
 	std::vector<std::string> packs = getFileList(path);

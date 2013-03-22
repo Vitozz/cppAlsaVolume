@@ -168,7 +168,11 @@ void SliderWindow::setVolumeValue(double value)
 
 std::string SliderWindow::getActiveMixer() const
 {
-	return mixerList_.at(mixerId_);
+	std::cout << mixerId_ << std::endl;
+	if (mixerId_ >= 0 && (mixerId_ < int(mixerList_.size()))) {
+		return mixerList_.at(mixerId_);
+	}
+	return std::string();
 }
 
 double SliderWindow::getVolumeValue()
@@ -244,16 +248,16 @@ void SliderWindow::createSettingsDialog()
 	updateControls(cardId_);
 	if (settingsDialog) {
 		settingsStr *str = new settingsStr();
-		str->cardId = cardId_;
-		str->mixerId = mixerId_;
-		str->cardList = cardList_;
-		str->mixerList = mixerList_;
-		str->switchList = *switches_;
-		str->notebookOrientation = orient_;
-		str->iconPacks = Tools::getIconPacks();
-		str->currIconPack = settings_->getCurrIconPack();
-		str->isAutorun = settings_->getAutorun();
-		settingsDialog->initParms(str);
+		str->setCardId(cardId_);
+		str->setMixerId(mixerId_);
+		str->setList(CARDS, cardList_);
+		str->setList(MIXERS, mixerList_);
+		str->setList(ICONS, Tools::getIconPacks());
+		str->setCurrIconPack(settings_->getCurrIconPack());
+		str->setNotebookOrientation(orient_);
+		str->setIsAutorun(settings_->getAutorun());
+		str->addMixerSwitch(*switches_);
+		settingsDialog->initParms(*str);
 		settingsDialog->signal_ok_pressed().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogOk));
 		settingsDialog->signal_switches_toggled().connect(sigc::mem_fun(*this, &SliderWindow::switchChanged));
 		settingsDialog->signal_autorun_toggled().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogAutostart));
@@ -286,10 +290,10 @@ void SliderWindow::setActiveCard(int card)
 	updateControls(card);
 }
 
-void SliderWindow::onSettingsDialogOk(const settingsStr &str)
+void SliderWindow::onSettingsDialogOk(settingsStr &str)
 {
-	cardId_ = str.cardId;
-	mixerId_ = str.mixerId;
+	cardId_ = str.cardId();
+	mixerId_ = str.mixerId();
 	updateControls(cardId_);
 	if (mixerList_.size() > 0 ) {
 		mixerName_ = mixerList_.at(mixerId_);
@@ -297,7 +301,7 @@ void SliderWindow::onSettingsDialogOk(const settingsStr &str)
 	else {
 		mixerName_ = "N/A";
 	}
-	orient_ = str.notebookOrientation;
+	orient_ = str.notebookOrientation();
 	volumeValue_ = alsaWork_->getAlsaVolume(mixerName_);
 	volumeSlider_->set_value(volumeValue_);
 }
@@ -343,10 +347,8 @@ void SliderWindow::updateControls(int cardId)
 		mixerList_.clear();
 	if (!cardList_.empty())
 		cardList_.clear();
-	if (!switches_->captureSwitchList_.empty())
-		switches_->captureSwitchList_.clear();
-	if (!switches_->playbackSwitchList_.empty())
-		switches_->playbackSwitchList_.clear();
+	switches_->clear(CAPTURE);
+	switches_->clear(PLAYBACK);
 	cardList_ = alsaWork_->getCardsList();
 	alsaWork_->setCardId(cardId);
 	mixerList_ = alsaWork_->getVolumeMixers(cardId);

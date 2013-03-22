@@ -13,6 +13,9 @@ public:
 	std::vector<std::string> &capture();
 	void setPlayback(std::vector<std::string> &list);
 	void setCapture(std::vector<std::string> &list);
+	void playBackClear();
+	void captureClear();
+	void pushBack(int mixerType, const std::string &item);
 private:
 	std::vector<std::string> *playback_;
 	std::vector<std::string> *capture_;

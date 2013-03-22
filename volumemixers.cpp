@@ -24,10 +24,34 @@ std::vector<std::string> &VolumeMixers::capture()
 
 void VolumeMixers::setPlayback(std::vector<std::string> &list)
 {
-	playback_ = list;
+	playback_ = &list;
 }
 
 void VolumeMixers::setCapture(std::vector<std::string> &list)
 {
-	capture_ = list;
+	capture_ = &list;
+}
+
+void VolumeMixers::playBackClear()
+{
+	if (!playback_->empty())
+		playback_->clear();
+}
+
+void VolumeMixers::captureClear()
+{
+	if (!capture_->empty())
+		capture_->clear();
+}
+
+void VolumeMixers::pushBack(int mixerType, const std::string &item)
+{
+	switch (mixerType) {
+	case 0:
+		playback_->push_back(item);
+		break;
+	case 1:
+		capture_->push_back(item);
+		break;
+	}
 }
