@@ -119,12 +119,13 @@ MixerSwitches *AlsaWork::getSwitchList(int cardIndex)
 void AlsaWork::setCardId(int cardId)
 {
 	try {
+		std::cout << "CardID = " << cardId << std::endl;
 		if (!cardList_->at(cardId).empty()) {
 			cardId_ = cardId;
 		}
 	}
 	catch (std::out_of_range &ex) {
-		std::cerr << "alsawork.cpp::122:: Item out of Range" << ex.what() << std::endl;
+		std::cerr << "alsawork.cpp::122:: Item out of Range " << ex.what() << std::endl;
 	}
 }
 
@@ -281,6 +282,7 @@ void AlsaWork::updateMixers(int cardIndex)
 	for (snd_mixer_elem_t *element = snd_mixer_first_elem(handle);
 	     element;
 	     element = snd_mixer_elem_next(element)) {
+		switchcap sCap;
 		snd_mixer_selem_get_id(element, smid);
 		name = snd_mixer_selem_id_get_name(smid);
 		snd_mixer_selem_channel_id_t channel = checkMixerChannels(element);
@@ -300,18 +302,21 @@ void AlsaWork::updateMixers(int cardIndex)
 		    || snd_mixer_selem_has_capture_switch_exclusive(element)){
 			int value = 0;
 			checkError(snd_mixer_selem_get_capture_switch(element, channel, &value));
-			switches_->pushBack(CAPTURE, new switchcap(bool(value),name));
+			sCap = std::make_pair(name, bool(value));
+			switches_->pushBack(CAPTURE, sCap);
 		}
 		if (snd_mixer_selem_has_playback_switch(element)
 		    || snd_mixer_selem_has_playback_switch_joined(element)){
 			int value = 0;
 			checkError(snd_mixer_selem_get_playback_switch(element, channel, &value));
-			switches_->pushBack(PLAYBACK, new switchcap(bool(value),name));
+			sCap = std::make_pair(name, bool(value));
+			switches_->pushBack(PLAYBACK, sCap);
 		}
 		if (snd_mixer_selem_is_enumerated(element)) {
 			uint value = 0;
 			checkError(snd_mixer_selem_get_enum_item(element, channel, &value));
-			switches_->pushBack(ENUM, new switchcap(bool(value),name));
+			sCap = std::make_pair(name, bool(value));
+			switches_->pushBack(ENUM, sCap);
 		}
 	}
 	checkError(snd_mixer_close(handle));

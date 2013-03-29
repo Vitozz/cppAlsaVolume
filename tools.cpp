@@ -55,13 +55,13 @@ Glib::ustring Tools::getCWD()
 {
 	const size_t cwdSize = 255;
 	char cwdBuffer[cwdSize];
-	const Glib::ustring cwd = Glib::ustring(getcwd(cwdBuffer, cwdSize));
+	Glib::ustring cwd = Glib::ustring(getcwd(cwdBuffer, cwdSize));
 	return cwd;
 }
 
 Glib::ustring Tools::getHomePath()
 {
-	const Glib::ustring homepath(Glib::ustring(getenv("HOME")) + "/.local/share/alsavolume/");
+	Glib::ustring homepath(Glib::ustring(getenv("HOME")) + "/.local/share/alsavolume/");
 	return homepath;
 }
 
@@ -76,13 +76,15 @@ Glib::ustring Tools::getResPath(const char *resName)
 	list.push_back("/usr"+ pathSuffix + resName_);
 	list.push_back("/usr/local" + pathSuffix + resName_);
 	std::vector<Glib::ustring>::iterator it = list.begin();
+	Glib::ustring result;
 	while (it != list.end()) {
 		if (checkFileExists(*it)) {
-			return Glib::ustring(*it);
+			result = Glib::ustring(*it);
+			return result;
 		}
 		it++;
 	}
-	return "";
+	return result;
 }
 
 void Tools::createDirectory(const std::string &dirName)
@@ -131,18 +133,20 @@ std::pair<bool, int> Tools::itemExists(std::vector<std::string> &vector_, const 
 
 std::vector<std::string> Tools::getFileList(const std::string &dir)
 {
+	std::vector<std::string> entries;
 	if (checkDirExists(dir)) {
 		std::string dirname = g_path_get_dirname(dir.c_str());
 		Glib::Dir dir_ (dirname);
-		std::vector<std::string> entries (dir_.begin(), dir_.end());
+		entries.assign(dir_.begin(), dir_.end());
 		return entries;
 	}
-	return std::vector<std::string>();
+	return entries;
 }
 
 std::string Tools::getTmpDir()
 {
-	return (std::string(g_get_user_cache_dir()) + std::string("/alsavolume"));
+	std::string result = std::string(g_get_user_cache_dir()) + std::string("/alsavolume");
+	return result;
 }
 
 void Tools::extractArchive(const std::string &archiveFileName, const std::string &outPath)

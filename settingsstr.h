@@ -27,6 +27,8 @@ public:
 	void addMixerSwitch(MixerSwitches &switchItem);
 	void setList(ListType listType, std::vector<std::string> &list);
 	void setCurrIconPack(const std::string &iconPack);
+	void clear(ListType listType);
+	void clearSwitches();
 private:
 	unsigned int cardId_;
 	unsigned int mixerId_;

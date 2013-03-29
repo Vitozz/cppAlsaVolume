@@ -41,6 +41,8 @@ enum ListType {
 	ICONS = 2
 };
 
+typedef std::pair<std::string, bool> switchcap;
+
 namespace Tools {
 	Glib::ustring getCWD();
 	Glib::ustring getHomePath();

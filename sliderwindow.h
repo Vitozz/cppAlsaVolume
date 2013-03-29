@@ -63,7 +63,7 @@ public:
 protected:
 	void on_volume_slider();
 	bool on_focus_out(GdkEventCrossing* event);
-	void onSettingsDialogOk(settingsStr &str);
+	void onSettingsDialogOk(settingsStr str);
 	void onSettingsDialogAutostart(bool isAutorun);
 	void onSettingsDialogIconpack(const std::string &path, int id, bool value);
 	//signal
@@ -79,12 +79,8 @@ private:
 	double volumeValue_;
 	Settings *settings_;
 	AlsaWork *alsaWork_;
-	std::vector<std::string> cardList_;
-	std::vector<std::string> mixerList_;
-	MixerSwitches *switches_;
-	int cardId_, mixerId_;
+	settingsStr *settingsStr_;
 	Glib::ustring mixerName_;
-	bool orient_;
 };
 
 #endif // SLIDERWINDOW_H

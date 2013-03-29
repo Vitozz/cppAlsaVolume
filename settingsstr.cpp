@@ -125,3 +125,28 @@ MixerSwitches &settingsStr::switchList()
 {
 	return *switchList_;
 }
+
+void settingsStr::clear(ListType listType)
+{
+	switch (listType) {
+	case CARDS:
+		if (!cardList_->empty())
+			cardList_->clear();
+		break;
+	case MIXERS:
+		if (!mixerList_->empty())
+			mixerList_->clear();
+		break;
+	case ICONS:
+		if (!iconPacks_->empty())
+			iconPacks_->clear();
+		break;
+	}
+}
+
+void settingsStr::clearSwitches()
+{
+	switchList_->clear(PLAYBACK);
+	switchList_->clear(CAPTURE);
+	switchList_->clear(ENUM);
+}

@@ -21,7 +21,7 @@ SOURCES += main.cpp \
 	alsawork.cpp \
 	tools.cpp \
 	settingsframe.cpp \
-	switchcap.cpp \
+	#switchcap.cpp \
 	volumemixers.cpp \
 	mixerswitches.cpp \
 	settingsstr.cpp
@@ -33,7 +33,7 @@ HEADERS += \
 	settings.h \
 	tools.h \
 	settingsframe.h \
-	switchcap.h \
+	#switchcap.h \
 	volumemixers.h \
 	mixerswitches.h \
 	settingsstr.h
