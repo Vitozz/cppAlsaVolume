@@ -18,9 +18,9 @@
  *
  */
 
-#include "sliderwindow.h"
-#include "trayicon.h"
-#include "tools.h"
+#include "gui/sliderwindow.h"
+#include "gui/trayicon.h"
+#include "tools/tools.h"
 #include "gtkmm/application.h"
 #include "gtkmm/builder.h"
 #include "glibmm.h"

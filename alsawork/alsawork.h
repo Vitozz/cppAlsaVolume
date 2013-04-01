@@ -22,7 +22,9 @@
 #define ALSAWORK_H
 
 #include "alsa/asoundlib.h"
-#include "tools.h"
+#include "../tools/tools.h"
+#include "mixerswitches.h"
+#include "volumemixers.h"
 #include <iostream>
 #include <vector>
 
@@ -34,9 +36,9 @@ public:
 	void setAlsaVolume(const std::string& mixer, double volume);
 	double getAlsaVolume(const std::string& mixer);
 	std::string getCardName(int index);
-	std::vector<std::string> getCardsList();
-	std::vector<std::string>  getVolumeMixers(int cardIndex);
-	MixerSwitches getSwitchList(int cardIndex);
+	std::vector<std::string> &getCardsList();
+	std::vector<std::string> &getVolumeMixers(int cardIndex);
+	MixerSwitches &getSwitchList(int cardIndex);
 	void setCardId(int cardId);
 	void setSwitch(int cardId, const std::string& mixer, int id, bool enabled);
 	void setMute(int cardId, const std::string& mixer, bool enabled);
@@ -54,8 +56,8 @@ private:
 private:
 	std::vector<std::string> cardList_;
 	std::vector<std::string> mixerList_;
-	MixerSwitches switches_;
-	VolumeMixers volumeMixers_;
+	MixerSwitches *switches_;
+	VolumeMixers *volumeMixers_;
 	int cardId_;
 };
 #endif // ALSAWORK_H

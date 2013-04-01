@@ -27,39 +27,19 @@
 #include <vector>
 #include <map>
 
-struct switchcap {
-	bool enabled;
-	std::string name;
-};
-
-struct VolumeMixers{
-	std::vector<std::string> playback;
-	std::vector<std::string> capture;
-};
-
-struct MixerSwitches{
-	std::vector<switchcap> captureSwitchList_;
-	std::vector<switchcap> playbackSwitchList_;
-	std::vector<switchcap> enumSwitchList_;
-};
-
-struct settingsStr {
-	unsigned int cardId;
-	unsigned int mixerId;
-	bool notebookOrientation;
-	bool isAutorun;
-	std::string currIconPack;
-	std::vector<std::string> cardList;
-	std::vector<std::string> mixerList;
-	std::vector<std::string> iconPacks;
-	MixerSwitches switchList;
-};
-
 enum SwitchType {
 	PLAYBACK = 0,
 	CAPTURE = 1,
 	ENUM = 2
 };
+
+enum ListType {
+	CARDS = 0,
+	MIXERS = 1,
+	ICONS = 2
+};
+
+typedef std::pair<std::string, bool> switchcap;
 
 namespace Tools {
 	Glib::ustring getCWD();
@@ -69,7 +49,7 @@ namespace Tools {
 	bool checkDirExists(const std::string &fileName);
 	void createDirectory(const std::string &dirName);
 	void saveFile(const std::string &fileName, const Glib::ustring &fileData);
-	std::pair<bool, int> itemExists(std::vector<std::string> vector, const Glib::ustring& item);
+	std::pair<bool, int> itemExists(const std::vector<std::string> &vector_, const Glib::ustring& item);
 	std::vector<std::string> getFileList(const std::string& dir);
 	std::string getTmpDir();
 	void clearTempDir(const std::string &path);
@@ -81,7 +61,7 @@ namespace Tools {
 	//Constatnts
 	const std::string defaultIconPack = "default";
 	//Program version
-	const std::string version = "0.0.8";
+	const std::string version = "0.0.9";
 }
 
 #endif // FILEWORK_H

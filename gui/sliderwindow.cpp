@@ -21,18 +21,14 @@
 #include "sliderwindow.h"
 #include "settingsframe.h"
 #include "gtkmm/aboutdialog.h"
-#include "glibmm.h"
+#include "glibmm/markup.h"
+#include "glibmm/fileutils.h"
 #include <iostream>
 #include <map>
 
 SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade)
 : Gtk::Window(cobject)
 {
-	mixerList_.reserve(mixerList_.size());
-	cardList_.reserve(cardList_.size());
-	switches_.captureSwitchList_.reserve(switches_.captureSwitchList_.size());
-	switches_.playbackSwitchList_.reserve(switches_.playbackSwitchList_.size());
-	alsaWork_ = new AlsaWork();
 	Glib::RefPtr<Gtk::Builder> builder = refGlade;
 	volumeSlider_ = 0;
 	builder->get_widget("volume_slider", volumeSlider_);
@@ -41,35 +37,43 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	}
 	set_events(Gdk::LEAVE_NOTIFY_MASK);
 	signal_leave_notify_event().connect(sigc::mem_fun(*this, &SliderWindow::on_focus_out));
+	//init class variables
+	alsaWork_ = new AlsaWork();
 	settings_ = new Settings();
-	cardList_ = alsaWork_->getCardsList();
-	cardId_ = settings_->getSoundCard();
-	mixerList_ = alsaWork_->getVolumeMixers(cardId_);
+	settingsStr_ = new settingsStr();
+	//
+	settingsStr_->setList(CARDS, alsaWork_->getCardsList());
+	settingsStr_->setCardId(settings_->getSoundCard());
+	settingsStr_->setList(MIXERS, alsaWork_->getVolumeMixers(settingsStr_->cardId()));
 	mixerName_ = settings_->getMixer();
 	if (!mixerName_.empty()) {
-		std::pair<bool, int> isMixer = Tools::itemExists(mixerList_, mixerName_);
+		std::pair<bool, int> isMixer = Tools::itemExists(settingsStr_->mixerList(), mixerName_);
 		if (isMixer.first) {
-			mixerId_ = isMixer.second;
+			settingsStr_->setMixerId(isMixer.second);
 		}
 	}
 	else {
-		mixerId_ = 0;
-		mixerName_ = mixerList_.at(mixerId_);
+		settingsStr_->setMixerId(0);
+		mixerName_ = settingsStr_->mixerList().at(settingsStr_->mixerId());
 	}
 	volumeValue_ = settings_->getVolume();
 	volumeSlider_->set_value(volumeValue_);
-	orient_ = settings_->getNotebookOrientation();
-	switches_ = alsaWork_->getSwitchList(cardId_);
+	settingsStr_->setNotebookOrientation(settings_->getNotebookOrientation());
+	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList(settingsStr_->cardId()));
 	settings_->setVersion(Tools::version);
-	const std::string iPack = settings_->getCurrIconPack();
-	if (!iPack.empty() && iPack != Tools::defaultIconPack) {
-		Tools::extractArchive(iPack, Tools::getTmpDir());
+	settingsStr_->setCurrIconPack(settings_->getCurrIconPack());
+	settingsStr_->setIsAutorun(settings_->getAutorun());
+	settingsStr_->setList(ICONS, Tools::getIconPacks());
+	std::string cIpack = settingsStr_->currIconPack();
+	if (!cIpack.empty() && (cIpack != Tools::defaultIconPack)) {
+		Tools::extractArchive(cIpack, Tools::getTmpDir());
 	}
 }
 
 SliderWindow::~SliderWindow()
 {
 	delete settings_;
+	delete settingsStr_;
 	delete alsaWork_;
 }
 
@@ -164,7 +168,7 @@ void SliderWindow::setVolumeValue(double value)
 
 std::string SliderWindow::getActiveMixer() const
 {
-	return mixerList_.at(mixerId_);
+	return mixerName_;
 }
 
 double SliderWindow::getVolumeValue()
@@ -200,9 +204,9 @@ int SliderWindow::getWidth() const
 void SliderWindow::saveSettings()
 {
 	settings_->saveVolume(volumeValue_);
-	settings_->saveSoundCard(cardId_);
+	settings_->saveSoundCard(settingsStr_->cardId());
 	settings_->saveMixer(std::string(mixerName_.c_str()));
-	settings_->saveNotebookOrientation(orient_);
+	settings_->saveNotebookOrientation(settingsStr_->notebookOrientation());
 
 }
 
@@ -213,7 +217,7 @@ SliderWindow::type_sliderwindow_signal SliderWindow::signal_volume_changed()
 
 std::string SliderWindow::getSoundCardName() const
 {
-	return alsaWork_->getCardName(cardId_);
+	return alsaWork_->getCardName(settingsStr_->cardId());
 }
 
 void SliderWindow::createSettingsDialog()
@@ -228,35 +232,24 @@ void SliderWindow::createSettingsDialog()
 		builder_->add_from_file(ui_);
 	}
 	catch(const Gtk::BuilderError& ex) {
-		std::cerr << "BuilderError::sliderwindow.cpp::190 " << ex.what() << std::endl;
+		std::cerr << "BuilderError::sliderwindow.cpp::232 " << ex.what() << std::endl;
 	}
 	catch(const Glib::MarkupError& ex) {
-		std::cerr << "MarkupError::sliderwindow.cpp::190 " << ex.what() << std::endl;
+		std::cerr << "MarkupError::sliderwindow.cpp::232 " << ex.what() << std::endl;
 	}
 	catch(const Glib::FileError& ex) {
-		std::cerr << "FileError::sliderwindow.cpp::190 " << ex.what() << std::endl;
+		std::cerr << "FileError::sliderwindow.cpp::232 " << ex.what() << std::endl;
 	}
 	builder_->get_widget_derived("settingsDialog", settingsDialog);
-	updateControls(cardId_);
+	updateControls(settingsStr_->cardId());
 	if (settingsDialog) {
-		settingsStr *str = new settingsStr();
-		str->cardId = cardId_;
-		str->mixerId = mixerId_;
-		str->cardList = cardList_;
-		str->mixerList = mixerList_;
-		str->switchList = switches_;
-		str->notebookOrientation = orient_;
-		str->iconPacks = Tools::getIconPacks();
-		str->currIconPack = settings_->getCurrIconPack();
-		str->isAutorun = settings_->getAutorun();
-		settingsDialog->initParms(str);
+		settingsDialog->initParms(*settingsStr_);
 		settingsDialog->signal_ok_pressed().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogOk));
 		settingsDialog->signal_switches_toggled().connect(sigc::mem_fun(*this, &SliderWindow::switchChanged));
 		settingsDialog->signal_autorun_toggled().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogAutostart));
 		settingsDialog->signal_iconpack_changed().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogIconpack));
 		settingsDialog->run();
 		delete settingsDialog;
-		delete str;
 	}
 
 }
@@ -266,14 +259,14 @@ void SliderWindow::runSettings()
 	createSettingsDialog();
 }
 
-std::vector<std::string> SliderWindow::getMixers()
+std::vector<std::string> &SliderWindow::getMixers()
 {
-	return mixerList_;
+	return settingsStr_->mixerList();
 }
 
-std::vector<std::string> SliderWindow::getCardsList()
+std::vector<std::string> &SliderWindow::getCardsList()
 {
-	return cardList_;
+	return settingsStr_->cardList();
 }
 
 void SliderWindow::setActiveCard(int card)
@@ -282,18 +275,18 @@ void SliderWindow::setActiveCard(int card)
 	updateControls(card);
 }
 
-void SliderWindow::onSettingsDialogOk(settingsStr str)
+void SliderWindow::onSettingsDialogOk(settingsStr &str)
 {
-	cardId_ = str.cardId;
-	mixerId_ = str.mixerId;
-	updateControls(cardId_);
-	if (mixerList_.size() > 0 ) {
-		mixerName_ = mixerList_.at(mixerId_);
+	settingsStr_->setCardId(str.cardId());
+	settingsStr_->setMixerId(str.mixerId());
+	updateControls(settingsStr_->cardId());
+	if (settingsStr_->mixerList().size() > 0 ) {
+		mixerName_ = settingsStr_->mixerList().at(settingsStr_->mixerId());
 	}
 	else {
 		mixerName_ = "N/A";
 	}
-	orient_ = str.notebookOrientation;
+	settingsStr_->setNotebookOrientation(str.notebookOrientation());
 	volumeValue_ = alsaWork_->getAlsaVolume(mixerName_);
 	volumeSlider_->set_value(volumeValue_);
 }
@@ -308,6 +301,7 @@ void SliderWindow::onSettingsDialogIconpack(const std::string &path, int id, boo
 	(void)id;
 	(void)value;
 	const std::string tmpDir = Tools::getTmpDir();
+	settingsStr_->setCurrIconPack(path);
 	settings_->setCurrIconPack(path);
 	if (path != Tools::defaultIconPack) {
 		Tools::extractArchive(path, tmpDir);
@@ -319,32 +313,28 @@ void SliderWindow::onSettingsDialogIconpack(const std::string &path, int id, boo
 
 void SliderWindow::switchChanged(const std::string &name, int id, bool enabled)
 {
-	alsaWork_->setSwitch(cardId_, name, id, enabled);
+	alsaWork_->setSwitch(settingsStr_->cardId(), name, id, enabled);
 }
 
 void SliderWindow::soundMuted(bool mute)
 {
-	alsaWork_->setMute(cardId_, mixerName_, mute);
+	alsaWork_->setMute(settingsStr_->cardId(), mixerName_, mute);
 }
 
 bool SliderWindow::getMuted()
 {
-	bool muted = alsaWork_->getMute(cardId_, mixerName_);
-	return !muted;
+	return !bool(alsaWork_->getMute(settingsStr_->cardId(), mixerName_));
 }
 
 void SliderWindow::updateControls(int cardId)
 {
-	if (!mixerList_.empty())
-		mixerList_.clear();
-	if (!cardList_.empty())
-		cardList_.clear();
-	if (!switches_.captureSwitchList_.empty())
-		switches_.captureSwitchList_.clear();
-	if (!switches_.playbackSwitchList_.empty())
-		switches_.playbackSwitchList_.clear();
-	cardList_ = alsaWork_->getCardsList();
-	alsaWork_->setCardId(cardId);
-	mixerList_ = alsaWork_->getVolumeMixers(cardId);
-	switches_ = alsaWork_->getSwitchList(cardId);
+	settingsStr_->clear(MIXERS);
+	settingsStr_->clear(CARDS);
+	settingsStr_->clearSwitches();
+	settingsStr_->setCardId(cardId);
+	int id = settingsStr_->cardId();
+	settingsStr_->setList(CARDS, alsaWork_->getCardsList());
+	alsaWork_->setCardId(id);
+	settingsStr_->setList(MIXERS, alsaWork_->getVolumeMixers(id));
+	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList(id));
 }

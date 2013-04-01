@@ -19,7 +19,7 @@
  */
 
 #include "trayicon.h"
-#include "tools.h"
+#include "../tools/tools.h"
 #include "gtkmm/separatormenuitem.h"
 #include "gtkmm/stock.h"
 #include "glibmm.h"
@@ -121,7 +121,7 @@ void TrayIcon::onMute()
 	m_signal_on_mute.emit(!muted_);
 }
 
-Glib::ustring TrayIcon::getIconName(double value)
+Glib::ustring TrayIcon::getIconName(double value) const
 {
 	Glib::ustring iconPath;
 	if (value <= 0) {
@@ -161,7 +161,7 @@ void TrayIcon::setIcon(double value)
 			set_from_file(iconPath);
 		}
 		catch (Glib::FileError &err) {
-			std::cerr << "FileError::trayicon.cpp::138:: " << err.what() << std::endl;
+			std::cerr << "FileError::trayicon.cpp::161:: " << err.what() << std::endl;
 		}
 	}
 }

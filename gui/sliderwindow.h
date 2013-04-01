@@ -25,16 +25,17 @@
 #include "gtkmm/window.h"
 #include "gtkmm/builder.h"
 #include "gtkmm/scale.h"
-#include "settings.h"
-#include "alsawork.h"
-#include "tools.h"
+#include "../tools/settings.h"
+#include "../alsawork/alsawork.h"
+#include "../tools/tools.h"
+#include "../tools/settingsstr.h"
 #include <vector>
 
 class SliderWindow : public Gtk::Window
 {
 public:
 	SliderWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>&refGlade);
-	virtual ~SliderWindow();
+	~SliderWindow();
 	void runAboutDialog();
 	void setWindowPosition(int x_, int y_, int height_, int width_);
 	bool getVisible();
@@ -50,8 +51,8 @@ public:
 	void setActiveMixer(int index);
 	void saveSettings();
 	void runSettings();
-	std::vector<std::string> getMixers();
-	std::vector<std::string> getCardsList();
+	std::vector<std::string> &getMixers();
+	std::vector<std::string> &getCardsList();
 	void switchChanged (const std::string& name, int id, bool enabled);
 	void soundMuted(bool mute);
 	bool getMuted();
@@ -62,7 +63,7 @@ public:
 protected:
 	void on_volume_slider();
 	bool on_focus_out(GdkEventCrossing* event);
-	void onSettingsDialogOk(settingsStr str);
+	void onSettingsDialogOk(settingsStr &str);
 	void onSettingsDialogAutostart(bool isAutorun);
 	void onSettingsDialogIconpack(const std::string &path, int id, bool value);
 	//signal
@@ -78,12 +79,8 @@ private:
 	double volumeValue_;
 	Settings *settings_;
 	AlsaWork *alsaWork_;
-	std::vector<std::string> cardList_;
-	std::vector<std::string> mixerList_;
-	MixerSwitches switches_;
-	int cardId_, mixerId_;
-	Glib::ustring mixerName_;
-	bool orient_;
+	settingsStr *settingsStr_;
+	std::string mixerName_;
 };
 
 #endif // SLIDERWINDOW_H
