@@ -23,8 +23,6 @@
 
 #include "glibmm/ustring.h"
 #include "archive.h"
-//#include "switchcap.h"
-//#include "volumemixers.h"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -51,19 +49,19 @@ namespace Tools {
 	bool checkDirExists(const std::string &fileName);
 	void createDirectory(const std::string &dirName);
 	void saveFile(const std::string &fileName, const Glib::ustring &fileData);
-	std::pair<bool, int> itemExists(std::vector<std::string> &vector_, const Glib::ustring& item);
+	std::pair<bool, int> itemExists(const std::vector<std::string> &vector_, const Glib::ustring& item);
 	std::vector<std::string> getFileList(const std::string& dir);
 	std::string getTmpDir();
 	void clearTempDir(const std::string &path);
 	void extractArchive(const std::string &archiveFileName, const std::string &outPath);
 	int copyData(struct archive *in, struct archive *out);
 	std::string checkIconPacks();
-	std::vector<std::string> &getIconPacks();
+	std::vector<std::string> getIconPacks();
 	std::string pathToFileName(const std::string &path);
 	//Constatnts
 	const std::string defaultIconPack = "default";
 	//Program version
-	const std::string version = "0.0.8";
+	const std::string version = "0.0.9";
 }
 
 #endif // FILEWORK_H

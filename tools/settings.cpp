@@ -51,7 +51,7 @@ void Settings::loadConfig(const std::string& fileName)
 		configFile_->load_from_file(fileName);
 	}
 	catch (Glib::FileError &err) {
-		std::cerr << "settings.cpp::54:: " << fileName << " - " << err.what() << std::endl;
+		std::cerr << "settings.cpp::51:: " << fileName << " - " << err.what() << std::endl;
 	}
 }
 
@@ -68,7 +68,7 @@ double Settings::getVolume() const
 		value = (double)configFile_->get_integer(Glib::ustring("main"),Glib::ustring("volume"));
 	}
 	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::71::KeyFileError " << ex.what() << std::endl;
+		std::cerr << "settings.cpp::68::KeyFileError " << ex.what() << std::endl;
 	}
 
 	return value;
@@ -79,14 +79,14 @@ void Settings::parseConfig(const Glib::ustring& keyFileName, const Glib::ustring
 	Tools::saveFile(keyFileName, keyFileData);
 }
 
-int Settings::getSoundCard()
+int Settings::getSoundCard() const
 {
 	int card = 0;
 	try {
 		card = (int)configFile_->get_integer(Glib::ustring("main"),Glib::ustring("card"));
 	}
 	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::89::KeyFileError " << ex.what() << std::endl;
+		std::cerr << "settings.cpp::86::KeyFileError " << ex.what() << std::endl;
 	}
 	return card;
 }
@@ -97,14 +97,14 @@ void Settings::saveSoundCard(int soundCard)
 	parseConfig(iniFileName_, configFile_->to_data());
 }
 
-Glib::ustring Settings::getMixer()
+Glib::ustring Settings::getMixer() const
 {
 	Glib::ustring mixer("");
 	try {
 		mixer = Glib::ustring(configFile_->get_string(Glib::ustring("main"),Glib::ustring("mixer")));
 	}
 	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::107::KeyFileError " << ex.what() << std::endl;
+		std::cerr << "settings.cpp::104::KeyFileError " << ex.what() << std::endl;
 	}
 	return mixer;
 }
@@ -128,7 +128,7 @@ bool Settings::getNotebookOrientation()
 		orient = bool(configFile_->get_boolean(Glib::ustring("main"),Glib::ustring("orient")));
 	}
 	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::131::KeyFileError " << ex.what() << std::endl;
+		std::cerr << "settings.cpp::128::KeyFileError " << ex.what() << std::endl;
 	}
 	return orient;
 }
@@ -143,7 +143,7 @@ void Settings::loadDesktopFile(const std::string &fileName)
 		desktopFile_->load_from_file(fileName);
 	}
 	catch (Glib::FileError &err) {
-		std::cerr << "settings.cpp::146:: " << fileName << " - " << err.what() << std::endl;
+		std::cerr << "settings.cpp::143:: " << fileName << " - " << err.what() << std::endl;
 	}
 }
 
@@ -173,7 +173,7 @@ bool Settings::getAutorun()
 		isAutorun = bool(desktopFile_->get_boolean(Glib::ustring("Desktop Entry"),Glib::ustring("X-GNOME-Autostart-enabled")));
 	}
 	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::176::KeyFileError " << ex.what() << std::endl;
+		std::cerr << "settings.cpp::173::KeyFileError " << ex.what() << std::endl;
 	}
 	return isAutorun;
 }
@@ -190,7 +190,7 @@ void Settings::setCurrIconPack(const std::string &packName)
 	parseConfig(iniFileName_, configFile_->to_data());
 }
 
-std::string Settings::getCurrIconPack()
+std::string Settings::getCurrIconPack() const
 {
 	std::string iconPack = Tools::defaultIconPack;
 	try {

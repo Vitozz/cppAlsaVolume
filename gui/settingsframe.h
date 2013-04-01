@@ -20,8 +20,8 @@
 
 #ifndef SETTINGSFRAME_H
 #define SETTINGSFRAME_H
-#include "tools.h"
-#include "settingsstr.h"
+#include "../tools/tools.h"
+#include "../tools/settingsstr.h"
 #include "gtkmm/dialog.h"
 #include "gtkmm/builder.h"
 #include "gtkmm/button.h"
@@ -38,10 +38,10 @@ class SettingsFrame : public Gtk::Dialog
 public:
 	SettingsFrame(BaseObjectType* cobject,
 		      const Glib::RefPtr<Gtk::Builder>& refGlade);
-	virtual ~SettingsFrame();
+	~SettingsFrame();
 	void initParms(settingsStr &str);
 	//
-	typedef sigc::signal<void, settingsStr> type_void_signal;
+	typedef sigc::signal<void, settingsStr&> type_void_signal;
 	type_void_signal signal_ok_pressed();
 	typedef sigc::signal<void, std::string, int ,bool> type_toggled_signal;
 	type_toggled_signal signal_switches_toggled();

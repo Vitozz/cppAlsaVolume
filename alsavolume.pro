@@ -1,8 +1,8 @@
 ### eqmake4 was here ###
 include(conf.pri)
 
-#CONFIG -= debug_and_release debug
-CONFIG += debug_and_release
+CONFIG -= debug_and_release debug
+CONFIG += release
 
 TARGET = alsavolume
 TEMPLATE = app
@@ -15,28 +15,26 @@ PKGCONFIG += gtkmm-3.0 \
 	     libarchive
 
 SOURCES += main.cpp \
-	trayicon.cpp \
-	sliderwindow.cpp \
-	settings.cpp \
-	alsawork.cpp \
-	tools.cpp \
-	settingsframe.cpp \
-	#switchcap.cpp \
-	volumemixers.cpp \
-	mixerswitches.cpp \
-	settingsstr.cpp
+	gui/trayicon.cpp \
+	gui/sliderwindow.cpp \
+	gui/settingsframe.cpp \
+	alsawork/alsawork.cpp \
+	alsawork/volumemixers.cpp \
+	alsawork/mixerswitches.cpp \
+	tools/settings.cpp \
+	tools/tools.cpp \
+	tools/settingsstr.cpp
 
 HEADERS += \
-	alsawork.h \
-	trayicon.h \
-	sliderwindow.h \
-	settings.h \
-	tools.h \
-	settingsframe.h \
-	#switchcap.h \
-	volumemixers.h \
-	mixerswitches.h \
-	settingsstr.h
+	alsawork/alsawork.h \
+	alsawork/volumemixers.h \
+	alsawork/mixerswitches.h \
+	gui/trayicon.h \
+	gui/sliderwindow.h \
+	gui/settingsframe.h \
+	tools/settings.h \
+	tools/tools.h \
+	tools/settingsstr.h
 
 INCLUDEPATH += \
 	/usr/include/gtkmm-3.0 \

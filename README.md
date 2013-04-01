@@ -4,9 +4,10 @@ Application uses GTK+ interface via gtkmm library
 
 Build Deps:
 
-	- gtkmm-3.0 (libgtkmm-3.0-dev package on Ubuntu)
-	- glib (libglibmm-2.4-dev package on Ubuntu)
-	- alsa/asoundlib (libasound2-dev package on Ubuntu)
+	- gtkmm-3.0 (libgtkmm-3.0-dev package in Ubuntu)
+	- glib (libglibmm-2.4-dev package in Ubuntu)
+	- alsa/asoundlib (libasound2-dev package in Ubuntu)
+	- libarchive (libarchive12 and libarchive-dev in Ubuntu)
 
 Howto build application:
 
@@ -18,7 +19,7 @@ if You have Qt installed:
 
 else:
 
->g++ -W -o alsavolume *.cpp \`pkg-config --cflags gtkmm-3.0 alsa\` \`pkg-config --libs gtkmm-3.0 alsa\`
+>g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa libarchive\` \`pkg-config --libs gtkmm-3.0 alsa libarchive\`
 
 What features available:
 
@@ -31,4 +32,4 @@ What features available:
 
 TODO LIST:
 
-	- add iconpacks support
+	- external mixer

@@ -25,17 +25,17 @@
 #include "gtkmm/window.h"
 #include "gtkmm/builder.h"
 #include "gtkmm/scale.h"
-#include "settings.h"
-#include "alsawork.h"
-#include "tools.h"
-#include "settingsstr.h"
+#include "../tools/settings.h"
+#include "../alsawork/alsawork.h"
+#include "../tools/tools.h"
+#include "../tools/settingsstr.h"
 #include <vector>
 
 class SliderWindow : public Gtk::Window
 {
 public:
 	SliderWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>&refGlade);
-	virtual ~SliderWindow();
+	~SliderWindow();
 	void runAboutDialog();
 	void setWindowPosition(int x_, int y_, int height_, int width_);
 	bool getVisible();
@@ -63,7 +63,7 @@ public:
 protected:
 	void on_volume_slider();
 	bool on_focus_out(GdkEventCrossing* event);
-	void onSettingsDialogOk(settingsStr str);
+	void onSettingsDialogOk(settingsStr &str);
 	void onSettingsDialogAutostart(bool isAutorun);
 	void onSettingsDialogIconpack(const std::string &path, int id, bool value);
 	//signal
@@ -80,7 +80,7 @@ private:
 	Settings *settings_;
 	AlsaWork *alsaWork_;
 	settingsStr *settingsStr_;
-	Glib::ustring mixerName_;
+	std::string mixerName_;
 };
 
 #endif // SLIDERWINDOW_H

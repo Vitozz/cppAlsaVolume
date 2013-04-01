@@ -26,19 +26,19 @@ class Settings
 {
 public:
 	Settings();
-	virtual ~Settings();
+	~Settings();
 	void saveVolume(double volume);
 	double getVolume() const;
-	int getSoundCard();
+	int getSoundCard() const;
 	void saveSoundCard(int soundCard);
-	Glib::ustring getMixer();
+	Glib::ustring getMixer() const;
 	void saveMixer(const std::string& mixerName);
 	void saveNotebookOrientation(bool orient);
 	bool getNotebookOrientation();
 	void setAutorun(bool isAutorun);
 	bool getAutorun();
 	void setVersion(const Glib::ustring& version);
-	std::string getCurrIconPack();
+	std::string getCurrIconPack() const;
 	void setCurrIconPack(const std::string &packName);
 private:
 	void parseConfig(const Glib::ustring& keyFileName, const Glib::ustring& keyFileData);

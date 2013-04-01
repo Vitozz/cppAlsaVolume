@@ -40,7 +40,6 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
   mixers_(0)
 {
 	//init all lists
-	//settings_ = new settingsStr();
 	Glib::RefPtr<Gtk::Builder> builder = refGlade;
 	builder->get_widget("ok_button", okButton_);
 	builder->get_widget("cancel_button", cancelButton_);
@@ -90,7 +89,6 @@ SettingsFrame::~SettingsFrame()
 	delete isAutoRun_;
 	delete tabPos_;
 	delete tabWidget_;
-	//delete settings_;
 }
 
 void SettingsFrame::initParms(settingsStr &str)

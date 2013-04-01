@@ -31,7 +31,6 @@
 #include <vector>
 #include <map>
 
-
 void checkArchiveError(int err, int lineNumber, const std::string &text) {
 	if (err != ARCHIVE_OK) {
 		std::cerr << "tools.cpp::" << lineNumber << "::" << text << std::endl;
@@ -111,12 +110,12 @@ void Tools::saveFile(const std::string &fileName, const Glib::ustring &fileData)
 	}
 }
 
-std::pair<bool, int> Tools::itemExists(std::vector<std::string> &vector_, const Glib::ustring& item)
+std::pair<bool, int> Tools::itemExists(const std::vector<std::string> &vector_, const Glib::ustring& item)
 {
 	int index = 0;
 	int i = 0;
 	bool exists = false;
-	std::vector<std::string>::iterator it = vector_.begin();
+	std::vector<std::string>::const_iterator it = vector_.begin();
 	while (it != vector_.end()) {
 		Glib::ustring answ(*it);
 		if (answ == item) {
@@ -285,7 +284,7 @@ std::string Tools::checkIconPacks()
 	return "";
 }
 
-std::vector<std::string> &Tools::getIconPacks()
+std::vector<std::string> Tools::getIconPacks()
 {
 	const std::string path = checkIconPacks();
 	std::vector<std::string> packs = getFileList(path);

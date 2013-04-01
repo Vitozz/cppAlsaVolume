@@ -21,7 +21,8 @@
 #include "sliderwindow.h"
 #include "settingsframe.h"
 #include "gtkmm/aboutdialog.h"
-#include "glibmm.h"
+#include "glibmm/markup.h"
+#include "glibmm/fileutils.h"
 #include <iostream>
 #include <map>
 
@@ -37,9 +38,6 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	set_events(Gdk::LEAVE_NOTIFY_MASK);
 	signal_leave_notify_event().connect(sigc::mem_fun(*this, &SliderWindow::on_focus_out));
 	//init class variables
-//	mixerList_ = new std::vector<std::string>();
-//	cardList_ = new std::vector<std::string>();
-	//switches_ = new MixerSwitches();
 	alsaWork_ = new AlsaWork();
 	settings_ = new Settings();
 	settingsStr_ = new settingsStr();
@@ -61,7 +59,7 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	volumeValue_ = settings_->getVolume();
 	volumeSlider_->set_value(volumeValue_);
 	settingsStr_->setNotebookOrientation(settings_->getNotebookOrientation());
-	settingsStr_->addMixerSwitch(*alsaWork_->getSwitchList(settingsStr_->cardId()));
+	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList(settingsStr_->cardId()));
 	settings_->setVersion(Tools::version);
 	settingsStr_->setCurrIconPack(settings_->getCurrIconPack());
 	settingsStr_->setIsAutorun(settings_->getAutorun());
@@ -74,9 +72,6 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 
 SliderWindow::~SliderWindow()
 {
-//	delete mixerList_;
-//	delete cardList_;
-//	delete switches_;
 	delete settings_;
 	delete settingsStr_;
 	delete alsaWork_;
@@ -173,12 +168,7 @@ void SliderWindow::setVolumeValue(double value)
 
 std::string SliderWindow::getActiveMixer() const
 {
-	uint id = settingsStr_->mixerId();
-	std::cout << id  << std::endl;
-	if (id >= 0 && (id < int(settingsStr_->mixerList().size()))) {
-		return settingsStr_->mixerList().at(id);
-	}
-	return std::string();
+	return mixerName_;
 }
 
 double SliderWindow::getVolumeValue()
@@ -242,13 +232,13 @@ void SliderWindow::createSettingsDialog()
 		builder_->add_from_file(ui_);
 	}
 	catch(const Gtk::BuilderError& ex) {
-		std::cerr << "BuilderError::sliderwindow.cpp::190 " << ex.what() << std::endl;
+		std::cerr << "BuilderError::sliderwindow.cpp::232 " << ex.what() << std::endl;
 	}
 	catch(const Glib::MarkupError& ex) {
-		std::cerr << "MarkupError::sliderwindow.cpp::190 " << ex.what() << std::endl;
+		std::cerr << "MarkupError::sliderwindow.cpp::232 " << ex.what() << std::endl;
 	}
 	catch(const Glib::FileError& ex) {
-		std::cerr << "FileError::sliderwindow.cpp::190 " << ex.what() << std::endl;
+		std::cerr << "FileError::sliderwindow.cpp::232 " << ex.what() << std::endl;
 	}
 	builder_->get_widget_derived("settingsDialog", settingsDialog);
 	updateControls(settingsStr_->cardId());
@@ -285,7 +275,7 @@ void SliderWindow::setActiveCard(int card)
 	updateControls(card);
 }
 
-void SliderWindow::onSettingsDialogOk(settingsStr str)
+void SliderWindow::onSettingsDialogOk(settingsStr &str)
 {
 	settingsStr_->setCardId(str.cardId());
 	settingsStr_->setMixerId(str.mixerId());
@@ -311,6 +301,7 @@ void SliderWindow::onSettingsDialogIconpack(const std::string &path, int id, boo
 	(void)id;
 	(void)value;
 	const std::string tmpDir = Tools::getTmpDir();
+	settingsStr_->setCurrIconPack(path);
 	settings_->setCurrIconPack(path);
 	if (path != Tools::defaultIconPack) {
 		Tools::extractArchive(path, tmpDir);
@@ -332,8 +323,7 @@ void SliderWindow::soundMuted(bool mute)
 
 bool SliderWindow::getMuted()
 {
-	bool muted = alsaWork_->getMute(settingsStr_->cardId(), mixerName_);
-	return !muted;
+	return !bool(alsaWork_->getMute(settingsStr_->cardId(), mixerName_));
 }
 
 void SliderWindow::updateControls(int cardId)
@@ -342,9 +332,9 @@ void SliderWindow::updateControls(int cardId)
 	settingsStr_->clear(CARDS);
 	settingsStr_->clearSwitches();
 	settingsStr_->setCardId(cardId);
-	uint id = settingsStr_->cardId();
+	int id = settingsStr_->cardId();
 	settingsStr_->setList(CARDS, alsaWork_->getCardsList());
 	alsaWork_->setCardId(id);
 	settingsStr_->setList(MIXERS, alsaWork_->getVolumeMixers(id));
-	settingsStr_->addMixerSwitch(*alsaWork_->getSwitchList(id));
+	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList(id));
 }

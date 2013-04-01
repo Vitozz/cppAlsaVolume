@@ -27,8 +27,6 @@ const double ZERO = 0.0;
 
 AlsaWork::AlsaWork()
 {
-	cardList_ = new std::vector<std::string>();
-	mixerList_= new std::vector<std::string>();
 	switches_ = new MixerSwitches();
 	volumeMixers_ = new VolumeMixers();
 	cardId_=0;
@@ -36,8 +34,6 @@ AlsaWork::AlsaWork()
 
 AlsaWork::~AlsaWork()
 {
-	delete cardList_;
-	delete mixerList_;
 	delete switches_;
 	delete volumeMixers_;
 	snd_config_update_free_global();
@@ -46,7 +42,7 @@ AlsaWork::~AlsaWork()
 //public
 void AlsaWork::setAlsaVolume(const std::string &mixer, double volume)
 {
-	if (Tools::itemExists(*mixerList_, mixer).first) {
+	if (Tools::itemExists(mixerList_, mixer).first) {
 		snd_mixer_t *handle = getMixerHanlde(cardId_);
 		snd_mixer_elem_t *element = initMixerElement(handle, mixer.c_str());
 		setVolume(element, handle, volume);
@@ -55,7 +51,7 @@ void AlsaWork::setAlsaVolume(const std::string &mixer, double volume)
 
 double AlsaWork::getAlsaVolume(const std::string& mixer)
 {
-	if (Tools::itemExists(*mixerList_, mixer).first) {
+	if (Tools::itemExists(mixerList_, mixer).first) {
 		snd_mixer_t *handle = getMixerHanlde(cardId_);
 		snd_mixer_elem_t *elem = initMixerElement(handle, mixer.c_str());
 		long minv, maxv, outvol;
@@ -94,7 +90,7 @@ std::string AlsaWork::getCardName(int index)
 std::vector<std::string> &AlsaWork::getCardsList()
 {
 	getCards();
-	return *cardList_;
+	return cardList_;
 }
 
 std::vector<std::string> &AlsaWork::getVolumeMixers(int cardIndex)
@@ -102,30 +98,29 @@ std::vector<std::string> &AlsaWork::getVolumeMixers(int cardIndex)
 	std::vector<std::string> cmixers = volumeMixers_->capture();
 	std::vector<std::string> pmixers = volumeMixers_->playback();
 	updateMixers(cardIndex);
-	if (!mixerList_->empty())
-		mixerList_->clear();
-	mixerList_->reserve(pmixers.size() + cmixers.size());
-	mixerList_->insert(mixerList_->end(), pmixers.begin(), pmixers.end());
-	mixerList_->insert(mixerList_->end(), cmixers.begin(), cmixers.end());
-	return *mixerList_;
+	if (!mixerList_.empty())
+		mixerList_.clear();
+	mixerList_.reserve(pmixers.size() + cmixers.size());
+	mixerList_.insert(mixerList_.end(), pmixers.begin(), pmixers.end());
+	mixerList_.insert(mixerList_.end(), cmixers.begin(), cmixers.end());
+	return mixerList_;
 }
 
-MixerSwitches *AlsaWork::getSwitchList(int cardIndex)
+MixerSwitches &AlsaWork::getSwitchList(int cardIndex)
 {
 	updateMixers(cardIndex);
-	return switches_;
+	return *switches_;
 }
 
 void AlsaWork::setCardId(int cardId)
 {
 	try {
-		std::cout << "CardID = " << cardId << std::endl;
-		if (!cardList_->at(cardId).empty()) {
+		if (!cardList_.at(cardId).empty()) {
 			cardId_ = cardId;
 		}
 	}
 	catch (std::out_of_range &ex) {
-		std::cerr << "alsawork.cpp::122:: Item out of Range " << ex.what() << std::endl;
+		std::cerr << "alsawork.cpp::118:: Item out of Range " << ex.what() << std::endl;
 	}
 }
 
@@ -148,7 +143,7 @@ void AlsaWork::setSwitch(int cardId, const std::string &mixer, int id, bool enab
 
 void AlsaWork::setMute(int cardId, const std::string &mixer, bool enabled)
 {
-	if (Tools::itemExists(*mixerList_, mixer).first) {
+	if (Tools::itemExists(mixerList_, mixer).first) {
 		snd_mixer_t *handle = getMixerHanlde(cardId);
 		snd_mixer_elem_t* elem = initMixerElement(handle, mixer.c_str());
 		if (snd_mixer_selem_has_playback_switch(elem)
@@ -167,7 +162,7 @@ void AlsaWork::setMute(int cardId, const std::string &mixer, bool enabled)
 
 bool AlsaWork::getMute(int cardId, const std::string &mixer)
 {
-	if (Tools::itemExists(*mixerList_, mixer).first) {
+	if (Tools::itemExists(mixerList_, mixer).first) {
 		snd_mixer_t *handle = getMixerHanlde(cardId);
 		snd_mixer_elem_t* elem = initMixerElement(handle, mixer.c_str());
 		snd_mixer_selem_channel_id_t channel = checkMixerChannels(elem);
@@ -324,13 +319,13 @@ void AlsaWork::updateMixers(int cardIndex)
 
 void AlsaWork::getCards()
 {
-	if (!cardList_->empty())
-		cardList_->clear();
+	if (!cardList_.empty())
+		cardList_.clear();
 	int total = getTotalCards();
 	if (total >= 1) {
 		for (int card = 0; card < total; card++) {
 			std::string cname(getCardName(card));
-			cardList_->push_back(cname);
+			cardList_.push_back(cname);
 		}
 	}
 }
