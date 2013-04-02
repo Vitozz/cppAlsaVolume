@@ -288,6 +288,7 @@ void SliderWindow::onSettingsDialogOk(settingsStr &str)
 		mixerName_ = "N/A";
 	}
 	settingsStr_->setNotebookOrientation(str.notebookOrientation());
+	settingsStr_->setIsAutorun(str.isAutorun());
 	volumeValue_ = alsaWork_->getAlsaVolume(mixerName_);
 	volumeSlider_->set_value(volumeValue_);
 }
@@ -340,4 +341,5 @@ void SliderWindow::updateControls(int cardId)
 	alsaWork_->setCardId(id);
 	settingsStr_->setList(MIXERS, alsaWork_->getVolumeMixers(id));
 	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList(id));
+	settingsStr_->setIsAutorun(settings_->getAutorun());
 }
