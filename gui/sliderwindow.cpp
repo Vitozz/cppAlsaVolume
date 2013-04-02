@@ -24,7 +24,6 @@
 #include "glibmm/markup.h"
 #include "glibmm/fileutils.h"
 #include <iostream>
-#include <map>
 
 SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade)
 : Gtk::Window(cobject)
@@ -90,18 +89,20 @@ void SliderWindow::runAboutDialog()
 	dialog->set_website("http://sites.google.com/site/thesomeprojects/");
 	dialog->set_website_label("Program Website");
 	Glib::RefPtr<Gdk::Pixbuf> logo;
-	std::string iconName;
+	std::string iconName, logoName;
 	if (!Tools::checkDirExists(tmpDir)) {
-		logo = Gdk::Pixbuf::create_from_file(Tools::getResPath("icons/volume.png"));
+		logoName = Tools::getResPath("icons/volume.png");
 		iconName = Tools::getResPath("icons/tb_icon100.png");
 	}
 	else {
-		logo = Gdk::Pixbuf::create_from_file(Glib::ustring(tmpDir + "/volume.png"));
+		logoName = tmpDir + "/volume.png";
 		iconName = tmpDir + "/tb_icon100.png";
 	}
+	logo = Gdk::Pixbuf::create_from_file(logoName);
 	dialog->set_icon_from_file(iconName);
 	dialog->set_logo(logo);
 	dialog->run();
+	dialog->unset_transient_for();
 	delete dialog;
 }
 
@@ -232,13 +233,13 @@ void SliderWindow::createSettingsDialog()
 		builder_->add_from_file(ui_);
 	}
 	catch(const Gtk::BuilderError& ex) {
-		std::cerr << "BuilderError::sliderwindow.cpp::232 " << ex.what() << std::endl;
+		std::cerr << "BuilderError::sliderwindow.cpp::233 " << ex.what() << std::endl;
 	}
 	catch(const Glib::MarkupError& ex) {
-		std::cerr << "MarkupError::sliderwindow.cpp::232 " << ex.what() << std::endl;
+		std::cerr << "MarkupError::sliderwindow.cpp::233 " << ex.what() << std::endl;
 	}
 	catch(const Glib::FileError& ex) {
-		std::cerr << "FileError::sliderwindow.cpp::232 " << ex.what() << std::endl;
+		std::cerr << "FileError::sliderwindow.cpp::233 " << ex.what() << std::endl;
 	}
 	builder_->get_widget_derived("settingsDialog", settingsDialog);
 	updateControls(settingsStr_->cardId());
@@ -328,9 +329,11 @@ bool SliderWindow::getMuted()
 
 void SliderWindow::updateControls(int cardId)
 {
+	//
 	settingsStr_->clear(MIXERS);
 	settingsStr_->clear(CARDS);
 	settingsStr_->clearSwitches();
+	//
 	settingsStr_->setCardId(cardId);
 	int id = settingsStr_->cardId();
 	settingsStr_->setList(CARDS, alsaWork_->getCardsList());

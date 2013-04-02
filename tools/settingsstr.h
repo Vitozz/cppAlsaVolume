@@ -29,6 +29,7 @@ class settingsStr
 {
 public:
 	settingsStr();
+	settingsStr(settingsStr &str);
 	unsigned int cardId() const;
 	unsigned int mixerId() const;
 	bool notebookOrientation();

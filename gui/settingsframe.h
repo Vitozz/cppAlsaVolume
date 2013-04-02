@@ -102,7 +102,7 @@ private:
 	Glib::RefPtr<Gtk::ListStore> pbSwitches_;
 	Glib::RefPtr<Gtk::ListStore> capSwitches_;
 	Glib::RefPtr<Gtk::ListStore> enumSwitches_;
-	settingsStr settings_;
+	settingsStr *settings_;
 };
 
 #endif // SETTINGSFRAME_H

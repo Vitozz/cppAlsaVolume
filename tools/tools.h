@@ -21,11 +21,9 @@
 #ifndef FILEWORK_H
 #define FILEWORK_H
 
-#include "glibmm/ustring.h"
 #include "archive.h"
 #include <iostream>
 #include <vector>
-#include <map>
 
 enum SwitchType {
 	PLAYBACK = 0,
@@ -42,19 +40,19 @@ enum ListType {
 typedef std::pair<std::string, bool> switchcap;
 
 namespace Tools {
-	Glib::ustring getCWD();
-	Glib::ustring getHomePath();
-	Glib::ustring getResPath(const char *resName);
+	std::string getCWD();
+	std::string getHomePath();
+	std::string getResPath(const char *resName);
 	bool checkFileExists(const std::string &fileName);
 	bool checkDirExists(const std::string &fileName);
 	void createDirectory(const std::string &dirName);
-	void saveFile(const std::string &fileName, const Glib::ustring &fileData);
-	std::pair<bool, int> itemExists(const std::vector<std::string> &vector_, const Glib::ustring& item);
+	void saveFile(const std::string &fileName, const std::string &fileData);
+	std::pair<bool, int> itemExists(const std::vector<std::string> &vector_, const std::string& item);
 	std::vector<std::string> getFileList(const std::string& dir);
 	std::string getTmpDir();
 	void clearTempDir(const std::string &path);
 	void extractArchive(const std::string &archiveFileName, const std::string &outPath);
-	int copyData(struct archive *in, struct archive *out);
+	int copyData(archive *in, archive *out);
 	std::string checkIconPacks();
 	std::vector<std::string> getIconPacks();
 	std::string pathToFileName(const std::string &path);

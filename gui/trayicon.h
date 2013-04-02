@@ -32,7 +32,6 @@ class TrayIcon : public Gtk::StatusIcon
 {
 public:
 	TrayIcon(double volume, const std::string &cardName, const std::string &mixerName, bool muted);
-	virtual ~TrayIcon();
 	void on_signal_volume_changed(double volume, const std::string &cardName, const std::string &mixerName);
 	//signals
 	typedef sigc::signal<void> type_trayicon_simple_signal;

@@ -70,9 +70,6 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 	mixerItem_->set_sensitive(false); //temporary
 }
 
-TrayIcon::~TrayIcon()
-{}
-
 void TrayIcon::onHideRestore()
 {
 	Glib::RefPtr<Gdk::Screen> screen;

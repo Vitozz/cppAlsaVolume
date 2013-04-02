@@ -20,7 +20,6 @@
 
 #include "tools.h"
 #include "glibmm/fileutils.h"
-#include "glibmm/keyfile.h"
 #include "glib.h"
 #include "glib/gstdio.h"
 #include "archive.h"
@@ -29,7 +28,8 @@
 #include <fstream>
 #include <cstdlib>
 #include <vector>
-#include <map>
+
+const std::string PathSuffix = "/share/alsavolume/";
 
 void checkArchiveError(int err, int lineNumber, const std::string &text) {
 	if (err != ARCHIVE_OK) {
@@ -50,35 +50,32 @@ bool Tools::checkDirExists(const std::string &fileName)
 	return g_file_test(fileName.c_str(), G_FILE_TEST_IS_DIR);
 }
 
-Glib::ustring Tools::getCWD()
+std::string Tools::getCWD()
 {
 	const size_t cwdSize = 255;
-	char cwdBuffer[cwdSize];
-	Glib::ustring cwd = Glib::ustring(getcwd(cwdBuffer, cwdSize));
-	return cwd;
+	char cwdBuffer[255];
+	return getcwd(cwdBuffer, cwdSize);
 }
 
-Glib::ustring Tools::getHomePath()
+std::string Tools::getHomePath()
 {
-	Glib::ustring homepath(Glib::ustring(getenv("HOME")) + "/.local/share/alsavolume/");
-	return homepath;
+	return std::string(getenv("HOME")) + "/.local" + PathSuffix;
 }
 
-Glib::ustring Tools::getResPath(const char *resName)
+std::string Tools::getResPath(const char *resName)
 {
-	const Glib::ustring pathSuffix("/share/alsavolume/");
-	const Glib::ustring resName_(resName);
-	std::vector<Glib::ustring> list;
+	const std::string resName_(resName);
+	std::vector<std::string> list;
 	list.push_back(getHomePath() + resName_);
 	list.push_back(getCWD() + "/" + resName_);
 	list.push_back(getTmpDir() + "/" + resName_);
-	list.push_back("/usr"+ pathSuffix + resName_);
-	list.push_back("/usr/local" + pathSuffix + resName_);
-	std::vector<Glib::ustring>::iterator it = list.begin();
-	Glib::ustring result;
+	list.push_back("/usr"+ PathSuffix + resName_);
+	list.push_back("/usr/local" + PathSuffix + resName_);
+	std::vector<std::string>::iterator it = list.begin();
+	std::string result;
 	while (it != list.end()) {
 		if (checkFileExists(*it)) {
-			result = Glib::ustring(*it);
+			result = std::string(*it);
 			return result;
 		}
 		it++;
@@ -98,7 +95,7 @@ void Tools::createDirectory(const std::string &dirName)
 	}
 }
 
-void Tools::saveFile(const std::string &fileName, const Glib::ustring &fileData)
+void Tools::saveFile(const std::string &fileName, const std::string &fileData)
 {
 	try {
 		std::ofstream ofile(fileName.c_str());
@@ -110,14 +107,14 @@ void Tools::saveFile(const std::string &fileName, const Glib::ustring &fileData)
 	}
 }
 
-std::pair<bool, int> Tools::itemExists(const std::vector<std::string> &vector_, const Glib::ustring& item)
+std::pair<bool, int> Tools::itemExists(const std::vector<std::string> &vector_, const std::string& item)
 {
 	int index = 0;
 	int i = 0;
 	bool exists = false;
 	std::vector<std::string>::const_iterator it = vector_.begin();
 	while (it != vector_.end()) {
-		Glib::ustring answ(*it);
+		std::string answ(*it);
 		if (answ == item) {
 			index = i;
 			exists = true;
@@ -144,8 +141,7 @@ std::vector<std::string> Tools::getFileList(const std::string &dir)
 
 std::string Tools::getTmpDir()
 {
-	std::string result = std::string(g_get_user_cache_dir()) + std::string("/alsavolume");
-	return result;
+	return (g_get_user_cache_dir()) + std::string("/alsavolume");
 }
 
 void Tools::extractArchive(const std::string &archiveFileName, const std::string &outPath)
@@ -254,7 +250,7 @@ void Tools::clearTempDir(const std::string &path)
 std::string Tools::checkIconPacks()
 {
 	std::vector<std::string> checkList;
-	const std::string preffix = "/share/alsavolume/iconpacks/";
+	const std::string preffix = PathSuffix + "iconpacks/";
 	const std::string localPath = "/usr/local" + preffix;
 	const std::string globalPath = "/usr" + preffix;
 	const std::string homePath = getHomePath() + "iconpacks/";
@@ -302,6 +298,5 @@ std::vector<std::string> Tools::getIconPacks()
 
 std::string Tools::pathToFileName(const std::string &path)
 {
-	const std::string fileName = g_path_get_basename(path.c_str());
-	return fileName;
+	return g_path_get_basename(path.c_str());
 }

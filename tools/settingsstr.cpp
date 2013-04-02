@@ -29,6 +29,19 @@ settingsStr::settingsStr()
 	currIconPack_ = std::string();
 }
 
+settingsStr::settingsStr(settingsStr &str)
+{
+	cardId_ = str.cardId();
+	mixerId_ = str.mixerId();
+	notebookOrientation_ = str.notebookOrientation();
+	isAutorun_ = str.isAutorun();
+	currIconPack_ = str.currIconPack();
+	cardList_ = str.cardList();
+	mixerList_ = str.mixerList();
+	iconPacks_ = str.iconPacks();
+	switchList_ = str.switchList();
+}
+
 unsigned int settingsStr::cardId() const
 {
 	return cardId_;
