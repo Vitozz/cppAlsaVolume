@@ -25,6 +25,13 @@
 #include "glibmm/fileutils.h"
 #include <iostream>
 
+const std::string TITLE = "About AlsaVolume";
+const std::string PROGNAME = "Alsa Volume Changer";
+const std::string COMMENTS = "Tray Alsa Volume Changer written using gtkmm";
+const std::string COPYRIGHT = "2012 (c) Vitaly Tonkacheyev (thetvg@gmail.com)";
+const std::string WEBSITE = "http://sites.google.com/site/thesomeprojects/";
+const std::string WEBSITELABEL = "Program Website";
+
 SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade)
 : Gtk::Window(cobject)
 {
@@ -81,14 +88,14 @@ void SliderWindow::runAboutDialog()
 	const std::string tmpDir = Tools::getTmpDir();
 	Gtk::AboutDialog *dialog = new Gtk::AboutDialog();
 	dialog->set_transient_for(*this);
-	dialog->set_title("About AlsaVolume");
-	dialog->set_program_name("Alsa Volume Changer");
-	dialog->set_comments("Tray Alsa Volume Changer written using gtkmm");
+	dialog->set_title(TITLE);
+	dialog->set_program_name(PROGNAME);
+	dialog->set_comments(COMMENTS);
 	dialog->set_version(Tools::version);
-	dialog->set_copyright("2012 (c) Vitaly Tonkacheyev (thetvg@gmail.com)");
-	dialog->set_website("http://sites.google.com/site/thesomeprojects/");
-	dialog->set_website_label("Program Website");
-	Glib::RefPtr<Gdk::Pixbuf> logo;
+	dialog->set_copyright(COPYRIGHT);
+	dialog->set_website(WEBSITE);
+	dialog->set_website_label(WEBSITELABEL);
+	Glib::RefPtr<Gdk::Pixbuf> logo, icon;
 	std::string iconName, logoName;
 	if (!Tools::checkDirExists(tmpDir)) {
 		logoName = Tools::getResPath("icons/volume.png");
@@ -99,7 +106,8 @@ void SliderWindow::runAboutDialog()
 		iconName = tmpDir + "/tb_icon100.png";
 	}
 	logo = Gdk::Pixbuf::create_from_file(logoName);
-	dialog->set_icon_from_file(iconName);
+	icon = Gdk::Pixbuf::create_from_file(iconName);
+	dialog->set_icon(icon);
 	dialog->set_logo(logo);
 	dialog->run();
 	dialog->unset_transient_for();

@@ -27,6 +27,7 @@
 
 const uint MIDDLE_BUTTON = 2;
 const int OFFSET = 2;
+const std::string ICON_PREFIX = "tb_icon";
 
 TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string &mixerName, bool muted)
 : volumeValue_(volume)
@@ -122,22 +123,22 @@ Glib::ustring TrayIcon::getIconName(double value) const
 {
 	Glib::ustring iconPath;
 	if (value <= 0) {
-		iconPath = Glib::ustring("tb_icon0.png");
+		iconPath = Glib::ustring(ICON_PREFIX + "0.png");
 	}
 	if (value >0 && (value < 40)) {
-		iconPath = Glib::ustring("tb_icon20.png");
+		iconPath = Glib::ustring(ICON_PREFIX + "20.png");
 	}
 	if (value >=40 && (value < 60)) {
-		iconPath = Glib::ustring("tb_icon40.png");
+		iconPath = Glib::ustring(ICON_PREFIX + "40.png");
 	}
 	if (value >=60 && (value < 80)) {
-		iconPath = Glib::ustring("tb_icon60.png");
+		iconPath = Glib::ustring(ICON_PREFIX + "60.png");
 	}
 	if (value >=80 && (value < 100)) {
-		iconPath = Glib::ustring("tb_icon80.png");
+		iconPath = Glib::ustring(ICON_PREFIX + "80.png");
 	}
 	if (value >= 100) {
-		iconPath = Glib::ustring("tb_icon100.png");
+		iconPath = Glib::ustring(ICON_PREFIX + "100.png");
 	}
 	return iconPath;
 }

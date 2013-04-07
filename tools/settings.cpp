@@ -24,6 +24,13 @@
 #include "glibmm/fileutils.h"
 #include "fstream"
 
+const std::string MAIN = "main";
+const std::string VOLUME = "volume";
+const std::string CARD = "card";
+const std::string MIXER = "mixer";
+const std::string ORIENT = "orient";
+const std::string IPACK = "iconpack";
+
 Settings::Settings()
 {
 	configFile_ = new Glib::KeyFile();
@@ -57,7 +64,7 @@ void Settings::loadConfig(const std::string& fileName)
 
 void Settings::saveVolume(double volume)
 {
-	configFile_->set_double(Glib::ustring("main"),Glib::ustring("volume"), volume);
+	configFile_->set_double(Glib::ustring(MAIN),Glib::ustring(VOLUME), volume);
 	parseConfig(iniFileName_, configFile_->to_data());
 }
 
@@ -65,7 +72,7 @@ double Settings::getVolume() const
 {
 	double value = 0;
 	try {
-		value = (double)configFile_->get_integer(Glib::ustring("main"),Glib::ustring("volume"));
+		value = (double)configFile_->get_integer(Glib::ustring(MAIN),Glib::ustring(VOLUME));
 	}
 	catch (const Glib::KeyFileError& ex) {
 		std::cerr << "settings.cpp::68::KeyFileError " << ex.what() << std::endl;
@@ -83,7 +90,7 @@ int Settings::getSoundCard() const
 {
 	int card = 0;
 	try {
-		card = (int)configFile_->get_integer(Glib::ustring("main"),Glib::ustring("card"));
+		card = (int)configFile_->get_integer(Glib::ustring(MAIN),Glib::ustring(CARD));
 	}
 	catch (const Glib::KeyFileError& ex) {
 		std::cerr << "settings.cpp::86::KeyFileError " << ex.what() << std::endl;
@@ -93,7 +100,7 @@ int Settings::getSoundCard() const
 
 void Settings::saveSoundCard(int soundCard)
 {
-	configFile_->set_integer(Glib::ustring("main"),Glib::ustring("card"),soundCard);
+	configFile_->set_integer(Glib::ustring(MAIN),Glib::ustring(CARD),soundCard);
 	parseConfig(iniFileName_, configFile_->to_data());
 }
 
@@ -101,7 +108,7 @@ Glib::ustring Settings::getMixer() const
 {
 	Glib::ustring mixer("");
 	try {
-		mixer = Glib::ustring(configFile_->get_string(Glib::ustring("main"),Glib::ustring("mixer")));
+		mixer = Glib::ustring(configFile_->get_string(Glib::ustring(MAIN),Glib::ustring(MIXER)));
 	}
 	catch (const Glib::KeyFileError& ex) {
 		std::cerr << "settings.cpp::104::KeyFileError " << ex.what() << std::endl;
@@ -111,13 +118,13 @@ Glib::ustring Settings::getMixer() const
 
 void Settings::saveMixer(const std::string &mixerName)
 {
-	configFile_->set_string(Glib::ustring("main"),Glib::ustring("mixer"),mixerName);
+	configFile_->set_string(Glib::ustring(MAIN),Glib::ustring(MIXER),mixerName);
 	parseConfig(iniFileName_, configFile_->to_data());
 }
 
 void Settings::saveNotebookOrientation(bool orient)
 {
-	configFile_->set_boolean(Glib::ustring("main"),Glib::ustring("orient"),orient);
+	configFile_->set_boolean(Glib::ustring(MAIN),Glib::ustring(ORIENT),orient);
 	parseConfig(iniFileName_, configFile_->to_data());
 }
 
@@ -125,7 +132,7 @@ bool Settings::getNotebookOrientation()
 {
 	bool orient = false;
 	try {
-		orient = bool(configFile_->get_boolean(Glib::ustring("main"),Glib::ustring("orient")));
+		orient = bool(configFile_->get_boolean(Glib::ustring(MAIN),Glib::ustring(ORIENT)));
 	}
 	catch (const Glib::KeyFileError& ex) {
 		std::cerr << "settings.cpp::128::KeyFileError " << ex.what() << std::endl;
@@ -186,7 +193,7 @@ void Settings::setVersion(const Glib::ustring &version)
 
 void Settings::setCurrIconPack(const std::string &packName)
 {
-	configFile_->set_string(Glib::ustring("main"),Glib::ustring("iconpack"),packName);
+	configFile_->set_string(Glib::ustring(MAIN),Glib::ustring(IPACK),packName);
 	parseConfig(iniFileName_, configFile_->to_data());
 }
 
@@ -194,7 +201,7 @@ std::string Settings::getCurrIconPack() const
 {
 	std::string iconPack = Tools::defaultIconPack;
 	try {
-		iconPack = std::string(configFile_->get_string(Glib::ustring("main"),Glib::ustring("iconpack")));
+		iconPack = std::string(configFile_->get_string(Glib::ustring(MAIN),Glib::ustring(IPACK)));
 	}
 	catch (const Glib::KeyFileError& ex) {
 		std::cerr << "settings.cpp::197::KeyFileError " << ex.what() << std::endl;

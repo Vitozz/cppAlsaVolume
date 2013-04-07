@@ -21,6 +21,8 @@
 #include "settingsframe.h"
 #include <iostream>
 
+const std::string STATUS = "Status";
+
 SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 			     const Glib::RefPtr<Gtk::Builder>& refGlade)
 : Gtk::Dialog(cobject),
@@ -188,7 +190,7 @@ void SettingsFrame::setupTreeModels()
 		playbackSwitchTree_->set_model(pbSwitches_);
 		Gtk::TreeModel::Row row;
 		Gtk::CellRendererToggle *pcell = Gtk::manage(new Gtk::CellRendererToggle);
-		int colsCount = playbackSwitchTree_->append_column("Status", *pcell);
+		int colsCount = playbackSwitchTree_->append_column(STATUS, *pcell);
 		pcell->set_activatable(true);
 		Gtk::TreeViewColumn* pColumn = playbackSwitchTree_->get_column(colsCount -1);
 		if (colsCount) {
@@ -210,7 +212,7 @@ void SettingsFrame::setupTreeModels()
 		captureSwitchTree_->set_model(capSwitches_);
 		Gtk::TreeModel::Row row;
 		Gtk::CellRendererToggle *rcell = Gtk::manage(new Gtk::CellRendererToggle);
-		int colsCount = captureSwitchTree_->append_column("Status", *rcell);
+		int colsCount = captureSwitchTree_->append_column(STATUS, *rcell);
 		rcell->set_activatable(true);
 		rcell->set_radio(true);
 		Gtk::TreeViewColumn* pColumn = captureSwitchTree_->get_column(colsCount -1);
@@ -234,7 +236,7 @@ void SettingsFrame::setupTreeModels()
 		otherSwitchTree_->set_model(enumSwitches_);
 		Gtk::TreeModel::Row row;
 		Gtk::CellRendererToggle *ecell = Gtk::manage(new Gtk::CellRendererToggle);
-		int colsCount = otherSwitchTree_->append_column("Status", *ecell);
+		int colsCount = otherSwitchTree_->append_column(STATUS, *ecell);
 		ecell->set_activatable(true);
 		Gtk::TreeViewColumn* pColumn = otherSwitchTree_->get_column(colsCount -1);
 		if (colsCount) {
