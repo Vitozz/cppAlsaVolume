@@ -72,9 +72,9 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 		isAutoRun_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onAutorunToggled));
 	}
 	this->signal_delete_event().connect(sigc::mem_fun(*this, &SettingsFrame::onDeleteEvent));
-	if (extMixer_) {
+	/*if (extMixer_) {
 		extMixer_->set_sensitive(false);
-	}
+	}*/
 	settings_ = new settingsStr();
 }
 
@@ -104,6 +104,9 @@ void SettingsFrame::initParms(settingsStr &str)
 	if (isAutoRun_) {
 		isAutoRun_->set_active(settings_->isAutorun());
 	}
+	if (extMixer_ && !settings_->externalMixer().empty()) {
+		extMixer_->set_text(settings_->externalMixer());
+	}
 	setupTreeModels();
 }
 
@@ -129,6 +132,10 @@ void SettingsFrame::onOkButton()
 {
 	if (!settings_->mixerId()) {
 		settings_->setMixerId(0);
+	}
+	std::string text = extMixer_->get_text();
+	if (!text.empty()) {
+		settings_->setExternalMixer(text);
 	}
 	m_signal_ok_pressed.emit(*settings_);
 	onCancelButton();

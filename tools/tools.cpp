@@ -22,23 +22,10 @@
 #include "glibmm/fileutils.h"
 #include "glib.h"
 #include "glib/gstdio.h"
-#include "archive.h"
-#include "archive_entry.h"
 #include "unistd.h"
 #include <fstream>
 #include <cstdlib>
 #include <vector>
-
-const std::string PathSuffix = "/share/alsavolume/";
-
-void checkArchiveError(int err, int lineNumber, const std::string &text) {
-	if (err != ARCHIVE_OK) {
-		std::cerr << "tools.cpp::" << lineNumber << "::" << text << std::endl;
-	}
-	if (err < ARCHIVE_WARN) {
-		std::cerr << "tools.cpp::" << lineNumber << "::" << text << std::endl;
-	}
-}
 
 bool Tools::checkFileExists(const std::string &fileName)
 {
@@ -144,83 +131,6 @@ std::string Tools::getTmpDir()
 	return (g_get_user_cache_dir()) + std::string("/alsavolume");
 }
 
-void Tools::extractArchive(const std::string &archiveFileName, const std::string &outPath)
-{
-	const std::string tmpDirPath = Tools::getTmpDir();
-	Tools::clearTempDir(tmpDirPath);
-	struct archive_entry *entry;
-	int flags = ARCHIVE_EXTRACT_TIME;
-	flags |= ARCHIVE_EXTRACT_PERM;
-	flags |= ARCHIVE_EXTRACT_ACL;
-	flags |= ARCHIVE_EXTRACT_FFLAGS;
-	int err;
-	struct archive *ar = archive_read_new();
-	struct archive *ext = archive_write_disk_new();
-	archive_read_support_format_all(ar);
-	archive_read_support_compression_all(ar);
-	archive_write_disk_set_options(ext, flags);
-	archive_write_disk_set_standard_lookup(ext);
-	try {
-		err = archive_read_open_file(ar, archiveFileName.c_str(), 10240);
-		checkArchiveError(err, 153, "Error reading archive");
-		std::string entryPath;
-		while (1) {
-			err = archive_read_next_header(ar, &entry);
-			if (err == ARCHIVE_EOF) {
-				break;
-			}
-			checkArchiveError(err, 156, "Reading header error");
-			if (!outPath.empty()) {
-				entryPath = outPath + "/" + archive_entry_pathname(entry);
-				archive_entry_set_pathname(entry, entryPath.c_str());
-			}
-			err = archive_write_header(ext, entry);
-			checkArchiveError(err, 161, "Writing header error");
-			if ((err == ARCHIVE_OK) && (archive_entry_size(entry) > 0)) {
-				err = copyData(ar, ext);
-				checkArchiveError(err, 164, "copyData function error");
-			}
-		}
-		err = archive_write_finish_entry(ext);
-		checkArchiveError(err, 168, "write_finish_entry function error");
-	}
-	catch (const std::exception &ex) {
-		std::cout << ex.what() << std::endl;
-	}
-	archive_read_close(ar);
-	archive_read_free(ar);
-	archive_write_close(ext);
-	archive_write_free(ext);
-}
-
-int Tools::copyData(archive *in, archive *out)
-{
-	int err;
-	const void *buff;
-	size_t size;
-#if ARCHIVE_VERSION_NUMBER >= 3000000
-	int64_t offset;
-#else
-	off_t offset;
-#endif
-
-	while (1) {
-		err = archive_read_data_block(in, &buff, &size, &offset);
-		if (err == ARCHIVE_EOF) {
-			return ARCHIVE_OK;
-		}
-		if (err != ARCHIVE_OK) {
-			return err;
-		}
-		err = archive_write_data_block(out, buff, size, offset);
-		if (err != ARCHIVE_OK) {
-			checkArchiveError(err, 199, "write data error");
-			return err;
-		}
-	}
-	return ARCHIVE_WARN;
-}
-
 void Tools::clearTempDir(const std::string &path)
 {
 	try {
@@ -245,55 +155,6 @@ void Tools::clearTempDir(const std::string &path)
 	catch (const std::exception &ex) {
 		std::cerr << ex.what() << std::endl;
 	}
-}
-
-std::string Tools::checkIconPacks()
-{
-	std::vector<std::string> checkList;
-	const std::string preffix = PathSuffix + "iconpacks/";
-	const std::string localPath = "/usr/local" + preffix;
-	const std::string globalPath = "/usr" + preffix;
-	const std::string homePath = getHomePath() + "iconpacks/";
-	const std::string cwd = getCWD() + "/iconpacks/";
-	checkList.push_back(globalPath);
-	checkList.push_back(localPath);
-	checkList.push_back(homePath);
-	checkList.push_back(cwd);
-	std::vector<std::string>::iterator it = checkList.begin();
-	std::vector<std::string> list;
-	std::string item;
-	while (it != checkList.end()) {
-		list = getFileList(*it);
-		if (list.size() > 0) {
-			std::vector<std::string>::iterator i = list.begin();
-			while (i != list.end()) {
-				item = std::string(*i);
-				if (item.find("tar.gz") != std::string::npos) {
-					return std::string(*it);
-				}
-				i++;
-			}
-
-		}
-		it++;
-	}
-	return "";
-}
-
-std::vector<std::string> Tools::getIconPacks()
-{
-	const std::string path = checkIconPacks();
-	std::vector<std::string> packs = getFileList(path);
-	std::vector<std::string> result;
-	result.push_back(Tools::defaultIconPack);
-	std::vector<std::string>::iterator it = packs.begin();
-	std::string item;
-	while (it != packs.end()) {
-		item = path + *it;
-		result.push_back(item);
-		it++;
-	}
-	return result;
 }
 
 std::string Tools::pathToFileName(const std::string &path)

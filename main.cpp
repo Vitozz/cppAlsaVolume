@@ -65,6 +65,7 @@ int main (int argc, char *argv[])
 		trayIcon->signal_save_settings().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::saveSettings));
 		trayIcon->signal_value_changed().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::setVolumeValue));
 		trayIcon->signal_on_mute().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::soundMuted));
+		trayIcon->signal_ask_extmixer().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::onExtMixerSignal));
 		sliderWindow->set_visible(false);
 		return app->run();
 	}

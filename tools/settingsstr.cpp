@@ -27,6 +27,7 @@ settingsStr::settingsStr()
   isAutorun_(false)
 {
 	currIconPack_ = std::string();
+	extMixer_ = std::string();
 }
 
 settingsStr::settingsStr(settingsStr &str)
@@ -40,6 +41,7 @@ settingsStr::settingsStr(settingsStr &str)
 	mixerList_ = str.mixerList();
 	iconPacks_ = str.iconPacks();
 	switchList_ = str.switchList();
+	extMixer_ = str.externalMixer();
 }
 
 unsigned int settingsStr::cardId() const
@@ -65,6 +67,11 @@ bool settingsStr::isAutorun()
 std::string &settingsStr::currIconPack()
 {
 	return currIconPack_;
+}
+
+std::string &settingsStr::externalMixer()
+{
+	return extMixer_;
 }
 
 std::vector<std::string> &settingsStr::cardList()
@@ -170,4 +177,9 @@ void settingsStr::clearSwitches()
 	switchList_.clear(PLAYBACK);
 	switchList_.clear(CAPTURE);
 	switchList_.clear(ENUM);
+}
+
+void settingsStr::setExternalMixer(const std::string &name)
+{
+	extMixer_ = name;
 }

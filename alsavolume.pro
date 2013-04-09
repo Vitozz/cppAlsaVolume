@@ -1,7 +1,6 @@
 ### eqmake4 was here ###
 include(conf.pri)
 
-CONFIG -= debug_and_release debug
 CONFIG += release
 
 TARGET = alsavolume
@@ -23,7 +22,8 @@ SOURCES += main.cpp \
 	alsawork/mixerswitches.cpp \
 	tools/settings.cpp \
 	tools/tools.cpp \
-	tools/settingsstr.cpp
+	tools/settingsstr.cpp \
+	tools/iconpacks.cpp
 
 HEADERS += \
 	alsawork/alsawork.h \
@@ -34,7 +34,8 @@ HEADERS += \
 	gui/settingsframe.h \
 	tools/settings.h \
 	tools/tools.h \
-	tools/settingsstr.h
+	tools/settingsstr.h \
+	tools/iconpacks.h
 
 INCLUDEPATH += \
 	/usr/include/gtkmm-3.0 \
@@ -80,13 +81,13 @@ unix{
 	gf2.files = gladefiles/SettingsFrame.glade
 	icon.path = $$PREFIX/share/alsavolume/icons/
 	icon.files = icons/tb_icon0.png \
-		      icons/tb_icon20.png \
-		      icons/tb_icon40.png \
-		      icons/tb_icon60.png \
-		      icons/tb_icon80.png \
-		      icons/tb_icon100.png \
-		      icons/volume.png \
-		      icons/volume_ico.png
+		     icons/tb_icon20.png \
+		     icons/tb_icon40.png \
+		     icons/tb_icon60.png \
+		     icons/tb_icon80.png \
+		     icons/tb_icon100.png \
+		     icons/volume.png \
+		     icons/volume_ico.png
 	INSTALLS += dt \
 		    gf1 \
 		    gf2 \

@@ -69,10 +69,12 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	settings_->setVersion(Tools::version);
 	settingsStr_->setCurrIconPack(settings_->getCurrIconPack());
 	settingsStr_->setIsAutorun(settings_->getAutorun());
-	settingsStr_->setList(ICONS, Tools::getIconPacks());
+	settingsStr_->setExternalMixer(settings_->getExternalMixer());
 	std::string cIpack = settingsStr_->currIconPack();
+	iconpacks_ = new iconpacks(cIpack, Tools::getTmpDir());
+	settingsStr_->setList(ICONS, iconpacks_->getPacks());
 	if (!cIpack.empty() && (cIpack != Tools::defaultIconPack)) {
-		Tools::extractArchive(cIpack, Tools::getTmpDir());
+		iconpacks_->extract();
 	}
 }
 
@@ -81,6 +83,7 @@ SliderWindow::~SliderWindow()
 	delete settings_;
 	delete settingsStr_;
 	delete alsaWork_;
+	delete iconpacks_;
 }
 
 void SliderWindow::runAboutDialog()
@@ -216,7 +219,7 @@ void SliderWindow::saveSettings()
 	settings_->saveSoundCard(settingsStr_->cardId());
 	settings_->saveMixer(std::string(mixerName_.c_str()));
 	settings_->saveNotebookOrientation(settingsStr_->notebookOrientation());
-
+	settings_->setExternalMixer(settingsStr_->externalMixer());
 }
 
 SliderWindow::type_sliderwindow_signal SliderWindow::signal_volume_changed()
@@ -299,6 +302,7 @@ void SliderWindow::onSettingsDialogOk(settingsStr &str)
 	settingsStr_->setIsAutorun(str.isAutorun());
 	volumeValue_ = alsaWork_->getAlsaVolume(mixerName_);
 	volumeSlider_->set_value(volumeValue_);
+	settingsStr_->setExternalMixer(str.externalMixer());
 }
 
 void SliderWindow::onSettingsDialogAutostart(bool isAutorun)
@@ -314,7 +318,8 @@ void SliderWindow::onSettingsDialogIconpack(const std::string &path, int id, boo
 	settingsStr_->setCurrIconPack(path);
 	settings_->setCurrIconPack(path);
 	if (path != Tools::defaultIconPack) {
-		Tools::extractArchive(path, tmpDir);
+		iconpacks_ = new iconpacks(path, tmpDir);
+		iconpacks_->extract();
 	}
 	else {
 		Tools::clearTempDir(tmpDir+"/");
@@ -350,4 +355,17 @@ void SliderWindow::updateControls(int cardId)
 	settingsStr_->setList(MIXERS, alsaWork_->getVolumeMixers(id));
 	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList(id));
 	settingsStr_->setIsAutorun(settings_->getAutorun());
+}
+
+void SliderWindow::onExtMixerSignal()
+{
+	std::string mixer = settingsStr_->externalMixer();
+	if (!mixer.empty()) {
+		try {
+			std::cout << system(mixer.c_str()) << std::endl;
+		}
+		catch (const std::exception &ex) {
+			std::cerr << ex.what() << std::endl;
+		}
+	}
 }

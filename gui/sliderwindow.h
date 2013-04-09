@@ -29,6 +29,7 @@
 #include "../alsawork/alsawork.h"
 #include "../tools/tools.h"
 #include "../tools/settingsstr.h"
+#include "../tools/iconpacks.h"
 #include <vector>
 
 class SliderWindow : public Gtk::Window
@@ -56,6 +57,7 @@ public:
 	void switchChanged (const std::string& name, int id, bool enabled);
 	void soundMuted(bool mute);
 	bool getMuted();
+	void onExtMixerSignal();
 	//signal
 	typedef sigc::signal<void, double, std::string, std::string> type_sliderwindow_signal;
 	type_sliderwindow_signal signal_volume_changed();
@@ -81,6 +83,7 @@ private:
 	AlsaWork *alsaWork_;
 	settingsStr *settingsStr_;
 	std::string mixerName_;
+	iconpacks *iconpacks_;
 };
 
 #endif // SLIDERWINDOW_H

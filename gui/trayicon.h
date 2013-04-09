@@ -38,6 +38,7 @@ public:
 	type_trayicon_simple_signal signal_ask_dialog();
 	type_trayicon_simple_signal signal_ask_settings();
 	type_trayicon_simple_signal signal_save_settings();
+	type_trayicon_simple_signal signal_ask_extmixer();
 	typedef sigc::signal<void, int, int, int ,int> type_trayicon_4int_signal;
 	type_trayicon_4int_signal signal_on_restore();
 	typedef sigc::signal<void, double> type_trayicon_double_signal;
@@ -64,6 +65,7 @@ protected:
 	type_trayicon_4int_signal m_signal_on_restore;
 	type_trayicon_double_signal m_signal_value_changed;
 	type_trayicon_bool_signal m_signal_on_mute;
+	type_trayicon_simple_signal m_signal_ask_extmixer;
 
 private:
 	void setIcon(double value);

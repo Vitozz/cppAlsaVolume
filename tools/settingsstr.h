@@ -35,6 +35,7 @@ public:
 	bool notebookOrientation();
 	bool isAutorun();
 	std::string &currIconPack();
+	std::string &externalMixer();
 	std::vector<std::string> &cardList();
 	std::vector<std::string> &mixerList();
 	std::vector<std::string> &iconPacks();
@@ -49,6 +50,7 @@ public:
 	void setCurrIconPack(const std::string &iconPack);
 	void clear(ListType listType);
 	void clearSwitches();
+	void setExternalMixer(const std::string &name);
 private:
 	unsigned int cardId_;
 	unsigned int mixerId_;
@@ -59,6 +61,7 @@ private:
 	std::vector<std::string> mixerList_;
 	std::vector<std::string> iconPacks_;
 	MixerSwitches switchList_;
+	std::string extMixer_;
 };
 
 #endif // SETTINGSSTR_H

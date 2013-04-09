@@ -30,6 +30,7 @@ const std::string CARD = "card";
 const std::string MIXER = "mixer";
 const std::string ORIENT = "orient";
 const std::string IPACK = "iconpack";
+const std::string EMIXER = "extmixer";
 
 Settings::Settings()
 {
@@ -207,4 +208,22 @@ std::string Settings::getCurrIconPack() const
 		std::cerr << "settings.cpp::197::KeyFileError " << ex.what() << std::endl;
 	}
 	return iconPack;
+}
+
+std::string Settings::getExternalMixer()
+{
+	std::string extMixer;
+	try {
+		extMixer = std::string(configFile_->get_string(Glib::ustring(MAIN),Glib::ustring(EMIXER)));
+	}
+	catch (const Glib::KeyFileError& ex) {
+		std::cerr << "settings.cpp::216::KeyFileError " << ex.what() << std::endl;
+	}
+	return extMixer;
+}
+
+void Settings::setExternalMixer(const std::string &extMixerName)
+{
+	configFile_->set_string(Glib::ustring(MAIN),Glib::ustring(EMIXER),extMixerName);
+	parseConfig(iniFileName_, configFile_->to_data());
 }

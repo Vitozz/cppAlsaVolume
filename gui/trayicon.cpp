@@ -68,7 +68,7 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 	on_signal_volume_changed(volumeValue_, cardName, mixerName);
 	muted_ = muted;
 	muteItem_->set_active(muted_);
-	mixerItem_->set_sensitive(false); //temporary
+	//mixerItem_->set_sensitive(false); //temporary
 }
 
 void TrayIcon::onHideRestore()
@@ -94,7 +94,7 @@ void TrayIcon::onQuit()
 
 void TrayIcon::runMixerApp()
 {
-	//not implemented yet
+	m_signal_ask_extmixer.emit();
 }
 
 void TrayIcon::runSettings()
@@ -240,4 +240,9 @@ TrayIcon::type_trayicon_double_signal TrayIcon::signal_value_changed()
 TrayIcon::type_trayicon_bool_signal TrayIcon::signal_on_mute()
 {
 	return m_signal_on_mute;
+}
+
+TrayIcon::type_trayicon_simple_signal TrayIcon::signal_ask_extmixer()
+{
+	return m_signal_ask_extmixer;
 }
