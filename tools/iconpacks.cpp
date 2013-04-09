@@ -149,9 +149,9 @@ std::vector<std::string> iconpacks::getPacks()
 		it++;
 	}
 	next:
+	result.push_back(Tools::defaultIconPack);
 	if (!path.empty()) {
 		std::vector<std::string> packs = Tools::getFileList(path);
-		result.push_back(Tools::defaultIconPack);
 		it = packs.begin();
 		std::string item;
 		while (it != packs.end()) {

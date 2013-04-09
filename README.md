@@ -31,10 +31,6 @@ What features available:
 	- enable or disable sound card switches in settings dialog
 	- iconpacks support
 
-TODO LIST:
-
-	- external mixer launch
-
 HOWTO USE ICONPACKS:
 
 	Iconpack - the usual *tar.gz archive with *.png icons (filenames are the same as the original icons).
