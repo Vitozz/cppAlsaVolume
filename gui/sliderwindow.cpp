@@ -48,9 +48,7 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	settings_ = new Settings();
 	settingsStr_ = new settingsStr();
 	//
-	settingsStr_->setList(CARDS, alsaWork_->getCardsList());
-	settingsStr_->setCardId(settings_->getSoundCard());
-	settingsStr_->setList(MIXERS, alsaWork_->getVolumeMixers(settingsStr_->cardId()));
+	updateControls(settings_->getSoundCard());
 	mixerName_ = settings_->getMixer();
 	if (!mixerName_.empty()) {
 		std::pair<bool, int> isMixer = Tools::itemExists(settingsStr_->mixerList(), mixerName_);
@@ -68,7 +66,6 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList(settingsStr_->cardId()));
 	settings_->setVersion(Tools::version);
 	settingsStr_->setCurrIconPack(settings_->getCurrIconPack());
-	settingsStr_->setIsAutorun(settings_->getAutorun());
 	settingsStr_->setExternalMixer(settings_->getExternalMixer());
 	std::string cIpack = settingsStr_->currIconPack();
 	iconpacks_ = new iconpacks(cIpack, Tools::getTmpDir());
@@ -147,7 +144,7 @@ void SliderWindow::setWindowPosition(int x_, int y_, int height_, int width_)
 void SliderWindow::on_volume_slider()
 {
 	volumeValue_ = volumeSlider_->get_value();
-	alsaWork_->setAlsaVolume(mixerName_, volumeValue_);
+	alsaWork_->setAlsaVolume(settingsStr_->cardId(), mixerName_, volumeValue_);
 	m_signal_volume_changed.emit(volumeValue_, getSoundCardName(), mixerName_);
 }
 
@@ -283,7 +280,6 @@ std::vector<std::string> &SliderWindow::getCardsList()
 
 void SliderWindow::setActiveCard(int card)
 {
-	alsaWork_->setCardId(card);
 	updateControls(card);
 }
 
@@ -300,7 +296,7 @@ void SliderWindow::onSettingsDialogOk(settingsStr &str)
 	}
 	settingsStr_->setNotebookOrientation(str.notebookOrientation());
 	settingsStr_->setIsAutorun(str.isAutorun());
-	volumeValue_ = alsaWork_->getAlsaVolume(mixerName_);
+	volumeValue_ = alsaWork_->getAlsaVolume(settingsStr_->cardId(),mixerName_);
 	volumeSlider_->set_value(volumeValue_);
 	settingsStr_->setExternalMixer(str.externalMixer());
 }
@@ -348,12 +344,10 @@ void SliderWindow::updateControls(int cardId)
 	settingsStr_->clear(CARDS);
 	settingsStr_->clearSwitches();
 	//
-	settingsStr_->setCardId(cardId);
-	int id = settingsStr_->cardId();
 	settingsStr_->setList(CARDS, alsaWork_->getCardsList());
-	alsaWork_->setCardId(id);
-	settingsStr_->setList(MIXERS, alsaWork_->getVolumeMixers(id));
-	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList(id));
+	settingsStr_->setCardId(cardId);
+	settingsStr_->setList(MIXERS, alsaWork_->getVolumeMixers(cardId));
+	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList(cardId));
 	settingsStr_->setIsAutorun(settings_->getAutorun());
 }
 

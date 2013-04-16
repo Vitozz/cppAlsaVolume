@@ -29,7 +29,6 @@ AlsaWork::AlsaWork()
 {
 	switches_ = new MixerSwitches();
 	volumeMixers_ = new VolumeMixers();
-	cardId_=0;
 }
 
 AlsaWork::~AlsaWork()
@@ -40,19 +39,19 @@ AlsaWork::~AlsaWork()
 }
 
 //public
-void AlsaWork::setAlsaVolume(const std::string &mixer, double volume)
+void AlsaWork::setAlsaVolume(int cardId, const std::string &mixer, double volume)
 {
-	if (Tools::itemExists(mixerList_, mixer).first) {
-		snd_mixer_t *handle = getMixerHanlde(cardId_);
+	if (checkCardId(cardId) && Tools::itemExists(mixerList_, mixer).first) {
+		snd_mixer_t *handle = getMixerHanlde(cardId);
 		snd_mixer_elem_t *element = initMixerElement(handle, mixer.c_str());
 		setVolume(element, handle, volume);
 	}
 }
 
-double AlsaWork::getAlsaVolume(const std::string& mixer)
+double AlsaWork::getAlsaVolume(int cardId, const std::string &mixer)
 {
-	if (Tools::itemExists(mixerList_, mixer).first) {
-		snd_mixer_t *handle = getMixerHanlde(cardId_);
+	if (checkCardId(cardId) && Tools::itemExists(mixerList_, mixer).first) {
+		snd_mixer_t *handle = getMixerHanlde(cardId);
 		snd_mixer_elem_t *elem = initMixerElement(handle, mixer.c_str());
 		long minv, maxv, outvol;
 		snd_mixer_selem_channel_id_t chanelid = checkMixerChannels(elem);
@@ -95,15 +94,20 @@ std::vector<std::string> &AlsaWork::getCardsList()
 
 std::vector<std::string> &AlsaWork::getVolumeMixers(int cardIndex)
 {
+	updateMixerList(cardIndex);
+	return mixerList_;
+}
+
+void AlsaWork::updateMixerList(int cardIndex)
+{
+	updateMixers(cardIndex);
 	std::vector<std::string> cmixers = volumeMixers_->capture();
 	std::vector<std::string> pmixers = volumeMixers_->playback();
-	updateMixers(cardIndex);
 	if (!mixerList_.empty())
 		mixerList_.clear();
 	mixerList_.reserve(pmixers.size() + cmixers.size());
 	mixerList_.insert(mixerList_.end(), pmixers.begin(), pmixers.end());
 	mixerList_.insert(mixerList_.end(), cmixers.begin(), cmixers.end());
-	return mixerList_;
 }
 
 MixerSwitches &AlsaWork::getSwitchList(int cardIndex)
@@ -112,16 +116,17 @@ MixerSwitches &AlsaWork::getSwitchList(int cardIndex)
 	return *switches_;
 }
 
-void AlsaWork::setCardId(int cardId)
+bool AlsaWork::checkCardId(int cardId)
 {
 	try {
-		if (!cardList_.at(cardId).empty()) {
-			cardId_ = cardId;
+		if (cardId < int(cardList_.size()) && !cardList_.at(cardId).empty()) {
+			return true;
 		}
 	}
 	catch (std::out_of_range &ex) {
-		std::cerr << "alsawork.cpp::118:: Item out of Range " << ex.what() << std::endl;
+		std::cerr << "alsawork.cpp::124:: Item out of Range " << ex.what() << std::endl;
 	}
+	return false;
 }
 
 void AlsaWork::setSwitch(int cardId, const std::string &mixer, int id, bool enabled)
@@ -240,7 +245,6 @@ snd_mixer_t *AlsaWork::getMixerHanlde(int id)
 
 std::string AlsaWork::formatCardName(int id)
 {
-	cardId_ = id;
 	size_t size = 64;
 	char *name = (char*)malloc(size);
 	sprintf(name, "hw:%d", id);
