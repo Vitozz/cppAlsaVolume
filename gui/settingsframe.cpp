@@ -34,7 +34,6 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
   playbackSwitchTree_(0),
   captureSwitchTree_(0),
   otherSwitchTree_(0),
-  iconPacks_(0),
   isAutoRun_(0),
   tabPos_(0),
   tabWidget_(0),
@@ -51,10 +50,13 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	builder->get_widget("playbacktree", playbackSwitchTree_);
 	builder->get_widget("capturetree", captureSwitchTree_);
 	builder->get_widget("othertree", otherSwitchTree_);
-	builder->get_widget("iconpacks", iconPacks_);
 	builder->get_widget("is_autorun", isAutoRun_);
 	builder->get_widget("tabspos", tabPos_);
 	builder->get_widget("tabwidget", tabWidget_);
+#ifdef HAVE_ICONPACKS
+	iconPacks_ = 0;
+	builder->get_widget("iconpacks", iconPacks_);
+#endif
 	//signals
 	if (tabPos_) {
 		tabPos_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onTabPos));
@@ -72,9 +74,6 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 		isAutoRun_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onAutorunToggled));
 	}
 	this->signal_delete_event().connect(sigc::mem_fun(*this, &SettingsFrame::onDeleteEvent));
-	/*if (extMixer_) {
-		extMixer_->set_sensitive(false);
-	}*/
 	settings_ = new settingsStr();
 }
 
@@ -88,11 +87,13 @@ SettingsFrame::~SettingsFrame()
 	delete playbackSwitchTree_;
 	delete captureSwitchTree_;
 	delete otherSwitchTree_;
-	delete iconPacks_;
 	delete isAutoRun_;
 	delete tabPos_;
 	delete tabWidget_;
 	delete settings_;
+#ifdef HAVE_ICONPACKS
+	delete iconPacks_;
+#endif
 }
 
 void SettingsFrame::initParms(settingsStr &str)
@@ -260,6 +261,7 @@ void SettingsFrame::setupTreeModels()
 		otherSwitchTree_->append_column("Enumerated Control", m_TColumns.m_col_name);
 		otherSwitchTree_->show_all_children();
 	}
+#ifdef HAVE_ICONPACKS
 	if (iconPacks_){
 		Glib::RefPtr<Gtk::ListStore> packs = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_Columns));
 		iconPacks_->set_model(packs);
@@ -281,6 +283,7 @@ void SettingsFrame::setupTreeModels()
 		}
 		iconPacks_->pack_start(m_Columns.m_col_name);
 	}
+#endif
 }
 
 void SettingsFrame::sndBoxChanged()
@@ -288,12 +291,14 @@ void SettingsFrame::sndBoxChanged()
 	settings_->setCardId(sndCardBox_->get_active_row_number());
 }
 
+#ifdef HAVE_ICONPACKS
 void SettingsFrame::iconPackChanged()
 {
 	int id = iconPacks_->get_active_row_number();
 	std::string path = settings_->iconPacks().at(id);
 	m_signal_iconpack_changed.emit(path, id, false);
 }
+#endif
 
 void SettingsFrame::mixerBoxChanged()
 {
@@ -369,7 +374,9 @@ SettingsFrame::type_bool_signal SettingsFrame::signal_autorun_toggled()
 	return m_signal_autorun_toggled;
 }
 
+#ifdef HAVE_ICONPACKS
 SettingsFrame::type_toggled_signal SettingsFrame::signal_iconpack_changed()
 {
 	return m_signal_iconpack_changed;
 }
+#endif

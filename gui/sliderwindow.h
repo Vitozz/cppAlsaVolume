@@ -29,8 +29,10 @@
 #include "../alsawork/alsawork.h"
 #include "../tools/tools.h"
 #include "../tools/settingsstr.h"
-#include "../tools/iconpacks.h"
 #include <vector>
+#ifdef HAVE_ICONPACKS
+#include "../tools/iconpacks.h"
+#endif
 
 class SliderWindow : public Gtk::Window
 {
@@ -67,10 +69,12 @@ protected:
 	bool on_focus_out(GdkEventCrossing* event);
 	void onSettingsDialogOk(settingsStr &str);
 	void onSettingsDialogAutostart(bool isAutorun);
-	void onSettingsDialogIconpack(const std::string &path, int id, bool value);
 	//signal
 	type_sliderwindow_signal m_signal_volume_changed;
-
+#ifdef HAVE_ICONPACKS
+protected:
+	void onSettingsDialogIconpack(const std::string &path, int id, bool value);
+#endif
 private:
 	void updateControls(int cardId);
 	void createSettingsDialog();
@@ -83,7 +87,10 @@ private:
 	AlsaWork *alsaWork_;
 	settingsStr *settingsStr_;
 	std::string mixerName_;
+#ifdef HAVE_ICONPACKS
+private:
 	iconpacks *iconpacks_;
+#endif
 };
 
 #endif // SLIDERWINDOW_H

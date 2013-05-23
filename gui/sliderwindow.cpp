@@ -61,18 +61,20 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 		mixerName_ = settingsStr_->mixerList().at(settingsStr_->mixerId());
 	}
 	volumeValue_ = settings_->getVolume();
-	volumeSlider_->set_value(volumeValue_);
 	settingsStr_->setNotebookOrientation(settings_->getNotebookOrientation());
 	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList(settingsStr_->cardId()));
 	settings_->setVersion(Tools::version);
-	settingsStr_->setCurrIconPack(settings_->getCurrIconPack());
 	settingsStr_->setExternalMixer(settings_->getExternalMixer());
+#ifdef HAVE_ICONPACKS
+	settingsStr_->setCurrIconPack(settings_->getCurrIconPack());
 	std::string cIpack = settingsStr_->currIconPack();
 	iconpacks_ = new iconpacks(cIpack, Tools::getTmpDir());
 	settingsStr_->setList(ICONS, iconpacks_->getPacks());
 	if (!cIpack.empty() && (cIpack != Tools::defaultIconPack)) {
 		iconpacks_->extract();
 	}
+#endif
+	volumeSlider_->set_value(volumeValue_);
 }
 
 SliderWindow::~SliderWindow()
@@ -80,7 +82,9 @@ SliderWindow::~SliderWindow()
 	delete settings_;
 	delete settingsStr_;
 	delete alsaWork_;
+#ifdef HAVE_ICONPACKS
 	delete iconpacks_;
+#endif
 }
 
 void SliderWindow::runAboutDialog()
@@ -256,7 +260,9 @@ void SliderWindow::createSettingsDialog()
 		settingsDialog->signal_ok_pressed().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogOk));
 		settingsDialog->signal_switches_toggled().connect(sigc::mem_fun(*this, &SliderWindow::switchChanged));
 		settingsDialog->signal_autorun_toggled().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogAutostart));
+#ifdef HAVE_ICONPACKS
 		settingsDialog->signal_iconpack_changed().connect(sigc::mem_fun(*this, &SliderWindow::onSettingsDialogIconpack));
+#endif
 		settingsDialog->run();
 		delete settingsDialog;
 	}
@@ -306,6 +312,7 @@ void SliderWindow::onSettingsDialogAutostart(bool isAutorun)
 	settings_->setAutorun(isAutorun);
 }
 
+#ifdef HAVE_ICONPACKS
 void SliderWindow::onSettingsDialogIconpack(const std::string &path, int id, bool value = false)
 {
 	(void)id;
@@ -321,6 +328,7 @@ void SliderWindow::onSettingsDialogIconpack(const std::string &path, int id, boo
 		Tools::clearTempDir(tmpDir+"/");
 	}
 }
+#endif
 
 void SliderWindow::switchChanged(const std::string &name, int id, bool enabled)
 {

@@ -146,6 +146,7 @@ Glib::ustring TrayIcon::getIconName(double value) const
 void TrayIcon::setIcon(double value)
 {
 	Glib::ustring iconPath;
+#ifdef HAVE_ICONPACKS
 	const std::string tmpDir = Tools::getTmpDir();
 	if (Tools::checkDirExists(tmpDir)) {
 		iconPath = Glib::ustring(tmpDir + "/") + getIconName(value);
@@ -154,6 +155,10 @@ void TrayIcon::setIcon(double value)
 		const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(value);
 		iconPath = Tools::getResPath(searchPath.c_str());
 	}
+#else
+	const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(value);
+	iconPath = Tools::getResPath(searchPath.c_str());
+#endif
 	if (!iconPath.empty()) {
 		try {
 			set_from_file(iconPath);

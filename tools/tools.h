@@ -33,8 +33,11 @@ enum SwitchType {
 
 enum ListType {
 	CARDS = 0,
-	MIXERS = 1,
+	MIXERS = 1
+#ifdef HAVE_ICONPACKS
+	,
 	ICONS = 2
+#endif
 };
 
 typedef std::pair<std::string, bool> switchcap;
@@ -56,7 +59,7 @@ namespace Tools {
 	const std::string defaultIconPack = "default";
 	const std::string PathSuffix = "/share/alsavolume/";
 	//Program version
-	const std::string version = "0.1.1";
+	const std::string version = "0.1.2";
 }
 
 #endif // FILEWORK_H

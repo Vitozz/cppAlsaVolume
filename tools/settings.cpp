@@ -192,11 +192,13 @@ void Settings::setVersion(const Glib::ustring &version)
 	parseConfig(desktopFilePath_, desktopFile_->to_data());
 }
 
+#ifdef HAVE_ICONPACKS
 void Settings::setCurrIconPack(const std::string &packName)
 {
 	configFile_->set_string(Glib::ustring(MAIN),Glib::ustring(IPACK),packName);
 	parseConfig(iniFileName_, configFile_->to_data());
 }
+#endif
 
 std::string Settings::getCurrIconPack() const
 {
@@ -207,7 +209,10 @@ std::string Settings::getCurrIconPack() const
 	catch (const Glib::KeyFileError& ex) {
 		std::cerr << "settings.cpp::197::KeyFileError " << ex.what() << std::endl;
 	}
-	return iconPack;
+	if (!iconPack.empty()) {
+		return iconPack;
+	}
+	return Tools::defaultIconPack;
 }
 
 std::string Settings::getExternalMixer()

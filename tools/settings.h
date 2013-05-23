@@ -39,9 +39,12 @@ public:
 	bool getAutorun();
 	void setVersion(const Glib::ustring& version);
 	std::string getCurrIconPack() const;
-	void setCurrIconPack(const std::string &packName);
 	void setExternalMixer(const std::string &extMixerName);
 	std::string getExternalMixer();
+#ifdef HAVE_ICONPACKS
+public:
+	void setCurrIconPack(const std::string &packName);
+#endif
 private:
 	void parseConfig(const Glib::ustring& keyFileName, const Glib::ustring& keyFileData);
 	void loadConfig(const std::string& fileName);

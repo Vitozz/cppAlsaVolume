@@ -74,12 +74,15 @@ protected:
 	void onCaptureCellToggled(const Glib::ustring &path);
 	void onEnumCellToggled(const Glib::ustring &path);
 	void onAutorunToggled();
-	void iconPackChanged();
 	//signals
 	type_void_signal m_signal_ok_pressed;
 	type_toggled_signal m_type_toggled_signal;
 	type_bool_signal m_signal_autorun_toggled;
+
+#ifdef HAVE_ICONPACKS
+	void iconPackChanged();
 	type_toggled_signal m_signal_iconpack_changed;
+#endif
 private:
 	void setupTreeModels();
 	void setTabPos(bool orient);
@@ -93,7 +96,6 @@ private:
 	Gtk::TreeView *playbackSwitchTree_;
 	Gtk::TreeView *captureSwitchTree_;
 	Gtk::TreeView *otherSwitchTree_;
-	Gtk::ComboBox *iconPacks_;
 	Gtk::CheckButton *isAutoRun_;
 	Gtk::CheckButton *tabPos_;
 	Gtk::Notebook *tabWidget_;
@@ -103,6 +105,9 @@ private:
 	Glib::RefPtr<Gtk::ListStore> capSwitches_;
 	Glib::RefPtr<Gtk::ListStore> enumSwitches_;
 	settingsStr *settings_;
+#ifdef HAVE_ICONPACKS
+	Gtk::ComboBox *iconPacks_;
+#endif
 };
 
 #endif // SETTINGSFRAME_H

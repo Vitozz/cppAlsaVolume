@@ -34,11 +34,14 @@ public:
 	unsigned int mixerId() const;
 	bool notebookOrientation();
 	bool isAutorun();
-	std::string &currIconPack();
 	std::string &externalMixer();
 	std::vector<std::string> &cardList();
 	std::vector<std::string> &mixerList();
+#ifdef HAVE_ICONPACKS
+	std::string &currIconPack();
 	std::vector<std::string> &iconPacks();
+	void setCurrIconPack(const std::string &iconPack);
+#endif
 	MixerSwitches &switchList();
 	void setCardId(unsigned int id);
 	void setMixerId(unsigned int id);
@@ -47,19 +50,22 @@ public:
 	void pushBack(ListType listType, const std::string &item);
 	void addMixerSwitch(const MixerSwitches &switchItem);
 	void setList(ListType listType, const std::vector<std::string> &list);
-	void setCurrIconPack(const std::string &iconPack);
 	void clear(ListType listType);
 	void clearSwitches();
 	void setExternalMixer(const std::string &name);
+
+
 private:
 	unsigned int cardId_;
 	unsigned int mixerId_;
 	bool notebookOrientation_;
 	bool isAutorun_;
-	std::string currIconPack_;
 	std::vector<std::string> cardList_;
 	std::vector<std::string> mixerList_;
+#ifdef HAVE_ICONPACKS
+	std::string currIconPack_;
 	std::vector<std::string> iconPacks_;
+#endif
 	MixerSwitches switchList_;
 	std::string extMixer_;
 };

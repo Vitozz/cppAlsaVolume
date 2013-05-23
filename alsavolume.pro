@@ -8,10 +8,11 @@ TEMPLATE = app
 CONFIG += console
 CONFIG -= qt
 
+#CONFIG += iconpacks
+
 CONFIG += link_pkgconfig
 PKGCONFIG += gtkmm-3.0 \
-	     alsa \
-	     libarchive
+	     alsa
 
 SOURCES += main.cpp \
 	gui/trayicon.cpp \
@@ -23,7 +24,6 @@ SOURCES += main.cpp \
 	tools/settings.cpp \
 	tools/tools.cpp \
 	tools/settingsstr.cpp \
-	tools/iconpacks.cpp
 
 HEADERS += \
 	alsawork/alsawork.h \
@@ -34,8 +34,7 @@ HEADERS += \
 	gui/settingsframe.h \
 	tools/settings.h \
 	tools/tools.h \
-	tools/settingsstr.h \
-	tools/iconpacks.h
+	tools/settingsstr.h
 
 INCLUDEPATH += \
 	/usr/include/gtkmm-3.0 \
@@ -69,6 +68,13 @@ INCLUDEPATH += \
 	/usr/include/libdrm \
 	/usr/include/qt4/QtCore \
 	/usr/include/gio-unix-2.0
+
+iconpacks{
+PKGCONFIG += libarchive
+SOURCES += tools/iconpacks.cpp
+HEADERS += tools/iconpacks.h
+DEFINES += HAVE_ICONPACKS
+}
 
 unix{
 	target.path = $$BINDIR
