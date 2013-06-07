@@ -29,9 +29,13 @@ What features available:
 	- volume control using popup window with slider
 	- mute sound on middleclick and by checkbox selection
 	- enable or disable sound card switches in settings dialog
-	- iconpacks support
+	- iconpacks support (disabled by default, to enable use "qmake CONFIG+=iconpacks")
 
 HOWTO USE ICONPACKS:
 
 	Iconpack - the usual *tar.gz archive with *.png icons (filenames are the same as the original icons).
 	Just copy *tar.gz archive into ~/.local/share/alsavolume/iconpacks folder and choose iconpack in settings dialog
+	
+KNOWN ISSUES:
+	- on newer versions of pulseaudio (4.0) sound mute (switch) does not work correctly (recomended to use original
+	pulseaudio control tool (pavucontrol))
