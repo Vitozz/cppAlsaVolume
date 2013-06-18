@@ -109,6 +109,7 @@ void TrayIcon::onAbout()
 
 void TrayIcon::onMute()
 {
+	std::cout << "clicked" << std::endl;
 	muted_ = muteItem_->get_active();
 	if (muted_) {
 		setIcon(0);

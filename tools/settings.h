@@ -27,8 +27,6 @@ class Settings
 public:
 	Settings();
 	~Settings();
-	void saveVolume(double volume);
-	double getVolume() const;
 	int getSoundCard() const;
 	void saveSoundCard(int soundCard);
 	Glib::ustring getMixer() const;

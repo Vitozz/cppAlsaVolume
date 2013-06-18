@@ -60,7 +60,7 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 		settingsStr_->setMixerId(0);
 		mixerName_ = settingsStr_->mixerList().at(settingsStr_->mixerId());
 	}
-	volumeValue_ = settings_->getVolume();
+	volumeValue_ = alsaWork_->getAlsaVolume(settingsStr_->cardId(), mixerName_);
 	settingsStr_->setNotebookOrientation(settings_->getNotebookOrientation());
 	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList(settingsStr_->cardId()));
 	settings_->setVersion(Tools::version);
@@ -75,6 +75,7 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	}
 #endif
 	volumeSlider_->set_value(volumeValue_);
+	set_keep_above(true);
 }
 
 SliderWindow::~SliderWindow()
@@ -216,7 +217,6 @@ int SliderWindow::getWidth() const
 
 void SliderWindow::saveSettings()
 {
-	settings_->saveVolume(volumeValue_);
 	settings_->saveSoundCard(settingsStr_->cardId());
 	settings_->saveMixer(std::string(mixerName_.c_str()));
 	settings_->saveNotebookOrientation(settingsStr_->notebookOrientation());
@@ -305,6 +305,7 @@ void SliderWindow::onSettingsDialogOk(settingsStr &str)
 	volumeValue_ = alsaWork_->getAlsaVolume(settingsStr_->cardId(),mixerName_);
 	volumeSlider_->set_value(volumeValue_);
 	settingsStr_->setExternalMixer(str.externalMixer());
+	saveSettings();
 }
 
 void SliderWindow::onSettingsDialogAutostart(bool isAutorun)

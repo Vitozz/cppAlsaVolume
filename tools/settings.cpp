@@ -63,25 +63,6 @@ void Settings::loadConfig(const std::string& fileName)
 	}
 }
 
-void Settings::saveVolume(double volume)
-{
-	configFile_->set_double(Glib::ustring(MAIN),Glib::ustring(VOLUME), volume);
-	parseConfig(iniFileName_, configFile_->to_data());
-}
-
-double Settings::getVolume() const
-{
-	double value = 0;
-	try {
-		value = (double)configFile_->get_integer(Glib::ustring(MAIN),Glib::ustring(VOLUME));
-	}
-	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::68::KeyFileError " << ex.what() << std::endl;
-	}
-
-	return value;
-}
-
 void Settings::parseConfig(const Glib::ustring& keyFileName, const Glib::ustring& keyFileData)
 {
 	Tools::saveFile(keyFileName, keyFileData);

@@ -60,14 +60,18 @@ double AlsaWork::getAlsaVolume(int cardId, const std::string &mixer)
 			if (snd_mixer_selem_has_playback_channel(elem, chanelid)) {
 				checkError(snd_mixer_selem_get_playback_volume(elem, chanelid, &outvol));
 			}
-			return double(100*(outvol - minv)/(maxv-minv));
+			if ((maxv - minv) != 0) {
+				return double(100*(outvol - minv)/(maxv-minv));
+			}
 		}
 		if (snd_mixer_selem_has_capture_volume(elem) || snd_mixer_selem_has_capture_volume_joined(elem)) {
 			checkError(snd_mixer_selem_get_capture_volume_range(elem, &minv, &maxv));
 			if (snd_mixer_selem_has_capture_channel(elem, chanelid)) {
 				checkError(snd_mixer_selem_get_capture_volume(elem, chanelid, &outvol));
 			}
-			return double(100*(outvol - minv)/(maxv-minv));
+			if ((maxv - minv) != 0) {
+				return double(100*(outvol - minv)/(maxv-minv));
+			}
 		}
 		checkError(snd_mixer_close(handle));
 	}
