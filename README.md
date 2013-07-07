@@ -38,4 +38,18 @@ HOWTO USE ICONPACKS:
 	
 KNOWN ISSUES:
 	- on newer versions of pulseaudio (4.0) sound mute (switch) does not work correctly (recomended to use original
-	pulseaudio control tool (pavucontrol))
+	pulseaudio control tool (pavucontrol)).
+	As a temporary fix try to create /etc/asound.conf file with content:
+
+	pcm.pulse {
+    	type pulse
+	}
+	ctl.pulse {
+    	type pulse
+	}
+	pcm.!default {
+    	type pulse
+	}
+	ctl.!default {
+    	type pulse
+	}
