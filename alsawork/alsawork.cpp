@@ -82,7 +82,7 @@ std::string AlsaWork::getCardName(int index)
 {
 	std::string card(formatCardName(index));
 	snd_ctl_t *ctl;
-	checkError(snd_ctl_open(&ctl, card.c_str(), 0));
+	checkError(snd_ctl_open(&ctl, card.c_str(), SND_CTL_NONBLOCK));
 	snd_ctl_card_info_t *cardInfo;
 	snd_ctl_card_info_alloca(&cardInfo);
 	checkError(snd_ctl_card_info(ctl, cardInfo));
@@ -137,15 +137,17 @@ void AlsaWork::setSwitch(int cardId, const std::string &mixer, int id, bool enab
 {
 	snd_mixer_t *handle = getMixerHanlde(cardId);
 	snd_mixer_elem_t* elem = initMixerElement(handle, mixer.c_str());
-	if (id == PLAYBACK) {
+	switch (id) {
+	case PLAYBACK:
 		checkError(snd_mixer_selem_set_playback_switch_all(elem, int(enabled)));
-	}
-	if (id == CAPTURE) {
+		break;
+	case CAPTURE:
 		checkError(snd_mixer_selem_set_capture_switch_all(elem, int(enabled)));
-	}
-	if (id == ENUM) {
+		break;
+	case ENUM:
 		snd_mixer_selem_channel_id_t channel = checkMixerChannels(elem);
 		checkError(snd_mixer_selem_set_enum_item(elem, channel, uint(enabled)));
+		break;
 	}
 	checkError(snd_mixer_close(handle));
 }
@@ -217,14 +219,14 @@ void AlsaWork::setVolume(snd_mixer_elem_t *element, snd_mixer_t *handle, double 
 	if (snd_mixer_selem_has_playback_volume(element)) {
 		long min, max;
 		checkError(snd_mixer_selem_get_playback_volume_range(element, &min, &max));
-		long volume_ = long(volume);
-		checkError(snd_mixer_selem_set_playback_volume_all(element, volume_ * max / 100));
+		long volume_ = long(volume)*(max - min) / 100;
+		checkError(snd_mixer_selem_set_playback_volume_all(element, volume_));
 	}
 	else if (snd_mixer_selem_has_capture_volume(element)) {
 		long min, max;
 		checkError(snd_mixer_selem_get_capture_volume_range(element, &min, &max));
-		long volume_ = long(volume);
-		checkError(snd_mixer_selem_set_capture_volume_all(element, volume_ * max /100));
+		long volume_ = long(volume)*(max - min) / 100;
+		checkError(snd_mixer_selem_set_capture_volume_all(element, volume_));
 	}
 	else{
 		std::cerr << "Selected mixer has no playback or capture volume" << std::endl;
@@ -236,7 +238,7 @@ snd_mixer_t *AlsaWork::getMixerHanlde(int id)
 {
 	std::string card(formatCardName(id));
 	snd_ctl_t *ctl;
-	checkError(snd_ctl_open(&ctl, card.c_str(), 0));
+	checkError(snd_ctl_open(&ctl, card.c_str(), SND_CTL_NONBLOCK));
 	snd_hctl_t *hctl;
 	checkError(snd_hctl_open_ctl(&hctl, ctl));
 	snd_mixer_t *handle;
