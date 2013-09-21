@@ -85,6 +85,9 @@ protected:
 #endif
 private:
 	void setupTreeModels();
+	void setupSoundCards();
+	void setupMixers();
+	void updateSwitchTree();
 	void setTabPos(bool orient);
 
 private:

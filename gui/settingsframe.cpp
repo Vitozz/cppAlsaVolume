@@ -61,17 +61,20 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	if (tabPos_) {
 		tabPos_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onTabPos));
 	}
-	if (okButton_)
-	{
+	if (okButton_) {
 		okButton_->signal_pressed().connect(sigc::mem_fun(*this, &SettingsFrame::onOkButton));
 	}
-	if (cancelButton_)
-	{
+	if (cancelButton_) {
 		cancelButton_->signal_pressed().connect(sigc::mem_fun(*this, &SettingsFrame::onCancelButton));
 	}
-	if (isAutoRun_)
-	{
+	if (isAutoRun_) {
 		isAutoRun_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onAutorunToggled));
+	}
+	if (sndCardBox_) {
+		sndCardBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::sndBoxChanged));
+	}
+	if (mixerBox_) {
+		mixerBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::mixerBoxChanged));
 	}
 	this->signal_delete_event().connect(sigc::mem_fun(*this, &SettingsFrame::onDeleteEvent));
 	settings_ = new settingsStr();
@@ -157,110 +160,7 @@ bool SettingsFrame::onDeleteEvent(GdkEventAny *event)
 void SettingsFrame::setupTreeModels()
 {
 	//treeview setup
-	if (sndCardBox_){
-		cards_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_Columns));
-		sndCardBox_->set_model(cards_);
-		sndCardBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::sndBoxChanged));
-		Gtk::TreeModel::Row row;
-		std::vector<std::string>::iterator it = settings_->cardList().begin();
-		uint i = 0;
-		while (it != settings_->cardList().end()) {
-			row = *(cards_->append());
-			row[m_Columns.m_col_name] = Glib::ustring(*it);
-			if (i == settings_->cardId()) {
-				sndCardBox_->set_active(row);
-			}
-			it++;
-			i++;
-		}
-		sndCardBox_->pack_start(m_Columns.m_col_name);
-	}
-	if (mixerBox_) {
-		mixers_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_Columns));
-		mixerBox_->set_model(mixers_);
-		mixerBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::mixerBoxChanged));
-		Gtk::TreeModel::Row row;
-		std::vector<std::string>::iterator it = settings_->mixerList().begin();
-		uint i = 0;
-		while (it != settings_->mixerList().end()) {
-			row = *(mixers_->append());
-			row[m_Columns.m_col_name] = Glib::ustring(*it);
-			if (i == settings_->mixerId()) {
-				mixerBox_->set_active(row);
-			}
-			it++;
-			i++;
-		}
-		mixerBox_->pack_start(m_Columns.m_col_name);
-	}
-	if (playbackSwitchTree_) {
-		pbSwitches_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_TColumns));
-		playbackSwitchTree_->set_model(pbSwitches_);
-		Gtk::TreeModel::Row row;
-		Gtk::CellRendererToggle *pcell = Gtk::manage(new Gtk::CellRendererToggle);
-		int colsCount = playbackSwitchTree_->append_column(STATUS, *pcell);
-		pcell->set_activatable(true);
-		Gtk::TreeViewColumn* pColumn = playbackSwitchTree_->get_column(colsCount -1);
-		if (colsCount) {
-			pColumn->add_attribute(pcell->property_active(), m_TColumns.m_col_toggle);
-		}
-		pcell->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onPlaybackCellToggled));
-		std::vector<switchcap>::iterator it = settings_->switchList().playbackSwitchList().begin();
-		while (it != settings_->switchList().playbackSwitchList().end()) {
-			row = *(pbSwitches_->append());
-			row[m_TColumns.m_col_toggle] = (*it).second;
-			row[m_TColumns.m_col_name] = (*it).first;
-			it++;
-		}
-		playbackSwitchTree_->append_column("Playback Switch", m_TColumns.m_col_name);
-		playbackSwitchTree_->show_all_children();
-	}
-	if (captureSwitchTree_) {
-		capSwitches_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_TColumns));
-		captureSwitchTree_->set_model(capSwitches_);
-		Gtk::TreeModel::Row row;
-		Gtk::CellRendererToggle *rcell = Gtk::manage(new Gtk::CellRendererToggle);
-		int colsCount = captureSwitchTree_->append_column(STATUS, *rcell);
-		rcell->set_activatable(true);
-		rcell->set_radio(true);
-		Gtk::TreeViewColumn* pColumn = captureSwitchTree_->get_column(colsCount -1);
-		if (colsCount) {
-			pColumn->add_attribute(rcell->property_active(), m_TColumns.m_col_toggle);
-		}
-		rcell->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onCaptureCellToggled));
-
-		std::vector<switchcap>::iterator it = settings_->switchList().captureSwitchList().begin();
-		while (it != settings_->switchList().captureSwitchList().end()) {
-			row = *(capSwitches_->append());
-			row[m_TColumns.m_col_toggle] = (*it).second;
-			row[m_TColumns.m_col_name] = (*it).first;
-			it++;
-		}
-		captureSwitchTree_->append_column("Capture Switch", m_TColumns.m_col_name);
-		captureSwitchTree_->show_all_children();
-	}
-	if (otherSwitchTree_) {
-		enumSwitches_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_TColumns));
-		otherSwitchTree_->set_model(enumSwitches_);
-		Gtk::TreeModel::Row row;
-		Gtk::CellRendererToggle *ecell = Gtk::manage(new Gtk::CellRendererToggle);
-		int colsCount = otherSwitchTree_->append_column(STATUS, *ecell);
-		ecell->set_activatable(true);
-		Gtk::TreeViewColumn* pColumn = otherSwitchTree_->get_column(colsCount -1);
-		if (colsCount) {
-			pColumn->add_attribute(ecell->property_active(), m_TColumns.m_col_toggle);
-		}
-		ecell->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onEnumCellToggled));
-		std::vector<switchcap>::iterator it = settings_->switchList().enumSwitchList().begin();
-		while (it != settings_->switchList().enumSwitchList().end()) {
-			row = *(enumSwitches_->append());
-			row[m_TColumns.m_col_toggle] = (*it).second;
-			row[m_TColumns.m_col_name] = (*it).first;
-			it++;
-		}
-		otherSwitchTree_->append_column("Enumerated Control", m_TColumns.m_col_name);
-		otherSwitchTree_->show_all_children();
-	}
+	setupSoundCards();
 #ifdef HAVE_ICONPACKS
 	if (iconPacks_){
 		Glib::RefPtr<Gtk::ListStore> packs = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_Columns));
@@ -286,9 +186,136 @@ void SettingsFrame::setupTreeModels()
 #endif
 }
 
+void SettingsFrame::setupSoundCards()
+{
+	if (sndCardBox_){
+		cards_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_Columns));
+		sndCardBox_->set_model(cards_);
+		Gtk::TreeModel::Row row;
+		std::vector<std::string>::iterator it = settings_->cardList().begin();
+		uint i = 0;
+		while (it != settings_->cardList().end()) {
+			row = *(cards_->append());
+			row[m_Columns.m_col_name] = Glib::ustring(*it);
+			if (i == settings_->cardId()) {
+				sndCardBox_->set_active(row);
+			}
+			it++;
+			i++;
+		}
+		sndCardBox_->pack_start(m_Columns.m_col_name);
+	}
+}
+
+void SettingsFrame::setupMixers()
+{
+	if (mixerBox_) {
+		mixerBox_->clear();
+		if (mixers_)
+			mixers_->clear();
+		mixers_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_Columns));
+		mixerBox_->set_model(mixers_);
+		Gtk::TreeModel::Row row;
+		std::vector<std::string>::iterator it = settings_->mixerList().begin();
+		uint i = 0;
+		while (it != settings_->mixerList().end()) {
+			row = *(mixers_->append());
+			row[m_Columns.m_col_name] = Glib::ustring(*it);
+			if (i == settings_->mixerId()) {
+				mixerBox_->set_active(row);
+			}
+			it++;
+			i++;
+		}
+		mixerBox_->pack_start(m_Columns.m_col_name);
+	}
+}
+
+void SettingsFrame::updateSwitchTree()
+{
+	if (playbackSwitchTree_) {
+		playbackSwitchTree_->remove_all_columns();
+		Gtk::CellRendererToggle *pcell = Gtk::manage(new Gtk::CellRendererToggle);
+		pcell->set_activatable(true);
+		pcell->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onPlaybackCellToggled));
+		if (pbSwitches_)
+			pbSwitches_->clear();
+		pbSwitches_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_TColumns));
+		playbackSwitchTree_->set_model(pbSwitches_);
+		Gtk::TreeModel::Row row;
+		int colsCount = playbackSwitchTree_->append_column(STATUS, *pcell);
+		Gtk::TreeViewColumn* pColumn = playbackSwitchTree_->get_column(colsCount -1);
+		if (colsCount) {
+			pColumn->add_attribute(pcell->property_active(), m_TColumns.m_col_toggle);
+		}
+		std::vector<switchcap>::iterator it = settings_->switchList().playbackSwitchList().begin();
+		while (it != settings_->switchList().playbackSwitchList().end()) {
+			row = *(pbSwitches_->append());
+			row[m_TColumns.m_col_toggle] = (*it).second;
+			row[m_TColumns.m_col_name] = (*it).first;
+			it++;
+		}
+		playbackSwitchTree_->append_column("Playback Switch", m_TColumns.m_col_name);
+		playbackSwitchTree_->show_all_children();
+	}
+	if (captureSwitchTree_) {
+		captureSwitchTree_->remove_all_columns();
+		Gtk::CellRendererToggle *rcell = Gtk::manage(new Gtk::CellRendererToggle);
+		rcell->set_activatable(true);
+		rcell->set_radio(true);
+		rcell->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onCaptureCellToggled));
+		if (capSwitches_)
+			capSwitches_->clear();
+		capSwitches_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_TColumns));
+		captureSwitchTree_->set_model(capSwitches_);
+		Gtk::TreeModel::Row row;
+		int colsCount = captureSwitchTree_->append_column(STATUS, *rcell);
+		Gtk::TreeViewColumn* pColumn = captureSwitchTree_->get_column(colsCount -1);
+		if (colsCount) {
+			pColumn->add_attribute(rcell->property_active(), m_TColumns.m_col_toggle);
+		}
+		std::vector<switchcap>::iterator it = settings_->switchList().captureSwitchList().begin();
+		while (it != settings_->switchList().captureSwitchList().end()) {
+			row = *(capSwitches_->append());
+			row[m_TColumns.m_col_toggle] = (*it).second;
+			row[m_TColumns.m_col_name] = (*it).first;
+			it++;
+		}
+		captureSwitchTree_->append_column("Capture Switch", m_TColumns.m_col_name);
+		captureSwitchTree_->show_all_children();
+	}
+	if (otherSwitchTree_) {
+		otherSwitchTree_->remove_all_columns();
+		Gtk::CellRendererToggle *ecell = Gtk::manage(new Gtk::CellRendererToggle);
+		ecell->set_activatable(true);
+		ecell->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onEnumCellToggled));
+		if (enumSwitches_)
+			enumSwitches_->clear();
+		enumSwitches_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_TColumns));
+		otherSwitchTree_->set_model(enumSwitches_);
+		Gtk::TreeModel::Row row;
+		int colsCount = otherSwitchTree_->append_column(STATUS, *ecell);
+		Gtk::TreeViewColumn* pColumn = otherSwitchTree_->get_column(colsCount -1);
+		if (colsCount) {
+			pColumn->add_attribute(ecell->property_active(), m_TColumns.m_col_toggle);
+		}
+		std::vector<switchcap>::iterator it = settings_->switchList().enumSwitchList().begin();
+		while (it != settings_->switchList().enumSwitchList().end()) {
+			row = *(enumSwitches_->append());
+			row[m_TColumns.m_col_toggle] = (*it).second;
+			row[m_TColumns.m_col_name] = (*it).first;
+			it++;
+		}
+		otherSwitchTree_->append_column("Enumerated Control", m_TColumns.m_col_name);
+		otherSwitchTree_->show_all_children();
+	}
+}
+
 void SettingsFrame::sndBoxChanged()
 {
 	settings_->setCardId(sndCardBox_->get_active_row_number());
+	setupMixers();
+	updateSwitchTree();
 }
 
 #ifdef HAVE_ICONPACKS
