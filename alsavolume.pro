@@ -1,7 +1,7 @@
 ### eqmake4 was here ###
 include(conf.pri)
 
-CONFIG += debug
+CONFIG += release
 
 TARGET = alsavolume
 TEMPLATE = app
