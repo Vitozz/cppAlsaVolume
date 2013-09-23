@@ -1,7 +1,7 @@
 ### eqmake4 was here ###
 include(conf.pri)
 
-CONFIG += release
+CONFIG += debug
 
 TARGET = alsavolume
 TEMPLATE = app
@@ -24,6 +24,7 @@ SOURCES += main.cpp \
 	tools/settings.cpp \
 	tools/tools.cpp \
 	tools/settingsstr.cpp \
+	tools/core.cpp
 
 HEADERS += \
 	alsawork/alsawork.h \
@@ -34,7 +35,8 @@ HEADERS += \
 	gui/settingsframe.h \
 	tools/settings.h \
 	tools/tools.h \
-	tools/settingsstr.h
+	tools/settingsstr.h \
+	tools/core.h
 
 INCLUDEPATH += \
 	/usr/include/gtkmm-3.0 \

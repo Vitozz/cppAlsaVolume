@@ -54,6 +54,7 @@ private:
 	Glib::KeyFile *desktopFile_;
 	std::string iniFileName_;
 	std::string desktopFilePath_;
+	std::string version_;
 };
 
 #endif // SETTINGS_H

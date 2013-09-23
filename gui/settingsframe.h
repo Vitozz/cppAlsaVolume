@@ -40,6 +40,9 @@ public:
 		      const Glib::RefPtr<Gtk::Builder>& refGlade);
 	~SettingsFrame();
 	void initParms(settingsStr &str);
+	void updateControls(settingsStr &str);
+	void updateMixers(const std::vector<std::string> &mixers);
+	void updateSwitches(const MixerSwitches &slist);
 	//
 	typedef sigc::signal<void, settingsStr&> type_void_signal;
 	type_void_signal signal_ok_pressed();
@@ -48,6 +51,8 @@ public:
 	type_toggled_signal signal_iconpack_changed();
 	typedef sigc::signal<void, bool> type_bool_signal;
 	type_bool_signal signal_autorun_toggled();
+	typedef sigc::signal<void, int> type_int_signal;
+	type_int_signal signal_sndcard_changed();
 protected:
 	class ModelCheckBox : public Gtk::TreeModel::ColumnRecord
 	{
@@ -78,6 +83,7 @@ protected:
 	type_void_signal m_signal_ok_pressed;
 	type_toggled_signal m_type_toggled_signal;
 	type_bool_signal m_signal_autorun_toggled;
+	type_int_signal m_signal_sndcard_changed;
 
 #ifdef HAVE_ICONPACKS
 	void iconPackChanged();
@@ -108,6 +114,8 @@ private:
 	Glib::RefPtr<Gtk::ListStore> capSwitches_;
 	Glib::RefPtr<Gtk::ListStore> enumSwitches_;
 	settingsStr *settings_;
+	int mixerId_;
+	int cardId_;
 #ifdef HAVE_ICONPACKS
 	Gtk::ComboBox *iconPacks_;
 #endif

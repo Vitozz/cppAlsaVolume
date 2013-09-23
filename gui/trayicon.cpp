@@ -68,7 +68,6 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 	on_signal_volume_changed(volumeValue_, cardName, mixerName);
 	muted_ = muted;
 	muteItem_->set_active(muted_);
-	//mixerItem_->set_sensitive(false); //temporary
 }
 
 void TrayIcon::onHideRestore()
@@ -81,35 +80,34 @@ void TrayIcon::onHideRestore()
 		int aX = area.get_x();
 		int aH = area.get_height();
 		int aW = area.get_width();
-		m_signal_on_restore.emit(aX, aY, aH, aW);
+		m_signal_on_restore(aX, aY, aH, aW);
 	}
 }
 
 void TrayIcon::onQuit()
 {
-	m_signal_save_settings.emit();
+	m_signal_save_settings();
 	Tools::clearTempDir(Tools::getTmpDir()+"/");
 	exit(0);
 }
 
 void TrayIcon::runMixerApp()
 {
-	m_signal_ask_extmixer.emit();
+	m_signal_ask_extmixer();
 }
 
 void TrayIcon::runSettings()
 {
-	m_signal_ask_settings.emit();
+	m_signal_ask_settings();
 }
 
 void TrayIcon::onAbout()
 {
-	m_signal_ask_dialog.emit();
+	m_signal_ask_dialog();
 }
 
 void TrayIcon::onMute()
 {
-	//std::cout << "clicked" << std::endl;
 	muted_ = muteItem_->get_active();
 	if (muted_) {
 		setIcon(0);
@@ -117,7 +115,7 @@ void TrayIcon::onMute()
 	else {
 		setIcon(volumeValue_);
 	}
-	m_signal_on_mute.emit(!muted_);
+	m_signal_on_mute(!muted_);
 }
 
 Glib::ustring TrayIcon::getIconName(double value) const
@@ -176,6 +174,15 @@ void TrayIcon::setTooltip(const Glib::ustring &message)
 		set_tooltip_text(message);
 }
 
+void TrayIcon::setMuted(bool isit)
+{
+	if (isit) {
+		setIcon(0);
+	}
+	muteItem_->set_active(isit);
+	muted_ = isit;
+
+}
 void TrayIcon::onPopup(guint button, guint32 activate_time)
 {
 	popup_menu_at_position(*menu_, button, activate_time);
@@ -208,7 +215,12 @@ void TrayIcon::on_signal_volume_changed(double volume, const std::string &cardNa
 	volumeValue_ = volume;
 	cardName_ = cardName;
 	mixerName_ = mixerName;
-	setIcon(volumeValue_);
+	if (!muted_) {
+		setIcon(volumeValue_);
+	}
+	else {
+		setIcon(0);
+	}
 	Glib::ustring tip = Glib::ustring("Card: ")
 			  + Glib::ustring(cardName_)
 			  + Glib::ustring("\n")

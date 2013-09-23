@@ -144,7 +144,7 @@ void Settings::initDesktopFileData()
 	desktopFile_->set_string(entry,Glib::ustring("Comment"),Glib::ustring("Changes the volume of ALSA from the system tray"));
 	desktopFile_->set_string(entry,Glib::ustring("Exec"),Glib::ustring("alsavolume"));
 	desktopFile_->set_string(entry,Glib::ustring("Type"),Glib::ustring("Application"));
-	desktopFile_->set_string(entry,Glib::ustring("Version"),Glib::ustring(Tools::version));
+	desktopFile_->set_string(entry,Glib::ustring("Version"),Glib::ustring(version_));
 	desktopFile_->set_boolean(entry,Glib::ustring("X-GNOME-Autostart-enabled"),false);
 	desktopFile_->set_string(entry,Glib::ustring("Comment[ru]"),Glib::ustring("Регулятор громкости ALSA"));
 }
@@ -169,6 +169,7 @@ bool Settings::getAutorun()
 
 void Settings::setVersion(const Glib::ustring &version)
 {
+	version_ = version;
 	desktopFile_->set_string(Glib::ustring("Desktop Entry"),Glib::ustring("Version"), version);
 	parseConfig(desktopFilePath_, desktopFile_->to_data());
 }

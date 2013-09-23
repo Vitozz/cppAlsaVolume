@@ -25,72 +25,27 @@
 #include "gtkmm/window.h"
 #include "gtkmm/builder.h"
 #include "gtkmm/scale.h"
-#include "../tools/settings.h"
-#include "../alsawork/alsawork.h"
-#include "../tools/tools.h"
-#include "../tools/settingsstr.h"
-#include <vector>
-#ifdef HAVE_ICONPACKS
-#include "../tools/iconpacks.h"
-#endif
 
 class SliderWindow : public Gtk::Window
 {
 public:
 	SliderWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>&refGlade);
 	~SliderWindow();
-	void runAboutDialog();
 	void setWindowPosition(int x_, int y_, int height_, int width_);
-	bool getVisible();
-	void showWindow();
-	void hideWindow();
-	int getHeight() const;
-	int getWidth() const;
 	void setVolumeValue(double value);
-	double getVolumeValue();
-	std::string getSoundCardName() const;
-	std::string getActiveMixer() const;
-	void setActiveCard(int card);
-	void setActiveMixer(int index);
-	void saveSettings();
-	void runSettings();
-	std::vector<std::string> &getMixers();
-	std::vector<std::string> &getCardsList();
-	void switchChanged (const std::string& name, int id, bool enabled);
-	void soundMuted(bool mute);
-	bool getMuted();
-	void onExtMixerSignal();
 	//signal
-	typedef sigc::signal<void, double, std::string, std::string> type_sliderwindow_signal;
+	typedef sigc::signal<void, double> type_sliderwindow_signal;
 	type_sliderwindow_signal signal_volume_changed();
 
-protected:
+private:
 	void on_volume_slider();
 	bool on_focus_out(GdkEventCrossing* event);
-	void onSettingsDialogOk(settingsStr &str);
-	void onSettingsDialogAutostart(bool isAutorun);
-	//signal
-	type_sliderwindow_signal m_signal_volume_changed;
-#ifdef HAVE_ICONPACKS
 protected:
-	void onSettingsDialogIconpack(const std::string &path, int id, bool value);
-#endif
-private:
-	void updateControls(int cardId);
-	void createSettingsDialog();
-
+	type_sliderwindow_signal m_signal_volume_changed;
 private:
 	Glib::RefPtr<Gtk::Builder> builder_;
 	Gtk::Scale *volumeSlider_;
 	double volumeValue_;
-	Settings *settings_;
-	AlsaWork *alsaWork_;
-	settingsStr *settingsStr_;
-	std::string mixerName_;
-#ifdef HAVE_ICONPACKS
-private:
-	iconpacks *iconpacks_;
-#endif
 };
 
 #endif // SLIDERWINDOW_H

@@ -58,8 +58,6 @@ namespace Tools {
 	//Constatnts
 	const std::string defaultIconPack = "default";
 	const std::string PathSuffix = "/share/alsavolume/";
-	//Program version
-	const std::string version = "0.1.5";
 }
 
 #endif // FILEWORK_H

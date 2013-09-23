@@ -78,6 +78,8 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	}
 	this->signal_delete_event().connect(sigc::mem_fun(*this, &SettingsFrame::onDeleteEvent));
 	settings_ = new settingsStr();
+	mixerId_ = 0;
+	cardId_ = 0;
 }
 
 SettingsFrame::~SettingsFrame()
@@ -111,6 +113,8 @@ void SettingsFrame::initParms(settingsStr &str)
 	if (extMixer_ && !settings_->externalMixer().empty()) {
 		extMixer_->set_text(settings_->externalMixer());
 	}
+	mixerId_ = settings_->mixerId();
+	cardId_ = settings_->cardId();
 	setupTreeModels();
 }
 
@@ -134,20 +138,32 @@ void SettingsFrame::onTabPos()
 
 void SettingsFrame::onOkButton()
 {
-	if (!settings_->mixerId()) {
+	if (mixerId_ < 0) {
+		mixerId_ = 0;
 		settings_->setMixerId(0);
+	}
+	else {
+		settings_->setMixerId(mixerId_);
+	}
+	if (cardId_ < 0) {
+		cardId_ = 0;
+		settings_->setCardId(0);
+	}
+	else {
+		settings_->setCardId(cardId_);
 	}
 	std::string text = extMixer_->get_text();
 	if (!text.empty()) {
 		settings_->setExternalMixer(text);
 	}
-	m_signal_ok_pressed.emit(*settings_);
-	onCancelButton();
+	m_signal_ok_pressed(*settings_);
+	this->hide();
 }
 
 void SettingsFrame::onCancelButton()
 {
-	this->destroy_();
+	mixerId_ = ((uint)mixerId_ == settings_->mixerId()) ? mixerId_ : settings_->mixerId();
+	this->hide();
 }
 
 bool SettingsFrame::onDeleteEvent(GdkEventAny *event)
@@ -189,7 +205,8 @@ void SettingsFrame::setupTreeModels()
 void SettingsFrame::setupSoundCards()
 {
 	if (sndCardBox_){
-		cards_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_Columns));
+		sndCardBox_->clear();
+		cards_ = Gtk::ListStore::create(m_Columns);
 		sndCardBox_->set_model(cards_);
 		Gtk::TreeModel::Row row;
 		std::vector<std::string>::iterator it = settings_->cardList().begin();
@@ -197,7 +214,7 @@ void SettingsFrame::setupSoundCards()
 		while (it != settings_->cardList().end()) {
 			row = *(cards_->append());
 			row[m_Columns.m_col_name] = Glib::ustring(*it);
-			if (i == settings_->cardId()) {
+			if (i == (uint)cardId_) {
 				sndCardBox_->set_active(row);
 			}
 			it++;
@@ -211,23 +228,23 @@ void SettingsFrame::setupMixers()
 {
 	if (mixerBox_) {
 		mixerBox_->clear();
-		if (mixers_)
-			mixers_->clear();
-		mixers_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_Columns));
+		mixers_ = Gtk::ListStore::create(m_Columns);
 		mixerBox_->set_model(mixers_);
-		Gtk::TreeModel::Row row;
-		std::vector<std::string>::iterator it = settings_->mixerList().begin();
-		uint i = 0;
-		while (it != settings_->mixerList().end()) {
-			row = *(mixers_->append());
-			row[m_Columns.m_col_name] = Glib::ustring(*it);
-			if (i == settings_->mixerId()) {
+		if (settings_->mixerList().size() > 0) {
+			Gtk::TreeModel::Row row;
+			std::vector<std::string>::iterator it = settings_->mixerList().begin();
+			uint i = 0;
+			while (it != settings_->mixerList().end()) {
+				row = *(mixers_->append());
+				row[m_Columns.m_col_name] = Glib::ustring(*it);
+				if (i == (uint)mixerId_) {
 				mixerBox_->set_active(row);
+				}
+				++it;
+				i++;
 			}
-			it++;
-			i++;
+			mixerBox_->pack_start(m_Columns.m_col_name);
 		}
-		mixerBox_->pack_start(m_Columns.m_col_name);
 	}
 }
 
@@ -313,8 +330,21 @@ void SettingsFrame::updateSwitchTree()
 
 void SettingsFrame::sndBoxChanged()
 {
-	settings_->setCardId(sndCardBox_->get_active_row_number());
+	cardId_ = sndCardBox_->get_active_row_number();
+	settings_->setCardId(cardId_);
+	m_signal_sndcard_changed(cardId_);
+}
+
+void SettingsFrame::updateMixers(const std::vector<std::string> &mixers)
+{
+	settings_->setList(MIXERS, mixers);
 	setupMixers();
+}
+
+void SettingsFrame::updateSwitches(const MixerSwitches &slist)
+{
+	settings_->clearSwitches();
+	settings_->addMixerSwitch(slist);
 	updateSwitchTree();
 }
 
@@ -323,13 +353,13 @@ void SettingsFrame::iconPackChanged()
 {
 	int id = iconPacks_->get_active_row_number();
 	std::string path = settings_->iconPacks().at(id);
-	m_signal_iconpack_changed.emit(path, id, false);
+	m_signal_iconpack_changed(path, id, false);
 }
 #endif
 
 void SettingsFrame::mixerBoxChanged()
 {
-	settings_->setMixerId(mixerBox_->get_active_row_number());
+	mixerId_ = mixerBox_->get_active_row_number();
 }
 
 void SettingsFrame::onPlaybackCellToggled(const Glib::ustring& path)
@@ -342,9 +372,9 @@ void SettingsFrame::onPlaybackCellToggled(const Glib::ustring& path)
 	else {
 		row[m_TColumns.m_col_toggle] = true;
 	}
-	m_type_toggled_signal.emit(row.get_value(m_TColumns.m_col_name),
-				   PLAYBACK,
-				   bool(row.get_value(m_TColumns.m_col_toggle)));
+	m_type_toggled_signal(row.get_value(m_TColumns.m_col_name),
+			      PLAYBACK,
+			      bool(row.get_value(m_TColumns.m_col_toggle)));
 }
 
 void SettingsFrame::onCaptureCellToggled(const Glib::ustring& path)
@@ -361,9 +391,9 @@ void SettingsFrame::onCaptureCellToggled(const Glib::ustring& path)
 	if (!bool(row.get_value(m_TColumns.m_col_toggle))) {
 		row[m_TColumns.m_col_toggle] = true;
 	}
-	m_type_toggled_signal.emit(row.get_value(m_TColumns.m_col_name),
-				   CAPTURE,
-				   bool(row.get_value(m_TColumns.m_col_toggle)));
+	m_type_toggled_signal(row.get_value(m_TColumns.m_col_name),
+			      CAPTURE,
+			      bool(row.get_value(m_TColumns.m_col_toggle)));
 }
 
 void SettingsFrame::onEnumCellToggled(const Glib::ustring& path)
@@ -376,14 +406,14 @@ void SettingsFrame::onEnumCellToggled(const Glib::ustring& path)
 	else {
 		row[m_TColumns.m_col_toggle] = true;
 	}
-	m_type_toggled_signal.emit(row.get_value(m_TColumns.m_col_name),
-				   ENUM,
-				   bool(row.get_value(m_TColumns.m_col_toggle)));
+	m_type_toggled_signal(row.get_value(m_TColumns.m_col_name),
+			      ENUM,
+			      bool(row.get_value(m_TColumns.m_col_toggle)));
 }
 
 void SettingsFrame::onAutorunToggled()
 {
-	m_signal_autorun_toggled.emit(isAutoRun_->get_active());
+	m_signal_autorun_toggled(isAutoRun_->get_active());
 }
 
 SettingsFrame::type_toggled_signal SettingsFrame::signal_switches_toggled()
@@ -399,6 +429,11 @@ SettingsFrame::type_void_signal SettingsFrame::signal_ok_pressed()
 SettingsFrame::type_bool_signal SettingsFrame::signal_autorun_toggled()
 {
 	return m_signal_autorun_toggled;
+}
+
+SettingsFrame::type_int_signal SettingsFrame::signal_sndcard_changed()
+{
+	return m_signal_sndcard_changed;
 }
 
 #ifdef HAVE_ICONPACKS

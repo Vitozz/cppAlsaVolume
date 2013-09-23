@@ -18,6 +18,7 @@
  *
  */
 
+#include "tools/core.h"
 #include "gui/sliderwindow.h"
 #include "gui/trayicon.h"
 #include "tools/tools.h"
@@ -29,14 +30,20 @@ int main (int argc, char *argv[])
 {
 	Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "org.gtkmm.alsavolume");
 
-	Glib::ustring ui_ = Tools::getResPath("gladefiles/SliderFrame.glade");
-	if (ui_.empty()) {
+	Glib::ustring slider_ui_ = Tools::getResPath("gladefiles/SliderFrame.glade");
+	if (slider_ui_.empty()) {
 		std::cerr << "No SliderFrame.glade file found" << std::endl;
+		return 1;
+	}
+	Glib::ustring settings_ui_ = Tools::getResPath("gladefiles/SettingsFrame.glade");
+	if (settings_ui_.empty()) {
+		std::cerr << "No SettingsFrame.glade file found" << std::endl;
 		return 1;
 	}
 	Glib::RefPtr<Gtk::Builder> refBuilder = Gtk::Builder::create();
 	try {
-		refBuilder->add_from_file(ui_);
+		refBuilder->add_from_file(slider_ui_);
+		refBuilder->add_from_file(settings_ui_);
 	}
 	catch(const Gtk::BuilderError& ex) {
 		std::cerr << "BuilderError::main.cpp::39 " << ex.what() << std::endl;
@@ -50,26 +57,33 @@ int main (int argc, char *argv[])
 		std::cerr << "FileError::main.cpp::39 " << ex.what() << std::endl;
 		return 1;
 	}
+	Core *core = new Core(refBuilder);
 	app->hold();
 	SliderWindow *sliderWindow = 0;
 	refBuilder->get_widget_derived("volumeFrame", sliderWindow);
-	TrayIcon *trayIcon = new TrayIcon(sliderWindow->getVolumeValue(),
-					  sliderWindow->getSoundCardName(),
-					  sliderWindow->getActiveMixer(),
-					  sliderWindow->getMuted());
-	if (sliderWindow && trayIcon) {
-		sliderWindow->signal_volume_changed().connect(sigc::mem_fun(*trayIcon, &TrayIcon::on_signal_volume_changed));
-		trayIcon->signal_ask_dialog().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::runAboutDialog));
-		trayIcon->signal_ask_settings().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::runSettings));
+	TrayIcon *trayIcon = new TrayIcon(core->getVolumeValue(),
+					  core->getSoundCardName(),
+					  core->getActiveMixer(),
+					  core->getMuted(core->getActiveMixer()));
+	if (trayIcon && sliderWindow) {
+		core->signal_value_changed().connect(sigc::mem_fun(*trayIcon, &TrayIcon::on_signal_volume_changed));
+		core->signal_mixer_muted().connect(sigc::mem_fun(*trayIcon, &TrayIcon::setMuted));
+		core->signal_volume_changed().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::setVolumeValue));
+		sliderWindow->signal_volume_changed().connect(sigc::mem_fun(*core, &Core::onVolumeSlider));
+		trayIcon->signal_ask_dialog().connect(sigc::mem_fun(*core, &Core::runAboutDialog));
+		trayIcon->signal_ask_settings().connect(sigc::mem_fun(*core, &Core::runSettings));
 		trayIcon->signal_on_restore().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::setWindowPosition));
-		trayIcon->signal_save_settings().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::saveSettings));
-		trayIcon->signal_value_changed().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::setVolumeValue));
-		trayIcon->signal_on_mute().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::soundMuted));
-		trayIcon->signal_ask_extmixer().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::onExtMixerSignal));
+		trayIcon->signal_save_settings().connect(sigc::mem_fun(*core, &Core::saveSettings));
+		trayIcon->signal_value_changed().connect(sigc::mem_fun(*core, &Core::onTrayIconScroll));
+		trayIcon->signal_on_mute().connect(sigc::mem_fun(*core, &Core::soundMuted));
+		trayIcon->signal_ask_extmixer().connect(sigc::mem_fun(*core, &Core::onExtMixerSignal));
+		trayIcon->signal_value_changed().connect(sigc::mem_fun(*core, &Core::onTrayIconScroll));
+		core->onTrayIconScroll(core->getVolumeValue());
 		sliderWindow->set_visible(false);
 		return app->run();
 	}
 	delete sliderWindow;
 	delete trayIcon;
+	delete core;
 	return 0;
 }
