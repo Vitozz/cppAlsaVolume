@@ -37,11 +37,6 @@ public:
 	std::string &externalMixer();
 	std::vector<std::string> &cardList();
 	std::vector<std::string> &mixerList();
-#ifdef HAVE_ICONPACKS
-	std::string &currIconPack();
-	std::vector<std::string> &iconPacks();
-	void setCurrIconPack(const std::string &iconPack);
-#endif
 	MixerSwitches &switchList();
 	void setCardId(unsigned int id);
 	void setMixerId(unsigned int id);
@@ -62,10 +57,6 @@ private:
 	bool isAutorun_;
 	std::vector<std::string> cardList_;
 	std::vector<std::string> mixerList_;
-#ifdef HAVE_ICONPACKS
-	std::string currIconPack_;
-	std::vector<std::string> iconPacks_;
-#endif
 	MixerSwitches switchList_;
 	std::string extMixer_;
 };

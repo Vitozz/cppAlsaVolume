@@ -24,12 +24,9 @@ settingsStr::settingsStr()
 : cardId_(0),
   mixerId_(0),
   notebookOrientation_(false),
-  isAutorun_(false)
+  isAutorun_(false),
+  extMixer_(std::string())
 {
-#ifdef HAVE_ICONPACKS
-	currIconPack_ = std::string();
-#endif
-	extMixer_ = std::string();
 }
 
 settingsStr::settingsStr(settingsStr &str)
@@ -42,10 +39,6 @@ settingsStr::settingsStr(settingsStr &str)
 	mixerList_ = str.mixerList();
 	switchList_ = str.switchList();
 	extMixer_ = str.externalMixer();
-#ifdef HAVE_ICONPACKS
-	currIconPack_ = str.currIconPack();
-	iconPacks_ = str.iconPacks();
-#endif
 }
 
 unsigned int settingsStr::cardId() const
@@ -83,25 +76,6 @@ std::vector<std::string> &settingsStr::mixerList()
 	return mixerList_;
 }
 
-#ifdef HAVE_ICONPACKS
-std::vector<std::string> &settingsStr::iconPacks()
-{
-	return iconPacks_;
-}
-
-
-std::string &settingsStr::currIconPack()
-{
-	return currIconPack_;
-}
-
-
-void settingsStr::setCurrIconPack(const std::string &iconPack)
-{
-	currIconPack_ = iconPack;
-}
-#endif
-
 void settingsStr::setCardId(unsigned int id)
 {
 	cardId_ = id;
@@ -131,11 +105,6 @@ void settingsStr::pushBack(ListType listType, const std::string &item)
 	case MIXERS:
 		mixerList_.push_back(item);
 		break;
-#ifdef HAVE_ICONPACKS
-	case ICONS:
-		iconPacks_.push_back(item);
-		break;
-#endif
 	}
 }
 
@@ -153,11 +122,6 @@ void settingsStr::setList(ListType listType,const  std::vector<std::string> &lis
 	case MIXERS:
 		mixerList_.assign(list.begin(),list.end());
 		break;
-#ifdef HAVE_ICONPACKS
-	case ICONS:
-		iconPacks_.assign(list.begin(),list.end());
-		break;
-#endif
 	}
 
 }
@@ -178,12 +142,6 @@ void settingsStr::clear(ListType listType)
 		if (!mixerList_.empty())
 			mixerList_.clear();
 		break;
-#ifdef HAVE_ICONPACKS
-	case ICONS:
-		if (!iconPacks_.empty())
-			iconPacks_.clear();
-		break;
-#endif
 	}
 
 }

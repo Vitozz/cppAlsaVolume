@@ -8,8 +8,6 @@ TEMPLATE = app
 CONFIG += console
 CONFIG -= qt
 
-#CONFIG += iconpacks
-
 CONFIG += link_pkgconfig
 PKGCONFIG += gtkmm-3.0 \
 	     alsa
@@ -70,13 +68,6 @@ INCLUDEPATH += \
 	/usr/include/libdrm \
 	/usr/include/qt4/QtCore \
 	/usr/include/gio-unix-2.0
-
-iconpacks{
-PKGCONFIG += libarchive
-SOURCES += tools/iconpacks.cpp
-HEADERS += tools/iconpacks.h
-DEFINES += HAVE_ICONPACKS
-}
 
 unix{
 	target.path = $$BINDIR

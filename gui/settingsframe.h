@@ -85,10 +85,6 @@ protected:
 	type_bool_signal m_signal_autorun_toggled;
 	type_int_signal m_signal_sndcard_changed;
 
-#ifdef HAVE_ICONPACKS
-	void iconPackChanged();
-	type_toggled_signal m_signal_iconpack_changed;
-#endif
 private:
 	void setupTreeModels();
 	void setupSoundCards();
@@ -116,9 +112,6 @@ private:
 	settingsStr *settings_;
 	int mixerId_;
 	int cardId_;
-#ifdef HAVE_ICONPACKS
-	Gtk::ComboBox *iconPacks_;
-#endif
 };
 
 #endif // SETTINGSFRAME_H

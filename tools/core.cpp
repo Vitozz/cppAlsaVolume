@@ -32,7 +32,7 @@ const std::string COMMENTS = "Tray Alsa Volume Changer written using gtkmm";
 const std::string COPYRIGHT = "2012 (c) Vitaly Tonkacheyev (thetvg@gmail.com)";
 const std::string WEBSITE = "http://sites.google.com/site/thesomeprojects/";
 const std::string WEBSITELABEL = "Program Website";
-const std::string VERSION = "0.1.6";
+const std::string VERSION = "0.1.7";
 
 Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 {
@@ -50,9 +50,6 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 		settingsDialog_->signal_switches_toggled().connect(sigc::mem_fun(*this, &Core::switchChanged));
 		settingsDialog_->signal_autorun_toggled().connect(sigc::mem_fun(*this, &Core::onSettingsDialogAutostart));
 		settingsDialog_->signal_sndcard_changed().connect(sigc::mem_fun(*this, &Core::updateControls));
-#ifdef HAVE_ICONPACKS
-		settingsDialog_->signal_iconpack_changed().connect(sigc::mem_fun(*this, &Core::onSettingsDialogIconpack));
-#endif
 	}
 	mixerName_ = settings_->getMixer();
 	if (!mixerName_.empty()) {
@@ -70,15 +67,6 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList(settingsStr_->cardId()));
 	settings_->setVersion(VERSION);
 	settingsStr_->setExternalMixer(settings_->getExternalMixer());
-#ifdef HAVE_ICONPACKS
-	settingsStr_->setCurrIconPack(settings_->getCurrIconPack());
-	std::string cIpack = settingsStr_->currIconPack();
-	iconpacks_ = new iconpacks(cIpack, Tools::getTmpDir());
-	settingsStr_->setList(ICONS, iconpacks_->getPacks());
-	if (!cIpack.empty() && (cIpack != Tools::defaultIconPack)) {
-		iconpacks_->extract();
-	}
-#endif
 	if (settingsDialog_) {
 		settingsDialog_->initParms(*settingsStr_);
 	}
@@ -94,7 +82,6 @@ Core::~Core()
 
 void Core::runAboutDialog()
 {
-	const std::string tmpDir = Tools::getTmpDir();
 	Gtk::AboutDialog *dialog = new Gtk::AboutDialog();
 	dialog->set_title(TITLE);
 	dialog->set_program_name(PROGNAME);
@@ -105,14 +92,8 @@ void Core::runAboutDialog()
 	dialog->set_website_label(WEBSITELABEL);
 	Glib::RefPtr<Gdk::Pixbuf> logo, icon;
 	std::string iconName, logoName;
-	if (!Tools::checkDirExists(tmpDir)) {
-		logoName = Tools::getResPath("icons/volume.png");
-		iconName = Tools::getResPath("icons/tb_icon100.png");
-	}
-	else {
-		logoName = tmpDir + "/volume.png";
-		iconName = tmpDir + "/tb_icon100.png";
-	}
+	logoName = Tools::getResPath("icons/volume.png");
+	iconName = Tools::getResPath("icons/tb_icon100.png");
 	logo = Gdk::Pixbuf::create_from_file(logoName);
 	icon = Gdk::Pixbuf::create_from_file(iconName);
 	dialog->set_icon(icon);
@@ -177,24 +158,6 @@ void Core::onSettingsDialogAutostart(bool isAutorun)
 {
 	settings_->setAutorun(isAutorun);
 }
-
-#ifdef HAVE_ICONPACKS
-void Core::onSettingsDialogIconpack(const std::string &path, int id, bool value = false)
-{
-	(void)id;
-	(void)value;
-	const std::string tmpDir = Tools::getTmpDir();
-	settingsStr_->setCurrIconPack(path);
-	settings_->setCurrIconPack(path);
-	if (path != Tools::defaultIconPack) {
-		iconpacks_ = new iconpacks(path, tmpDir);
-		iconpacks_->extract();
-	}
-	else {
-		Tools::clearTempDir(tmpDir+"/");
-	}
-}
-#endif
 
 void Core::switchChanged(const std::string &name, int id, bool enabled)
 {

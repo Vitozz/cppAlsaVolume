@@ -55,7 +55,6 @@ std::string Tools::getResPath(const char *resName)
 	std::vector<std::string> list;
 	list.push_back(getHomePath() + resName_);
 	list.push_back(getCWD() + "/" + resName_);
-	list.push_back(getTmpDir() + "/" + resName_);
 	list.push_back("/usr"+ PathSuffix + resName_);
 	list.push_back("/usr/local" + PathSuffix + resName_);
 	std::vector<std::string>::iterator it = list.begin();
@@ -65,7 +64,7 @@ std::string Tools::getResPath(const char *resName)
 			result = std::string(*it);
 			return result;
 		}
-		it++;
+		++it;
 	}
 	return result;
 }
@@ -107,54 +106,11 @@ std::pair<bool, int> Tools::itemExists(const std::vector<std::string> &vector_, 
 			exists = true;
 			break;
 		}
-		it++;
-		i++;
+		++it;
+		++i;
 	}
 	std::pair<bool, int> result(exists, index);
 	return result;
-}
-
-std::vector<std::string> Tools::getFileList(const std::string &dir)
-{
-	std::vector<std::string> entries;
-	if (checkDirExists(dir)) {
-		std::string dirname = g_path_get_dirname(dir.c_str());
-		Glib::Dir dir_ (dirname);
-		entries.assign(dir_.begin(), dir_.end());
-		return entries;
-	}
-	return entries;
-}
-
-std::string Tools::getTmpDir()
-{
-	return (g_get_user_cache_dir()) + std::string("/alsavolume");
-}
-
-void Tools::clearTempDir(const std::string &path)
-{
-	try {
-		if (checkDirExists(path)) {
-			int err;
-			std::vector<std::string> filelist = getFileList(path);
-			std::vector<std::string>::iterator it = filelist.begin();
-			std::string filename;
-			while (it != filelist.end()) {
-				filename = path + std::string(*it);
-				if (checkFileExists(filename)) {
-					err = g_unlink(filename.c_str());
-					if (err != 0)
-						std::cout << "Temp file" + *it + " was not removed : " << err << std::endl;
-				}
-				it++;
-			}
-			if ((err = g_rmdir(path.c_str())))
-				std::cout << "Temp dir was not removed : " << err << std::endl;
-		}
-	}
-	catch (const std::exception &ex) {
-		std::cerr << ex.what() << std::endl;
-	}
 }
 
 std::string Tools::pathToFileName(const std::string &path)

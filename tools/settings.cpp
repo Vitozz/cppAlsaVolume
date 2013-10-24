@@ -40,8 +40,8 @@ Settings::Settings()
 	iniFileName_ = configDir + std::string("/config.ini");
 	desktopFilePath_ = std::string(std::string(getenv("HOME")) + "/.config/autostart/alsavolume.desktop");
 	Tools::createDirectory(configDir);
-	loadConfig(iniFileName_.c_str());
-	loadDesktopFile(desktopFilePath_.c_str());
+	loadConfig(iniFileName_);
+	loadDesktopFile(desktopFilePath_);
 }
 
 Settings::~Settings()
@@ -145,7 +145,7 @@ void Settings::initDesktopFileData()
 	desktopFile_->set_string(entry,Glib::ustring("Exec"),Glib::ustring("alsavolume"));
 	desktopFile_->set_string(entry,Glib::ustring("Type"),Glib::ustring("Application"));
 	desktopFile_->set_string(entry,Glib::ustring("Version"),Glib::ustring(version_));
-	desktopFile_->set_boolean(entry,Glib::ustring("X-GNOME-Autostart-enabled"),false);
+	desktopFile_->set_boolean(entry,Glib::ustring("Hidden"),false);
 	desktopFile_->set_string(entry,Glib::ustring("Comment[ru]"),Glib::ustring("Регулятор громкости ALSA"));
 }
 
@@ -159,7 +159,7 @@ bool Settings::getAutorun()
 {
 	bool isAutorun = false;
 	try {
-		isAutorun = bool(desktopFile_->get_boolean(Glib::ustring("Desktop Entry"),Glib::ustring("X-GNOME-Autostart-enabled")));
+		isAutorun = bool(desktopFile_->get_boolean(Glib::ustring("Desktop Entry"),Glib::ustring("Hidden")));
 	}
 	catch (const Glib::KeyFileError& ex) {
 		std::cerr << "settings.cpp::173::KeyFileError " << ex.what() << std::endl;
@@ -172,29 +172,6 @@ void Settings::setVersion(const Glib::ustring &version)
 	version_ = version;
 	desktopFile_->set_string(Glib::ustring("Desktop Entry"),Glib::ustring("Version"), version);
 	parseConfig(desktopFilePath_, desktopFile_->to_data());
-}
-
-#ifdef HAVE_ICONPACKS
-void Settings::setCurrIconPack(const std::string &packName)
-{
-	configFile_->set_string(Glib::ustring(MAIN),Glib::ustring(IPACK),packName);
-	parseConfig(iniFileName_, configFile_->to_data());
-}
-#endif
-
-std::string Settings::getCurrIconPack() const
-{
-	std::string iconPack = Tools::defaultIconPack;
-	try {
-		iconPack = std::string(configFile_->get_string(Glib::ustring(MAIN),Glib::ustring(IPACK)));
-	}
-	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::197::KeyFileError " << ex.what() << std::endl;
-	}
-	if (!iconPack.empty()) {
-		return iconPack;
-	}
-	return Tools::defaultIconPack;
 }
 
 std::string Settings::getExternalMixer()

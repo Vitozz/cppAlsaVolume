@@ -21,7 +21,6 @@
 #ifndef FILEWORK_H
 #define FILEWORK_H
 
-#include "archive.h"
 #include <iostream>
 #include <vector>
 
@@ -34,10 +33,6 @@ enum SwitchType {
 enum ListType {
 	CARDS = 0,
 	MIXERS = 1
-#ifdef HAVE_ICONPACKS
-	,
-	ICONS = 2
-#endif
 };
 
 typedef std::pair<std::string, bool> switchcap;
@@ -51,12 +46,8 @@ namespace Tools {
 	void createDirectory(const std::string &dirName);
 	void saveFile(const std::string &fileName, const std::string &fileData);
 	std::pair<bool, int> itemExists(const std::vector<std::string> &vector_, const std::string& item);
-	std::vector<std::string> getFileList(const std::string& dir);
-	std::string getTmpDir();
-	void clearTempDir(const std::string &path);
 	std::string pathToFileName(const std::string &path);
 	//Constatnts
-	const std::string defaultIconPack = "default";
 	const std::string PathSuffix = "/share/alsavolume/";
 }
 

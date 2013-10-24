@@ -27,9 +27,6 @@
 #include "tools.h"
 #include "settingsstr.h"
 #include <vector>
-#ifdef HAVE_ICONPACKS
-#include "iconpacks.h"
-#endif
 
 class Core
 {
@@ -54,9 +51,7 @@ public:
 	void onVolumeSlider(double value);
 	void onSettingsDialogOk(settingsStr &str);
 	void onSettingsDialogAutostart(bool isAutorun);
-#ifdef HAVE_ICONPACKS
-	void onSettingsDialogIconpack(const std::string &path, int id, bool value);
-#endif
+
 	typedef sigc::signal<void, double> type_double_signal;
 	type_double_signal signal_volume_changed();
 	typedef sigc::signal<void, double, std::string, std::string> type_volumevalue_signal;
@@ -78,9 +73,6 @@ private:
 	std::string mixerName_;
 	double volumeValue_;
 	SettingsFrame *settingsDialog_;
-#ifdef HAVE_ICONPACKS
-	iconpacks *iconpacks_;
-#endif
 };
 
 #endif // CORE_H

@@ -53,10 +53,6 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	builder->get_widget("is_autorun", isAutoRun_);
 	builder->get_widget("tabspos", tabPos_);
 	builder->get_widget("tabwidget", tabWidget_);
-#ifdef HAVE_ICONPACKS
-	iconPacks_ = 0;
-	builder->get_widget("iconpacks", iconPacks_);
-#endif
 	//signals
 	if (tabPos_) {
 		tabPos_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onTabPos));
@@ -96,13 +92,13 @@ SettingsFrame::~SettingsFrame()
 	delete tabPos_;
 	delete tabWidget_;
 	delete settings_;
-#ifdef HAVE_ICONPACKS
-	delete iconPacks_;
-#endif
 }
 
 void SettingsFrame::initParms(settingsStr &str)
 {
+	if (settings_) {
+		settings_ = 0;
+	}
 	settings_ = new settingsStr(str);
 	if (tabPos_) {
 		tabPos_->set_active(settings_->notebookOrientation());
@@ -177,29 +173,6 @@ void SettingsFrame::setupTreeModels()
 {
 	//treeview setup
 	setupSoundCards();
-#ifdef HAVE_ICONPACKS
-	if (iconPacks_){
-		Glib::RefPtr<Gtk::ListStore> packs = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_Columns));
-		iconPacks_->set_model(packs);
-		iconPacks_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::iconPackChanged));
-		Gtk::TreeModel::Row row;
-		std::vector<std::string>::iterator it = settings_->iconPacks().begin();
-		std::string item;
-		while (it != settings_->iconPacks().end()) {
-			row = *(packs->append());
-			item  = Tools::pathToFileName(*it);
-			row[m_Columns.m_col_name] = Glib::ustring(item);
-			if (settings_->currIconPack().empty() && (item == Tools::defaultIconPack)) {
-				iconPacks_->set_active(row);
-			}
-			else if (item == Tools::pathToFileName(settings_->currIconPack())) {
-				iconPacks_->set_active(row);
-			}
-			it++;
-		}
-		iconPacks_->pack_start(m_Columns.m_col_name);
-	}
-#endif
 }
 
 void SettingsFrame::setupSoundCards()
@@ -217,8 +190,8 @@ void SettingsFrame::setupSoundCards()
 			if (i == (uint)cardId_) {
 				sndCardBox_->set_active(row);
 			}
-			it++;
-			i++;
+			++it;
+			++i;
 		}
 		sndCardBox_->pack_start(m_Columns.m_col_name);
 	}
@@ -270,7 +243,7 @@ void SettingsFrame::updateSwitchTree()
 			row = *(pbSwitches_->append());
 			row[m_TColumns.m_col_toggle] = (*it).second;
 			row[m_TColumns.m_col_name] = (*it).first;
-			it++;
+			++it;
 		}
 		playbackSwitchTree_->append_column("Playback Switch", m_TColumns.m_col_name);
 		playbackSwitchTree_->show_all_children();
@@ -296,7 +269,7 @@ void SettingsFrame::updateSwitchTree()
 			row = *(capSwitches_->append());
 			row[m_TColumns.m_col_toggle] = (*it).second;
 			row[m_TColumns.m_col_name] = (*it).first;
-			it++;
+			++it;
 		}
 		captureSwitchTree_->append_column("Capture Switch", m_TColumns.m_col_name);
 		captureSwitchTree_->show_all_children();
@@ -321,7 +294,7 @@ void SettingsFrame::updateSwitchTree()
 			row = *(enumSwitches_->append());
 			row[m_TColumns.m_col_toggle] = (*it).second;
 			row[m_TColumns.m_col_name] = (*it).first;
-			it++;
+			++it;
 		}
 		otherSwitchTree_->append_column("Enumerated Control", m_TColumns.m_col_name);
 		otherSwitchTree_->show_all_children();
@@ -347,15 +320,6 @@ void SettingsFrame::updateSwitches(const MixerSwitches &slist)
 	settings_->addMixerSwitch(slist);
 	updateSwitchTree();
 }
-
-#ifdef HAVE_ICONPACKS
-void SettingsFrame::iconPackChanged()
-{
-	int id = iconPacks_->get_active_row_number();
-	std::string path = settings_->iconPacks().at(id);
-	m_signal_iconpack_changed(path, id, false);
-}
-#endif
 
 void SettingsFrame::mixerBoxChanged()
 {
@@ -384,7 +348,7 @@ void SettingsFrame::onCaptureCellToggled(const Glib::ustring& path)
 	while (iter != capSwitches_->children().end()) {
 		row = *iter;
 		row[m_TColumns.m_col_toggle] = false;
-		iter++;
+		++iter;
 	}
 	iter = capSwitches_->get_iter(path);
 	row = *iter;
@@ -435,10 +399,3 @@ SettingsFrame::type_int_signal SettingsFrame::signal_sndcard_changed()
 {
 	return m_signal_sndcard_changed;
 }
-
-#ifdef HAVE_ICONPACKS
-SettingsFrame::type_toggled_signal SettingsFrame::signal_iconpack_changed()
-{
-	return m_signal_iconpack_changed;
-}
-#endif
