@@ -26,6 +26,7 @@ class Settings
 {
 public:
 	Settings();
+	Settings(Settings const &);
 	~Settings();
 	int getSoundCard() const;
 	void saveSoundCard(int soundCard);

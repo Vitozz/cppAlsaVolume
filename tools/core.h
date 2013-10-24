@@ -32,6 +32,7 @@ class Core
 {
 public:
 	Core(const Glib::RefPtr<Gtk::Builder>& refGlade);
+	Core(Core const &);
 	~Core();
 	void runAboutDialog();
 	std::string getSoundCardName() const;

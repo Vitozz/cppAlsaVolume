@@ -32,6 +32,7 @@ class AlsaWork
 {
 public:
 	AlsaWork();
+	AlsaWork(AlsaWork const &);
 	~AlsaWork();
 	void setAlsaVolume(int cardId, const std::string &mixer, double volume);
 	double getAlsaVolume(int cardId, const std::string& mixer);
