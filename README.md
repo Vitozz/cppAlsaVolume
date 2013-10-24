@@ -7,7 +7,6 @@ Build Deps:
 	- gtkmm-3.0 (libgtkmm-3.0-dev package in Ubuntu)
 	- glib (libglibmm-2.4-dev package in Ubuntu)
 	- alsa/asoundlib (libasound2-dev package in Ubuntu)
-	- libarchive (libarchive12 and libarchive-dev in Ubuntu)
 
 Howto build application:
 
@@ -19,7 +18,7 @@ if You have Qt installed:
 
 else:
 
->g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa libarchive\` \`pkg-config --libs gtkmm-3.0 alsa libarchive\`
+>g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa \` \`pkg-config --libs gtkmm-3.0 alsa \`
 
 What features available:
 
@@ -29,13 +28,7 @@ What features available:
 	- volume control using popup window with slider
 	- mute sound on middleclick and by checkbox selection
 	- enable or disable sound card switches in settings dialog
-	- iconpacks support (disabled by default, to enable use "qmake CONFIG+=iconpacks")
 
-HOWTO USE ICONPACKS:
-
-	Iconpack - the usual *tar.gz archive with *.png icons (filenames are the same as the original icons).
-	Just copy *tar.gz archive into ~/.local/share/alsavolume/iconpacks folder and choose iconpack in settings dialog
-	
 KNOWN ISSUES:
 	- on newer versions of pulseaudio (4.0) sound mute (switch) does not work correctly (recomended to use original
 	pulseaudio control tool (pavucontrol)).
