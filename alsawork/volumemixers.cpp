@@ -24,14 +24,20 @@ VolumeMixers::VolumeMixers()
 {
 }
 
-std::vector<std::string> &VolumeMixers::playback()
+std::vector<std::string> VolumeMixers::playback()
 {
-	return playback_;
+	if (!playback_.empty()) {
+		return playback_;
+	}
+	return std::vector<std::string>();
 }
 
-std::vector<std::string> &VolumeMixers::capture()
+std::vector<std::string> VolumeMixers::capture()
 {
-	return capture_;
+	if (!capture_.empty()) {
+		return capture_;
+	}
+	return std::vector<std::string>();
 }
 
 void VolumeMixers::setPlayback(const std::vector<std::string> &list)
@@ -67,3 +73,12 @@ void VolumeMixers::pushBack(int mixerType, const std::string &item)
 		break;
 	}
 }
+
+bool VolumeMixers::isEmpty()
+{
+	if (playback_.empty() && capture_.empty()) {
+		return true;
+	}
+	return false;
+}
+

@@ -96,22 +96,27 @@ std::vector<std::string> &AlsaWork::getCardsList()
 	return cardList_;
 }
 
-std::vector<std::string> &AlsaWork::getVolumeMixers(int cardIndex)
+std::vector<std::string> AlsaWork::getVolumeMixers(int cardIndex)
 {
 	updateMixerList(cardIndex);
-	return mixerList_;
+	if (!mixerList_.empty()) {
+		return mixerList_;
+	}
+	return std::vector<std::string>();
 }
 
 void AlsaWork::updateMixerList(int cardIndex)
 {
 	updateMixers(cardIndex);
-	std::vector<std::string> cmixers = volumeMixers_->capture();
-	std::vector<std::string> pmixers = volumeMixers_->playback();
-	if (!mixerList_.empty())
-		mixerList_.clear();
-	mixerList_.reserve(pmixers.size() + cmixers.size());
-	mixerList_.insert(mixerList_.end(), pmixers.begin(), pmixers.end());
-	mixerList_.insert(mixerList_.end(), cmixers.begin(), cmixers.end());
+	if (!volumeMixers_->isEmpty()) {
+		std::vector<std::string> cmixers = volumeMixers_->capture();
+		std::vector<std::string> pmixers = volumeMixers_->playback();
+		if (!mixerList_.empty())
+			mixerList_.clear();
+		mixerList_.reserve(pmixers.size() + cmixers.size());
+		mixerList_.insert(mixerList_.end(), pmixers.begin(), pmixers.end());
+		mixerList_.insert(mixerList_.end(), cmixers.begin(), cmixers.end());
+	}
 }
 
 MixerSwitches &AlsaWork::getSwitchList(int cardIndex)

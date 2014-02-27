@@ -32,7 +32,7 @@ const std::string COMMENTS = "Tray Alsa Volume Changer written using gtkmm";
 const std::string COPYRIGHT = "2012 (c) Vitaly Tonkacheyev (thetvg@gmail.com)";
 const std::string WEBSITE = "http://sites.google.com/site/thesomeprojects/";
 const std::string WEBSITELABEL = "Program Website";
-const std::string VERSION = "0.1.7";
+const std::string VERSION = "0.1.8";
 
 Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 {
@@ -181,11 +181,27 @@ void Core::updateControls(int cardId)
 	settingsStr_->clear(CARDS);
 	settingsStr_->clearSwitches();
 	//
-	settingsStr_->setList(CARDS, alsaWork_->getCardsList());
-	cardId = (cardId >=0) ? cardId : 0;
-	settingsStr_->setCardId(cardId);
-	settingsStr_->setList(MIXERS, alsaWork_->getVolumeMixers(cardId));
-	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList(cardId));
+	int soundCardId = cardId;
+	std::vector<std::string> cards = alsaWork_->getCardsList();
+	settingsStr_->setList(CARDS, cards);
+	soundCardId = (soundCardId >=0 && (soundCardId < (int)cards.size())) ? soundCardId : 0;
+	std::vector<std::string> vmixers = alsaWork_->getVolumeMixers(soundCardId);
+	if (vmixers.empty()) {
+		std::vector<std::string>::iterator it = cards.begin();
+		int index = 0;
+		while (it != cards.end()) {
+			vmixers = alsaWork_->getVolumeMixers(index);
+			if(!vmixers.empty()) {
+				soundCardId = index;
+				break;
+			}
+			++index;
+			++it;
+		}
+	}
+	settingsStr_->setCardId(soundCardId);
+	settingsStr_->setList(MIXERS, vmixers);
+	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList(soundCardId));
 	settingsStr_->setIsAutorun(settings_->getAutorun());
 
 	settingsDialog_->updateMixers(settingsStr_->mixerList());

@@ -38,7 +38,7 @@ public:
 	double getAlsaVolume(int cardId, const std::string& mixer);
 	std::string getCardName(int index);
 	std::vector<std::string> &getCardsList();
-	std::vector<std::string> &getVolumeMixers(int cardIndex);
+	std::vector<std::string> getVolumeMixers(int cardIndex);
 	MixerSwitches &getSwitchList(int cardIndex);
 	void setSwitch(int cardId, const std::string& mixer, int id, bool enabled);
 	void setMute(int cardId, const std::string& mixer, bool enabled);

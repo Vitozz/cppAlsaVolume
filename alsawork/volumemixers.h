@@ -28,13 +28,14 @@ class VolumeMixers
 {
 public:
 	VolumeMixers();
-	std::vector<std::string> &playback();
-	std::vector<std::string> &capture();
+	std::vector<std::string> playback();
+	std::vector<std::string> capture();
 	void setPlayback(const std::vector<std::string> &list);
 	void setCapture(const std::vector<std::string> &list);
 	void playBackClear();
 	void captureClear();
 	void pushBack(int mixerType, const std::string &item);
+	bool isEmpty();
 private:
 	std::vector<std::string> playback_;
 	std::vector<std::string> capture_;
