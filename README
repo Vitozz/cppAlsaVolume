@@ -1,0 +1,16 @@
+This is a simple application to control one of the Alsa's mixers volume in tray.
+
+Application uses GTK+3 interface via gtkmm library
+
+What features available:
+
+	- sound card selection
+	- sound card mixer selection
+	- volume control by "scroll" on tray icon
+	- volume control using popup window with slider
+	- mute sound on middleclick and by checkbox selection
+	- enable or disable sound card switches in settings dialog
+
+KNOWN ISSUES:
+	- on newer versions of pulseaudio (4.0) sound mute (switch) does not work correctly (recomended to use original
+	pulseaudio control tool (pavucontrol)).

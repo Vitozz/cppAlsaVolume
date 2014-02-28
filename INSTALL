@@ -1,0 +1,35 @@
+Build Deps:
+
+- gtkmm-3.0 (libgtkmm-3.0-dev package in Ubuntu)
+- glib (libglibmm-2.4-dev package in Ubuntu)
+- alsa/asoundlib (libasound2-dev package in Ubuntu)
+
+Howto build application:
+
+if You have Qt installed:
+
+$ qmake
+
+$ make
+
+$ make install
+
+if You have cmake installed:
+
+$ mkdir build
+
+$ cd build
+
+$ cmake ..
+
+You can use
+$ cmake -DCMAKE_INSTALL_PREFIX=/dir ..
+to set install prefix to /dir
+
+$ make
+
+$ make install
+
+Or you may build alsavolume executable by runing:
+
+$ g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa \` \`pkg-config --libs gtkmm-3.0 alsa \` 

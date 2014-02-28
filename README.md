@@ -16,6 +16,16 @@ if You have Qt installed:
 
 >make
 
+if You have cmake installed
+
+>mkdir build
+
+>cd build
+
+>cmake ..
+
+>make
+
 else:
 
 >g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa \` \`pkg-config --libs gtkmm-3.0 alsa \`
