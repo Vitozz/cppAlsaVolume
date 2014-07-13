@@ -26,9 +26,11 @@
 const double ZERO = 0.0;
 
 AlsaWork::AlsaWork()
+: cardList_(std::vector<std::string>()),
+  mixerList_(std::vector<std::string>()),
+  switches_(new MixerSwitches()),
+  volumeMixers_(new VolumeMixers())
 {
-	switches_ = new MixerSwitches();
-	volumeMixers_ = new VolumeMixers();
 }
 
 AlsaWork::~AlsaWork()

@@ -33,9 +33,9 @@ const std::string IPACK = "iconpack";
 const std::string EMIXER = "extmixer";
 
 Settings::Settings()
+: configFile_(new Glib::KeyFile()),
+  desktopFile_(new Glib::KeyFile())
 {
-	configFile_ = new Glib::KeyFile();
-	desktopFile_ = new Glib::KeyFile();
 	const std::string configDir = std::string(std::string(getenv("HOME")) + "/.config/cppAlsaVolume");
 	iniFileName_ = configDir + std::string("/config.ini");
 	desktopFilePath_ = std::string(std::string(getenv("HOME")) + "/.config/autostart/alsavolume.desktop");
@@ -145,13 +145,13 @@ void Settings::initDesktopFileData()
 	desktopFile_->set_string(entry,Glib::ustring("Exec"),Glib::ustring("alsavolume"));
 	desktopFile_->set_string(entry,Glib::ustring("Type"),Glib::ustring("Application"));
 	desktopFile_->set_string(entry,Glib::ustring("Version"),Glib::ustring(version_));
-	desktopFile_->set_boolean(entry,Glib::ustring("Hidden"),false);
+	desktopFile_->set_boolean(entry,Glib::ustring("Hidden"),true);
 	desktopFile_->set_string(entry,Glib::ustring("Comment[ru]"),Glib::ustring("Регулятор громкости ALSA"));
 }
 
 void Settings::setAutorun(bool isAutorun)
 {
-	desktopFile_->set_boolean(Glib::ustring("Desktop Entry"),Glib::ustring("X-GNOME-Autostart-enabled"),isAutorun);
+	desktopFile_->set_boolean(Glib::ustring("Desktop Entry"),Glib::ustring("Hidden"),!isAutorun);
 	parseConfig(desktopFilePath_, desktopFile_->to_data());
 }
 
@@ -159,7 +159,7 @@ bool Settings::getAutorun()
 {
 	bool isAutorun = false;
 	try {
-		isAutorun = bool(desktopFile_->get_boolean(Glib::ustring("Desktop Entry"),Glib::ustring("Hidden")));
+		isAutorun = !bool(desktopFile_->get_boolean(Glib::ustring("Desktop Entry"),Glib::ustring("Hidden")));
 	}
 	catch (const Glib::KeyFileError& ex) {
 		std::cerr << "settings.cpp::173::KeyFileError " << ex.what() << std::endl;

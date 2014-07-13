@@ -32,15 +32,17 @@ const std::string COMMENTS = "Tray Alsa Volume Changer written using gtkmm";
 const std::string COPYRIGHT = "2012 (c) Vitaly Tonkacheyev (thetvg@gmail.com)";
 const std::string WEBSITE = "http://sites.google.com/site/thesomeprojects/";
 const std::string WEBSITELABEL = "Program Website";
-const std::string VERSION = "0.1.8";
+const std::string VERSION = "0.1.9";
 
 Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
+: settings_(new Settings()),
+  alsaWork_(new AlsaWork()),
+  settingsStr_(new settingsStr()),
+  mixerName_(settings_->getMixer()),
+  volumeValue_(0.0),
+  settingsDialog_(0)
 {
-	alsaWork_ = new AlsaWork();
-	settings_ = new Settings();
-	settingsStr_ = new settingsStr();
 	//
-	settingsDialog_ = 0;
 	refGlade->get_widget_derived("settingsDialog", settingsDialog_);
 	int cardId = settings_->getSoundCard();
 	cardId = (settings_->getSoundCard() >=0) ? cardId : 0;
@@ -51,7 +53,6 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 		settingsDialog_->signal_autorun_toggled().connect(sigc::mem_fun(*this, &Core::onSettingsDialogAutostart));
 		settingsDialog_->signal_sndcard_changed().connect(sigc::mem_fun(*this, &Core::updateControls));
 	}
-	mixerName_ = settings_->getMixer();
 	if (!mixerName_.empty()) {
 		std::pair<bool, int> isMixer = Tools::itemExists(settingsStr_->mixerList(), mixerName_);
 		if (isMixer.first) {
@@ -119,16 +120,6 @@ void Core::saveSettings()
 	settings_->setExternalMixer(settingsStr_->externalMixer());
 }
 
-std::vector<std::string> &Core::getMixers()
-{
-	return settingsStr_->mixerList();
-}
-
-std::vector<std::string> &Core::getCardsList()
-{
-	return settingsStr_->cardList();
-}
-
 void Core::setActiveCard(int card)
 {
 	updateControls(card);
@@ -148,7 +139,7 @@ void Core::onSettingsDialogOk(settingsStr &str)
 	settingsStr_->setNotebookOrientation(str.notebookOrientation());
 	settingsStr_->setIsAutorun(str.isAutorun());
 	volumeValue_ = alsaWork_->getAlsaVolume(settingsStr_->cardId(),mixerName_);
-	m_signal_volume_changed(volumeValue_);
+	onVolumeSlider(volumeValue_);
 	m_signal_mixer_muted(getMuted(mixerName_));
 	settingsStr_->setExternalMixer(str.externalMixer());
 	saveSettings();

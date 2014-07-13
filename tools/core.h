@@ -41,8 +41,6 @@ public:
 	void setActiveMixer(int index);
 	void saveSettings();
 	void runSettings();
-	std::vector<std::string> &getMixers();
-	std::vector<std::string> &getCardsList();
 	void switchChanged (const std::string& name, int id, bool enabled);
 	void soundMuted(bool mute);
 	bool getMuted(const std::string &mixer);
