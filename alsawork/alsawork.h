@@ -24,7 +24,8 @@
 #include "alsa/asoundlib.h"
 #include "../tools/tools.h"
 #include "mixerswitches.h"
-#include "volumemixers.h"
+//#include "volumemixers.h"
+#include "alsadevice.h"
 #include <iostream>
 #include <vector>
 
@@ -34,15 +35,19 @@ public:
 	AlsaWork();
 	AlsaWork(AlsaWork const &);
 	~AlsaWork();
-	void setAlsaVolume(int cardId, const std::string &mixer, double volume);
-	double getAlsaVolume(int cardId, const std::string& mixer);
+	void setCurrentCard(int cardId);
+	void setCurrentMixer(const std::string &mixer);
+	void setAlsaVolume(double volume);
+	double getAlsaVolume();
 	std::string getCardName(int index);
 	std::vector<std::string> &getCardsList();
-	std::vector<std::string> getVolumeMixers(int cardIndex);
-	MixerSwitches &getSwitchList(int cardIndex);
-	void setSwitch(int cardId, const std::string& mixer, int id, bool enabled);
-	void setMute(int cardId, const std::string& mixer, bool enabled);
-	bool getMute(int cardId, const std::string& mixer);
+	std::vector<std::string> getVolumeMixers();
+	MixerSwitches getSwitchList();
+	void setSwitch(const std::string& mixer, int id, bool enabled);
+	void setMute(bool enabled);
+	bool getMute();
+	bool haveVolumeMixers();
+	int getFirstCardWithMixers();
 private:
 	bool checkCardId(int cardId);
 	int getTotalCards();
@@ -57,8 +62,8 @@ private:
 	snd_mixer_selem_channel_id_t checkMixerChannels(snd_mixer_elem_t *element);
 private:
 	std::vector<std::string> cardList_;
-	std::vector<std::string> mixerList_;
-	MixerSwitches *switches_;
-	VolumeMixers *volumeMixers_;
+	int totalCards_;
+	AlsaDevice *currentAlsaDevice_;
+	std::vector< AlsaDevice* > devices_;
 };
 #endif // ALSAWORK_H

@@ -50,7 +50,6 @@ public:
 protected:
 	//menu actions
 	void onHideRestore();
-	void runMixerApp();
 	void runSettings();
 	void onMute();
 	void onAbout();
@@ -66,7 +65,6 @@ protected:
 	type_trayicon_4int_signal m_signal_on_restore;
 	type_trayicon_double_signal m_signal_value_changed;
 	type_trayicon_bool_signal m_signal_on_mute;
-	type_trayicon_simple_signal m_signal_ask_extmixer;
 
 private:
 	void setIcon(double value);

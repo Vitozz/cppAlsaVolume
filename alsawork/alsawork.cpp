@@ -23,61 +23,50 @@
 #include "alsawork.h"
 #include <stdexcept>
 
-const double ZERO = 0.0;
-
 AlsaWork::AlsaWork()
-: cardList_(std::vector<std::string>()),
-  mixerList_(std::vector<std::string>()),
-  switches_(new MixerSwitches()),
-  volumeMixers_(new VolumeMixers())
+: cardList_(std::vector<std::string>())
 {
+	getCards();
+	int id = 0;
+	std::vector<std::string>::iterator it = cardList_.begin();
+	while (it != cardList_.end()) {
+		std::string name = *it;
+		devices_.push_back(new AlsaDevice(id, name));
+		++it;
+		++id;
+	}
+	setCurrentCard(0);
 }
 
 AlsaWork::~AlsaWork()
 {
-	delete switches_;
-	delete volumeMixers_;
+	if(!devices_.empty())
+		devices_.clear();
+	delete currentAlsaDevice_;
 	snd_config_update_free_global();
 }
 
 //public
-void AlsaWork::setAlsaVolume(int cardId, const std::string &mixer, double volume)
+void AlsaWork::setCurrentCard(int cardId)
 {
-	if (checkCardId(cardId) && Tools::itemExists(mixerList_, mixer).first) {
-		snd_mixer_t *handle = getMixerHanlde(cardId);
-		snd_mixer_elem_t *element = initMixerElement(handle, mixer.c_str());
-		setVolume(element, handle, volume);
+	if(cardId < (int)devices_.size()) {
+		currentAlsaDevice_ = devices_.at(cardId);
 	}
 }
 
-double AlsaWork::getAlsaVolume(int cardId, const std::string &mixer)
+void AlsaWork::setCurrentMixer(const std::string &mixer)
 {
-	if (checkCardId(cardId) && Tools::itemExists(mixerList_, mixer).first) {
-		snd_mixer_t *handle = getMixerHanlde(cardId);
-		snd_mixer_elem_t *elem = initMixerElement(handle, mixer.c_str());
-		long minv, maxv, outvol;
-		snd_mixer_selem_channel_id_t chanelid = checkMixerChannels(elem);
-		if (snd_mixer_selem_has_playback_volume(elem) || snd_mixer_selem_has_playback_volume_joined(elem)) {
-			checkError(snd_mixer_selem_get_playback_volume_range(elem, &minv, &maxv));
-			if (snd_mixer_selem_has_playback_channel(elem, chanelid)) {
-				checkError(snd_mixer_selem_get_playback_volume(elem, chanelid, &outvol));
-			}
-			if ((maxv - minv) != 0) {
-				return double(100*(outvol - minv)/(maxv-minv));
-			}
-		}
-		if (snd_mixer_selem_has_capture_volume(elem) || snd_mixer_selem_has_capture_volume_joined(elem)) {
-			checkError(snd_mixer_selem_get_capture_volume_range(elem, &minv, &maxv));
-			if (snd_mixer_selem_has_capture_channel(elem, chanelid)) {
-				checkError(snd_mixer_selem_get_capture_volume(elem, chanelid, &outvol));
-			}
-			if ((maxv - minv) != 0) {
-				return double(100*(outvol - minv)/(maxv-minv));
-			}
-		}
-		checkError(snd_mixer_close(handle));
-	}
-	return ZERO;
+	currentAlsaDevice_->setCurrentMixer(mixer);
+}
+
+void AlsaWork::setAlsaVolume(double volume)
+{
+	currentAlsaDevice_->setDeviceVolume(volume);
+}
+
+double AlsaWork::getAlsaVolume()
+{
+	return currentAlsaDevice_->getVolume();
 }
 
 std::string AlsaWork::getCardName(int index)
@@ -98,33 +87,29 @@ std::vector<std::string> &AlsaWork::getCardsList()
 	return cardList_;
 }
 
-std::vector<std::string> AlsaWork::getVolumeMixers(int cardIndex)
+std::vector<std::string> AlsaWork::getVolumeMixers()
 {
-	updateMixerList(cardIndex);
-	if (!mixerList_.empty()) {
-		return mixerList_;
-	}
-	return std::vector<std::string>();
+	return currentAlsaDevice_->mixers();
 }
 
-void AlsaWork::updateMixerList(int cardIndex)
+MixerSwitches AlsaWork::getSwitchList()
 {
-	updateMixers(cardIndex);
-	if (!volumeMixers_->isEmpty()) {
-		std::vector<std::string> cmixers = volumeMixers_->capture();
-		std::vector<std::string> pmixers = volumeMixers_->playback();
-		if (!mixerList_.empty())
-			mixerList_.clear();
-		mixerList_.reserve(pmixers.size() + cmixers.size());
-		mixerList_.insert(mixerList_.end(), pmixers.begin(), pmixers.end());
-		mixerList_.insert(mixerList_.end(), cmixers.begin(), cmixers.end());
-	}
+	return currentAlsaDevice_->switches();
 }
 
-MixerSwitches &AlsaWork::getSwitchList(int cardIndex)
+void AlsaWork::setMute(bool enabled)
 {
-	updateMixers(cardIndex);
-	return *switches_;
+	currentAlsaDevice_->setMute(enabled);
+}
+
+bool AlsaWork::getMute()
+{
+	return currentAlsaDevice_->getMute();
+}
+
+void AlsaWork::setSwitch(const std::string &mixer, int id, bool enabled)
+{
+	currentAlsaDevice_->setSwitch(mixer, id, enabled);
 }
 
 bool AlsaWork::checkCardId(int cardId)
@@ -140,120 +125,12 @@ bool AlsaWork::checkCardId(int cardId)
 	return false;
 }
 
-void AlsaWork::setSwitch(int cardId, const std::string &mixer, int id, bool enabled)
-{
-	snd_mixer_t *handle = getMixerHanlde(cardId);
-	snd_mixer_elem_t* elem = initMixerElement(handle, mixer.c_str());
-	switch (id) {
-	case PLAYBACK:
-		checkError(snd_mixer_selem_set_playback_switch_all(elem, int(enabled)));
-		break;
-	case CAPTURE:
-		checkError(snd_mixer_selem_set_capture_switch_all(elem, int(enabled)));
-		break;
-	case ENUM:
-		snd_mixer_selem_channel_id_t channel = checkMixerChannels(elem);
-		checkError(snd_mixer_selem_set_enum_item(elem, channel, uint(enabled)));
-		break;
-	}
-	checkError(snd_mixer_close(handle));
-}
-
-void AlsaWork::setMute(int cardId, const std::string &mixer, bool enabled)
-{
-	if (Tools::itemExists(mixerList_, mixer).first) {
-		snd_mixer_t *handle = getMixerHanlde(cardId);
-		snd_mixer_elem_t* elem = initMixerElement(handle, mixer.c_str());
-		if (snd_mixer_selem_has_playback_switch(elem)
-		   || snd_mixer_selem_has_playback_switch_joined(elem)) {
-			checkError(snd_mixer_selem_set_playback_switch_all(elem, int(enabled)));
-		}
-		if (snd_mixer_selem_has_capture_switch(elem)
-		    || snd_mixer_selem_has_common_switch(elem)
-		    || snd_mixer_selem_has_capture_switch_joined(elem)
-		    || snd_mixer_selem_has_capture_switch_exclusive(elem)) {
-			checkError(snd_mixer_selem_set_capture_switch_all(elem, int(enabled)));
-		}
-		checkError(snd_mixer_close(handle));
-	}
-}
-
-bool AlsaWork::getMute(int cardId, const std::string &mixer)
-{
-	if (Tools::itemExists(mixerList_, mixer).first) {
-		snd_mixer_t *handle = getMixerHanlde(cardId);
-		snd_mixer_elem_t* elem = initMixerElement(handle, mixer.c_str());
-		snd_mixer_selem_channel_id_t channel = checkMixerChannels(elem);
-
-		if (snd_mixer_selem_has_playback_switch(elem)
-		    || snd_mixer_selem_has_playback_switch_joined(elem)) {
-			int value = 0;
-			checkError(snd_mixer_selem_get_playback_switch(elem, channel, &value));
-			return bool(value);
-		}
-		if (snd_mixer_selem_has_capture_switch(elem)
-		    || snd_mixer_selem_has_common_switch(elem)
-		    || snd_mixer_selem_has_capture_switch_joined(elem)
-		    || snd_mixer_selem_has_capture_switch_exclusive(elem)) {
-			int value = 0;
-			checkError(snd_mixer_selem_get_capture_switch(elem, channel, &value));
-			return bool(value);
-		}
-		checkError(snd_mixer_close(handle));
-	}
-	return true;
-}
 //private
 void AlsaWork::checkError (int errorIndex)
 {
 	if (errorIndex < 0) {
 		std::cerr << snd_strerror(errorIndex) << std::endl;
 	}
-}
-
-snd_mixer_elem_t *AlsaWork::initMixerElement(snd_mixer_t *handle, const char *mixer)
-{
-	snd_mixer_selem_id_t *smid;
-	snd_mixer_selem_id_alloca(&smid);
-	snd_mixer_selem_id_set_index(smid, 0);
-	snd_mixer_selem_id_set_name(smid, mixer);
-	snd_mixer_elem_t* elem = snd_mixer_find_selem(handle, smid);
-	return elem;
-}
-
-void AlsaWork::setVolume(snd_mixer_elem_t *element, snd_mixer_t *handle, double volume)
-{
-	if (snd_mixer_selem_has_playback_volume(element)) {
-		long min, max;
-		checkError(snd_mixer_selem_get_playback_volume_range(element, &min, &max));
-		long volume_ = long(volume)*(max - min) / 100;
-		checkError(snd_mixer_selem_set_playback_volume_all(element, volume_));
-	}
-	else if (snd_mixer_selem_has_capture_volume(element)) {
-		long min, max;
-		checkError(snd_mixer_selem_get_capture_volume_range(element, &min, &max));
-		long volume_ = long(volume)*(max - min) / 100;
-		checkError(snd_mixer_selem_set_capture_volume_all(element, volume_));
-	}
-	else{
-		std::cerr << "Selected mixer has no playback or capture volume" << std::endl;
-	}
-	checkError(snd_mixer_close(handle));
-}
-
-snd_mixer_t *AlsaWork::getMixerHanlde(int id)
-{
-	std::string card(formatCardName(id));
-	snd_ctl_t *ctl;
-	checkError(snd_ctl_open(&ctl, card.c_str(), SND_CTL_NONBLOCK));
-	snd_hctl_t *hctl;
-	checkError(snd_hctl_open_ctl(&hctl, ctl));
-	snd_mixer_t *handle;
-	checkError(snd_mixer_open(&handle, 0));
-	checkError(snd_mixer_attach_hctl(handle, hctl));
-	checkError(snd_mixer_selem_register(handle, NULL, NULL));
-	checkError(snd_mixer_load(handle));
-	return handle;
 }
 
 std::string AlsaWork::formatCardName(int id)
@@ -278,96 +155,37 @@ int AlsaWork::getTotalCards()
 	return cards;
 }
 
-void AlsaWork::updateMixers(int cardIndex)
-{
-	//clearing lists
-	volumeMixers_->playBackClear();
-	volumeMixers_->captureClear();
-	switches_->clear(CAPTURE);
-	switches_->clear(PLAYBACK);
-	switches_->clear(ENUM);
-	//
-	snd_mixer_t *handle = getMixerHanlde(cardIndex);
-	snd_mixer_selem_id_t *smid;
-	snd_mixer_selem_id_alloca(&smid);
-	std::string name;
-	for (snd_mixer_elem_t *element = snd_mixer_first_elem(handle);
-	     element;
-	     element = snd_mixer_elem_next(element)) {
-		switchcap sCap;
-		snd_mixer_selem_get_id(element, smid);
-		name = snd_mixer_selem_id_get_name(smid);
-		snd_mixer_selem_channel_id_t channel = checkMixerChannels(element);
-
-		if (snd_mixer_selem_has_playback_volume(element)
-		    || snd_mixer_selem_has_playback_volume_joined(element)
-		    || snd_mixer_selem_has_common_volume(element)) {
-			volumeMixers_->pushBack(PLAYBACK, name);
-		}
-		if (snd_mixer_selem_has_capture_volume(element)
-		    || snd_mixer_selem_has_capture_volume_joined(element)) {
-			volumeMixers_->pushBack(CAPTURE, name);
-		}
-		if (snd_mixer_selem_has_capture_switch(element)
-		    || snd_mixer_selem_has_common_switch(element)
-		    || snd_mixer_selem_has_capture_switch_joined(element)
-		    || snd_mixer_selem_has_capture_switch_exclusive(element)){
-			int value = 0;
-			checkError(snd_mixer_selem_get_capture_switch(element, channel, &value));
-			sCap = std::make_pair(name, bool(value));
-			switches_->pushBack(CAPTURE, sCap);
-		}
-		if (snd_mixer_selem_has_playback_switch(element)
-		    || snd_mixer_selem_has_playback_switch_joined(element)){
-			int value = 0;
-			checkError(snd_mixer_selem_get_playback_switch(element, channel, &value));
-			sCap = std::make_pair(name, bool(value));
-			switches_->pushBack(PLAYBACK, sCap);
-		}
-		if (snd_mixer_selem_is_enumerated(element)) {
-			uint value = 0;
-			checkError(snd_mixer_selem_get_enum_item(element, channel, &value));
-			sCap = std::make_pair(name, bool(value));
-			switches_->pushBack(ENUM, sCap);
-		}
-	}
-	checkError(snd_mixer_close(handle));
-}
-
 void AlsaWork::getCards()
 {
 	if (!cardList_.empty())
 		cardList_.clear();
-	int total = getTotalCards();
-	if (total >= 1) {
-		for (int card = 0; card < total; card++) {
+	totalCards_ = getTotalCards();
+	if (totalCards_ >= 1) {
+		for (int card = 0; card < totalCards_; card++) {
 			std::string cname(getCardName(card));
 			cardList_.push_back(cname);
 		}
 	}
 }
 
-snd_mixer_selem_channel_id_t AlsaWork::checkMixerChannels(snd_mixer_elem_t *element)
+bool AlsaWork::haveVolumeMixers()
 {
-	if (snd_mixer_selem_is_playback_mono(element)) {
-		return SND_MIXER_SCHN_MONO;
-	}
-	else {
-		for (int channel = 0; channel <= SND_MIXER_SCHN_LAST; channel++) {
-			if (snd_mixer_selem_has_playback_channel(element, (snd_mixer_selem_channel_id_t)channel)) {
-				return (snd_mixer_selem_channel_id_t)channel;
-			}
+	return currentAlsaDevice_->haveMixers();
+}
+
+int AlsaWork::getFirstCardWithMixers()
+{
+	std::vector< AlsaDevice* >::iterator it = devices_.begin();
+	int inc = 0;
+	while (it != devices_.end()) {
+		AlsaDevice *dev = *it;
+		if(dev->haveMixers()) {
+			delete dev;
+			return inc;
 		}
+		++it;
+		++inc;
+		delete dev;
 	}
-	if (snd_mixer_selem_is_capture_mono(element)) {
-		return SND_MIXER_SCHN_MONO;
-	}
-	else {
-		for (int channel = 0; channel <= SND_MIXER_SCHN_LAST; channel++) {
-			if (snd_mixer_selem_has_capture_channel(element, (snd_mixer_selem_channel_id_t)channel)) {
-				return (snd_mixer_selem_channel_id_t)channel;
-			}
-		}
-	}
-	return SND_MIXER_SCHN_UNKNOWN;
+	return 0;
 }

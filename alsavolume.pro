@@ -8,9 +8,22 @@ TEMPLATE = app
 CONFIG += console
 CONFIG -= qt
 
+#CONFIG += pulseaudio
+
 CONFIG += link_pkgconfig
 PKGCONFIG += gtkmm-3.0 \
 	     alsa
+
+pulseaudio {
+	DEFINES += HAVE_PULSE
+	PKGCONFIG += libpulse
+	SOURCES += pulsework/pulsecore.cpp \
+		   pulsework/pulsedevice.cpp
+	HEADERS += pulsework/pulsecore.h \
+		   pulsework/pulsedevice.h
+}
+
+
 
 SOURCES += main.cpp \
 	gui/trayicon.cpp \
@@ -22,7 +35,8 @@ SOURCES += main.cpp \
 	tools/settings.cpp \
 	tools/tools.cpp \
 	tools/settingsstr.cpp \
-	tools/core.cpp
+	tools/core.cpp \
+    alsawork/alsadevice.cpp
 
 HEADERS += \
 	alsawork/alsawork.h \
@@ -34,7 +48,8 @@ HEADERS += \
 	tools/settings.h \
 	tools/tools.h \
 	tools/settingsstr.h \
-	tools/core.h
+	tools/core.h \
+    alsawork/alsadevice.h
 
 INCLUDEPATH += \
 	/usr/include/gtkmm-3.0 \

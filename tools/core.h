@@ -27,6 +27,9 @@
 #include "tools.h"
 #include "settingsstr.h"
 #include <vector>
+#ifdef HAVE_PULSE
+#include "pulsework/pulsecore.h"
+#endif
 
 class Core
 {
@@ -43,7 +46,7 @@ public:
 	void runSettings();
 	void switchChanged (const std::string& name, int id, bool enabled);
 	void soundMuted(bool mute);
-	bool getMuted(const std::string &mixer);
+	bool getMuted();
 	void onExtMixerSignal();
 	double getVolumeValue() const;
 	void onTrayIconScroll(double value);
@@ -72,6 +75,14 @@ private:
 	std::string mixerName_;
 	double volumeValue_;
 	SettingsFrame *settingsDialog_;
+	bool isPulse_;
+#ifdef HAVE_PULSE
+	PulseCore *pulse_;
+	std::string pulseDevice_;
+	std::string pulseDeviceDesc_;
+	int pulseVolume_;
+	bool pulseMuted_;
+#endif
 };
 
 #endif // CORE_H

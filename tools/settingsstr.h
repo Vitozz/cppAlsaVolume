@@ -32,6 +32,7 @@ public:
 	settingsStr(settingsStr &str);
 	unsigned int cardId() const;
 	unsigned int mixerId() const;
+	int pulseDeviceId();
 	bool notebookOrientation();
 	bool isAutorun();
 	std::string &externalMixer();
@@ -48,11 +49,12 @@ public:
 	void clear(ListType listType);
 	void clearSwitches();
 	void setExternalMixer(const std::string &name);
-
+	void setPulseDeviceId(int id);
 
 private:
 	unsigned int cardId_;
 	unsigned int mixerId_;
+	int pulseDeviceId_;
 	bool notebookOrientation_;
 	bool isAutorun_;
 	std::vector<std::string> cardList_;

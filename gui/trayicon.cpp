@@ -41,10 +41,6 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 	Gtk::SeparatorMenuItem *separator1 = Gtk::manage(new Gtk::SeparatorMenuItem());
 	Gtk::SeparatorMenuItem *separator2 = Gtk::manage(new Gtk::SeparatorMenuItem());
 	menu_->append(*Gtk::manage(separator1));
-	mixerItem_ = Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::MEDIA_RECORD));
-	mixerItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::runMixerApp));
-	mixerItem_->set_label("Mixer");
-	menu_->append(*Gtk::manage(mixerItem_));
 	settingsItem_ = Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::PREFERENCES));
 	settingsItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::runSettings));
 	menu_->append(*Gtk::manage(settingsItem_));
@@ -88,11 +84,6 @@ void TrayIcon::onQuit()
 {
 	m_signal_save_settings();
 	exit(0);
-}
-
-void TrayIcon::runMixerApp()
-{
-	m_signal_ask_extmixer();
 }
 
 void TrayIcon::runSettings()
@@ -246,9 +237,4 @@ TrayIcon::type_trayicon_double_signal TrayIcon::signal_value_changed()
 TrayIcon::type_trayicon_bool_signal TrayIcon::signal_on_mute()
 {
 	return m_signal_on_mute;
-}
-
-TrayIcon::type_trayicon_simple_signal TrayIcon::signal_ask_extmixer()
-{
-	return m_signal_ask_extmixer;
 }

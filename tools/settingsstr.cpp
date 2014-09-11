@@ -157,3 +157,13 @@ void settingsStr::setExternalMixer(const std::string &name)
 {
 	extMixer_ = name;
 }
+
+int settingsStr::pulseDeviceId()
+{
+	return pulseDeviceId_;
+}
+
+void settingsStr::setPulseDeviceId(int id)
+{
+	pulseDeviceId_ = id;
+}

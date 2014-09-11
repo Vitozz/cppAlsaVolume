@@ -24,13 +24,13 @@
 #include "glibmm/fileutils.h"
 #include "fstream"
 
-const std::string MAIN = "main";
-const std::string VOLUME = "volume";
-const std::string CARD = "card";
-const std::string MIXER = "mixer";
-const std::string ORIENT = "orient";
-const std::string IPACK = "iconpack";
-const std::string EMIXER = "extmixer";
+#define MAIN "main"
+#define VOLUME "volume"
+#define CARD "card"
+#define MIXER "mixer"
+#define ORIENT "orient"
+#define IPACK "iconpack"
+#define EMIXER "extmixer"
 
 Settings::Settings()
 : configFile_(new Glib::KeyFile()),

@@ -79,10 +79,16 @@ protected:
 	void onCaptureCellToggled(const Glib::ustring &path);
 	void onEnumCellToggled(const Glib::ustring &path);
 	void onAutorunToggled();
+#ifdef HAVE_PULSE
+	void onPulseToggled();
+#endif
 	//signals
 	type_void_signal m_signal_ok_pressed;
 	type_toggled_signal m_type_toggled_signal;
 	type_bool_signal m_signal_autorun_toggled;
+#ifdef HAVE_PULSE
+	type_bool_signal m_signal_pulse_toggled;
+#endif
 	type_int_signal m_signal_sndcard_changed;
 
 private:
@@ -97,13 +103,17 @@ private:
 	Gtk::Button *cancelButton_;
 	Gtk::ComboBox *sndCardBox_;
 	Gtk::ComboBox *mixerBox_;
-	Gtk::Entry *extMixer_;
 	Gtk::TreeView *playbackSwitchTree_;
 	Gtk::TreeView *captureSwitchTree_;
 	Gtk::TreeView *otherSwitchTree_;
 	Gtk::CheckButton *isAutoRun_;
 	Gtk::CheckButton *tabPos_;
 	Gtk::Notebook *tabWidget_;
+	Gtk::Box *pulseHBox_;
+	Gtk::CheckButton *usePulse_;
+#ifdef HAVE_PULSE
+	Gtk::ComboBox *pulseBox_;
+#endif
 	Glib::RefPtr<Gtk::ListStore> cards_;
 	Glib::RefPtr<Gtk::ListStore> mixers_;
 	Glib::RefPtr<Gtk::ListStore> pbSwitches_;

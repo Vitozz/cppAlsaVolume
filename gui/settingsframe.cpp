@@ -30,13 +30,13 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
   cancelButton_(0),
   sndCardBox_(0),
   mixerBox_(0),
-  extMixer_(0),
   playbackSwitchTree_(0),
   captureSwitchTree_(0),
   otherSwitchTree_(0),
   isAutoRun_(0),
   tabPos_(0),
   tabWidget_(0),
+  pulseHBox_(0),
   cards_(0),
   mixers_(0)
 {
@@ -46,13 +46,17 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	builder->get_widget("cancel_button", cancelButton_);
 	builder->get_widget("sndcardbox", sndCardBox_);
 	builder->get_widget("mixerBox", mixerBox_);
-	builder->get_widget("ext_mixer", extMixer_);
 	builder->get_widget("playbacktree", playbackSwitchTree_);
 	builder->get_widget("capturetree", captureSwitchTree_);
 	builder->get_widget("othertree", otherSwitchTree_);
 	builder->get_widget("is_autorun", isAutoRun_);
 	builder->get_widget("tabspos", tabPos_);
 	builder->get_widget("tabwidget", tabWidget_);
+	builder->get_widget("pulseBox", pulseHBox_);
+	builder->get_widget("usePulse", usePulse_);
+#ifdef HAVE_PULSE
+	builder->get_widget("pulseDevices", pulseBox_);
+#endif
 	//signals
 	if (tabPos_) {
 		tabPos_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onTabPos));
@@ -72,6 +76,15 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	if (mixerBox_) {
 		mixerBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::mixerBoxChanged));
 	}
+#ifdef HAVE_PULSE
+	if (usePulse_) {
+		usePulse_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onPulseToggled));
+	}
+
+#else
+	pulseHBox_->set_visible(false);
+	usePulse_->set_visible(false);
+#endif
 	this->signal_delete_event().connect(sigc::mem_fun(*this, &SettingsFrame::onDeleteEvent));
 	settings_ = new settingsStr();
 	mixerId_ = 0;
@@ -80,11 +93,15 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 
 SettingsFrame::~SettingsFrame()
 {
+#ifdef HAVE_PULSE
+	delete pulseBox_;
+#endif
+	delete usePulse_;
+	delete pulseHBox_;
 	delete okButton_;
 	delete cancelButton_;
 	delete sndCardBox_;
 	delete mixerBox_;
-	delete extMixer_;
 	delete playbackSwitchTree_;
 	delete captureSwitchTree_;
 	delete otherSwitchTree_;
@@ -105,9 +122,6 @@ void SettingsFrame::initParms(settingsStr &str)
 	}
 	if (isAutoRun_) {
 		isAutoRun_->set_active(settings_->isAutorun());
-	}
-	if (extMixer_ && !settings_->externalMixer().empty()) {
-		extMixer_->set_text(settings_->externalMixer());
 	}
 	mixerId_ = settings_->mixerId();
 	cardId_ = settings_->cardId();
@@ -147,10 +161,6 @@ void SettingsFrame::onOkButton()
 	}
 	else {
 		settings_->setCardId(cardId_);
-	}
-	std::string text = extMixer_->get_text();
-	if (!text.empty()) {
-		settings_->setExternalMixer(text);
 	}
 	m_signal_ok_pressed(*settings_);
 	this->hide();
@@ -211,7 +221,7 @@ void SettingsFrame::setupMixers()
 				row = *(mixers_->append());
 				row[m_Columns.m_col_name] = Glib::ustring(*it);
 				if (i == (uint)mixerId_) {
-				mixerBox_->set_active(row);
+					mixerBox_->set_active(row);
 				}
 				++it;
 				i++;
@@ -379,6 +389,13 @@ void SettingsFrame::onAutorunToggled()
 {
 	m_signal_autorun_toggled(isAutoRun_->get_active());
 }
+
+#ifdef HAVE_PULSE
+void SettingsFrame::onPulseToggled()
+{
+	m_signal_pulse_toggled(usePulse_->get_active());
+}
+#endif
 
 SettingsFrame::type_toggled_signal SettingsFrame::signal_switches_toggled()
 {
