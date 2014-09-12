@@ -40,12 +40,15 @@ public:
 	~PulseCore();
 	state pState;
 	std::string defaultSink();
-	std::vector<std::string> getCardList() const;
+	const std::vector<std::string> &getCardList() const;
+	const std::vector<std::string> &getCardNames() const;
 	std::string getDeviceDescription(const std::string &name);
 	std::string getDeviceNameByIndex(int index);
 	int getCurrentDeviceIndex();
 	int getVolume();
 	bool getMute();
+	bool deviceNameExists(const std::string &name);
+	bool deviceDescriptionExists(const std::string &description);
 	void setVolume(int value);
 	void setMute(bool mute);
 	void setCurrentDevice(const std::string &name);
@@ -77,6 +80,8 @@ private:
 	PulseDevice *currentDevice_;
 	std::vector<std::string> sinksDescriptions_;
 	std::vector<std::string> sourcesDescriptions_;
+	std::vector<std::string> devicesNames_;
+	std::vector<std::string> devicesDescs_;
 };
 
 #endif // PULSECORE_H

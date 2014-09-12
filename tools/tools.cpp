@@ -117,3 +117,14 @@ std::string Tools::pathToFileName(const std::string &path)
 {
 	return g_path_get_basename(path.c_str());
 }
+
+void Tools::printList(const std::vector<std::string> &list)
+{
+	std::cout << "Printing vector contents" << std::endl;
+	std::vector<std::string> vector(list);
+	std::vector<std::string>::iterator it = vector.begin();
+	while (it != vector.end()) {
+		std::cout << std::string(*it) << std::endl;
+		++it;
+	}
+}

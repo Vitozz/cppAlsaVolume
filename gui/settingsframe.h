@@ -48,11 +48,13 @@ public:
 	type_void_signal signal_ok_pressed();
 	typedef sigc::signal<void, std::string, int ,bool> type_toggled_signal;
 	type_toggled_signal signal_switches_toggled();
-	type_toggled_signal signal_iconpack_changed();
 	typedef sigc::signal<void, bool> type_bool_signal;
 	type_bool_signal signal_autorun_toggled();
 	typedef sigc::signal<void, int> type_int_signal;
 	type_int_signal signal_sndcard_changed();
+	type_int_signal signal_mixer_changed();
+	type_int_signal signal_pulsedevices_changed();
+	type_bool_signal signal_pulsdev_toggled();
 protected:
 	class ModelCheckBox : public Gtk::TreeModel::ColumnRecord
 	{
@@ -81,6 +83,7 @@ protected:
 	void onAutorunToggled();
 #ifdef HAVE_PULSE
 	void onPulseToggled();
+	void onPulseDeviceChanged();
 #endif
 	//signals
 	type_void_signal m_signal_ok_pressed;
@@ -88,8 +91,10 @@ protected:
 	type_bool_signal m_signal_autorun_toggled;
 #ifdef HAVE_PULSE
 	type_bool_signal m_signal_pulse_toggled;
+	type_int_signal m_signal_pulsedev_changed;
 #endif
 	type_int_signal m_signal_sndcard_changed;
+	type_int_signal m_signal_mixer_changed;
 
 private:
 	void setupTreeModels();
@@ -110,9 +115,12 @@ private:
 	Gtk::CheckButton *tabPos_;
 	Gtk::Notebook *tabWidget_;
 	Gtk::Box *pulseHBox_;
+	Gtk::Box *alsaHBox_;
 	Gtk::CheckButton *usePulse_;
 #ifdef HAVE_PULSE
 	Gtk::ComboBox *pulseBox_;
+	int pulseDev_;
+	Glib::RefPtr<Gtk::ListStore> pulseCards_;
 #endif
 	Glib::RefPtr<Gtk::ListStore> cards_;
 	Glib::RefPtr<Gtk::ListStore> mixers_;
@@ -122,6 +130,7 @@ private:
 	settingsStr *settings_;
 	int mixerId_;
 	int cardId_;
+	bool isPulse_;
 };
 
 #endif // SETTINGSFRAME_H

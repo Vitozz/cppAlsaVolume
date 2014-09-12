@@ -29,16 +29,18 @@ public:
 	Settings(Settings const &);
 	~Settings();
 	int getSoundCard() const;
-	void saveSoundCard(int soundCard);
 	Glib::ustring getMixer() const;
+	bool getNotebookOrientation();
+	bool getAutorun();
+	bool usePulse();
+	std::string pulseDeviceName() const;
+	void saveSoundCard(int soundCard);
 	void saveMixer(const std::string& mixerName);
 	void saveNotebookOrientation(bool orient);
-	bool getNotebookOrientation();
 	void setAutorun(bool isAutorun);
-	bool getAutorun();
 	void setVersion(const Glib::ustring& version);
-	void setExternalMixer(const std::string &extMixerName);
-	std::string getExternalMixer();
+	void setUsePulse(bool use);
+	void savePulseDeviceName(const std::string &name);
 
 private:
 	void parseConfig(const Glib::ustring& keyFileName, const Glib::ustring& keyFileData);

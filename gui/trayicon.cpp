@@ -169,6 +169,7 @@ void TrayIcon::onPopup(guint button, guint32 activate_time)
 
 bool TrayIcon::onScrollEvent(GdkEventScroll* event)
 {
+	std::cout << "scrolled" << std::endl;
 	double value = 0.0;
 	if (event->direction == GDK_SCROLL_UP) {
 		value+=OFFSET;

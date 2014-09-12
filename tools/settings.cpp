@@ -29,8 +29,8 @@
 #define CARD "card"
 #define MIXER "mixer"
 #define ORIENT "orient"
-#define IPACK "iconpack"
-#define EMIXER "extmixer"
+#define ISPULSE "ispulse"
+#define PULSEDEV "pulsedev"
 
 Settings::Settings()
 : configFile_(new Glib::KeyFile()),
@@ -68,34 +68,10 @@ void Settings::parseConfig(const Glib::ustring& keyFileName, const Glib::ustring
 	Tools::saveFile(keyFileName, keyFileData);
 }
 
-int Settings::getSoundCard() const
-{
-	int card = 0;
-	try {
-		card = (int)configFile_->get_integer(Glib::ustring(MAIN),Glib::ustring(CARD));
-	}
-	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::86::KeyFileError " << ex.what() << std::endl;
-	}
-	return card;
-}
-
 void Settings::saveSoundCard(int soundCard)
 {
 	configFile_->set_integer(Glib::ustring(MAIN),Glib::ustring(CARD),soundCard);
 	parseConfig(iniFileName_, configFile_->to_data());
-}
-
-Glib::ustring Settings::getMixer() const
-{
-	Glib::ustring mixer("");
-	try {
-		mixer = Glib::ustring(configFile_->get_string(Glib::ustring(MAIN),Glib::ustring(MIXER)));
-	}
-	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::104::KeyFileError " << ex.what() << std::endl;
-	}
-	return mixer;
 }
 
 void Settings::saveMixer(const std::string &mixerName)
@@ -108,18 +84,6 @@ void Settings::saveNotebookOrientation(bool orient)
 {
 	configFile_->set_boolean(Glib::ustring(MAIN),Glib::ustring(ORIENT),orient);
 	parseConfig(iniFileName_, configFile_->to_data());
-}
-
-bool Settings::getNotebookOrientation()
-{
-	bool orient = false;
-	try {
-		orient = bool(configFile_->get_boolean(Glib::ustring(MAIN),Glib::ustring(ORIENT)));
-	}
-	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::128::KeyFileError " << ex.what() << std::endl;
-	}
-	return orient;
 }
 
 void Settings::loadDesktopFile(const std::string &fileName)
@@ -155,18 +119,6 @@ void Settings::setAutorun(bool isAutorun)
 	parseConfig(desktopFilePath_, desktopFile_->to_data());
 }
 
-bool Settings::getAutorun()
-{
-	bool isAutorun = false;
-	try {
-		isAutorun = !bool(desktopFile_->get_boolean(Glib::ustring("Desktop Entry"),Glib::ustring("Hidden")));
-	}
-	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::173::KeyFileError " << ex.what() << std::endl;
-	}
-	return isAutorun;
-}
-
 void Settings::setVersion(const Glib::ustring &version)
 {
 	version_ = version;
@@ -174,20 +126,86 @@ void Settings::setVersion(const Glib::ustring &version)
 	parseConfig(desktopFilePath_, desktopFile_->to_data());
 }
 
-std::string Settings::getExternalMixer()
+void Settings::setUsePulse(bool use)
 {
-	std::string extMixer;
-	try {
-		extMixer = std::string(configFile_->get_string(Glib::ustring(MAIN),Glib::ustring(EMIXER)));
-	}
-	catch (const Glib::KeyFileError& ex) {
-		std::cerr << "settings.cpp::216::KeyFileError " << ex.what() << std::endl;
-	}
-	return extMixer;
+	configFile_->set_boolean(Glib::ustring(MAIN), Glib::ustring(ISPULSE), use);
+	parseConfig(iniFileName_, configFile_->to_data());
 }
 
-void Settings::setExternalMixer(const std::string &extMixerName)
+void Settings::savePulseDeviceName(const std::string &name)
 {
-	configFile_->set_string(Glib::ustring(MAIN),Glib::ustring(EMIXER),extMixerName);
+	configFile_->set_string(Glib::ustring(MAIN), Glib::ustring(PULSEDEV), Glib::ustring(name));
 	parseConfig(iniFileName_, configFile_->to_data());
+}
+
+int Settings::getSoundCard() const
+{
+	int card = 0;
+	try {
+		card = (int)configFile_->get_integer(Glib::ustring(MAIN),Glib::ustring(CARD));
+	}
+	catch (const Glib::KeyFileError& ex) {
+		std::cerr << "settings.cpp::151::KeyFileError " << ex.what() << std::endl;
+	}
+	return card;
+}
+
+Glib::ustring Settings::getMixer() const
+{
+	Glib::ustring mixer("");
+	try {
+		mixer = Glib::ustring(configFile_->get_string(Glib::ustring(MAIN),Glib::ustring(MIXER)));
+	}
+	catch (const Glib::KeyFileError& ex) {
+		std::cerr << "settings.cpp::163::KeyFileError " << ex.what() << std::endl;
+	}
+	return mixer;
+}
+
+bool Settings::getNotebookOrientation()
+{
+	bool orient = false;
+	try {
+		orient = bool(configFile_->get_boolean(Glib::ustring(MAIN),Glib::ustring(ORIENT)));
+	}
+	catch (const Glib::KeyFileError& ex) {
+		std::cerr << "settings.cpp::175::KeyFileError " << ex.what() << std::endl;
+	}
+	return orient;
+}
+
+bool Settings::getAutorun()
+{
+	bool isAutorun = false;
+	try {
+		isAutorun = !bool(desktopFile_->get_boolean(Glib::ustring("Desktop Entry"),Glib::ustring("Hidden")));
+	}
+	catch (const Glib::KeyFileError& ex) {
+		std::cerr << "settings.cpp::187::KeyFileError " << ex.what() << std::endl;
+	}
+	return isAutorun;
+}
+
+std::string Settings::pulseDeviceName() const
+{
+	std::string device("");
+	try {
+		device = std::string(configFile_->get_string(Glib::ustring(MAIN),Glib::ustring(PULSEDEV)));
+	}
+	catch (const Glib::KeyFileError& ex) {
+		std::cerr << "settings.cpp::198::KeyFileError " << ex.what() << std::endl;
+	}
+	return device;
+}
+
+bool Settings::usePulse()
+{
+	bool isPulse = false;
+	try {
+		isPulse = bool(configFile_->get_boolean(Glib::ustring(MAIN),Glib::ustring(ISPULSE)));
+	}
+	catch (const Glib::KeyFileError& ex) {
+		std::cerr << "settings.cpp::211::KeyFileError " << ex.what() << std::endl;
+	}
+	return isPulse;
 }

@@ -33,13 +33,8 @@ PulseDevice::PulseDevice(const pa_source_info* i)
 : index_(i->index),
   type_(SOURCE)
 {
-#ifdef QT_VESRION
-	name_ = QString(i->name);
-	description_ = QString::fromLocal8Bit(i->description);
-#else
 	name_ = std::string(i->name);
 	description_ = std::string(i->description);
-#endif
 	volume.channels = i->volume.channels;
 	int n;
 	for (n = 0; n < volume.channels; ++n) {
@@ -54,13 +49,8 @@ PulseDevice::PulseDevice(const pa_sink_info* i)
 : index_(i->index),
   type_(SINK)
 {
-#ifdef QT_VESRION
-	name_ = QString(i->name);
-	description_ = QString::fromLocal8Bit(i->description);
-#else
 	name_ = std::string(i->name);
 	description_ = std::string(i->description);
-#endif
 	volume.channels = i->volume.channels;
 	int n;
 	for (n = 0; n < volume.channels; ++n) {
@@ -90,17 +80,6 @@ device_type PulseDevice::type() const
 	return type_;
 }
 
-#ifdef QT_VESRION
-const QString &PulseDevice::name() const
-{
-	return name_;
-}
-
-const QString &PulseDevice::description() const
-{
-	return description_;
-}
-#else
 const std::string &PulseDevice::name() const
 {
 	return name_;
@@ -110,7 +89,6 @@ const std::string &PulseDevice::description() const
 {
 	return description_;
 }
-#endif
 
 int PulseDevice::volume_percent() const
 {

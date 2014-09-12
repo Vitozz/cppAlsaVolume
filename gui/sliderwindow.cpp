@@ -88,14 +88,8 @@ bool SliderWindow::on_focus_out(GdkEventCrossing* event)
 
 void SliderWindow::setVolumeValue(double value)
 {
-	volumeValue_ += value;
-	if (volumeValue_ >= 100) {
-		volumeValue_ = 100;
-	}
-	else if (volumeValue_ <= 0){
-		volumeValue_ = 0;
-	}
-	volumeSlider_->set_value(volumeValue_);
+	volumeValue_ = value;
+	volumeSlider_->set_value(value);
 }
 
 SliderWindow::type_sliderwindow_signal SliderWindow::signal_volume_changed()

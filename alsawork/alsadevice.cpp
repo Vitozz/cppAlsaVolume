@@ -1,3 +1,22 @@
+/*
+ * alsadevice.cpp
+ * Copyright (C) 2014 Vitaly Tonkacheyev
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
 #include "alsadevice.h"
 
 const double ZERO = 0.0;
@@ -138,14 +157,15 @@ void AlsaDevice::setDeviceVolume(double volume)
 	if (!currentMixerName_.empty()) {
 		snd_mixer_t *handle = getMixerHanlde(id_);
 		snd_mixer_elem_t *element = initMixerElement(handle, currentMixerName_.c_str());
-		long min, max;
-		long realVolume = long(volume)*(max - min) / 100;
+		long min, max, realVolume;
 		if (snd_mixer_selem_has_playback_volume(element)) {
 			checkError(snd_mixer_selem_get_playback_volume_range(element, &min, &max));
+			realVolume = long(volume)*((max - min) / 100);
 			checkError(snd_mixer_selem_set_playback_volume_all(element, realVolume));
 		}
 		else if (snd_mixer_selem_has_capture_volume(element)) {
 			checkError(snd_mixer_selem_get_capture_volume_range(element, &min, &max));
+			realVolume = long(volume)*((max - min) / 100);
 			checkError(snd_mixer_selem_set_capture_volume_all(element, realVolume));
 		}
 		else {
@@ -161,14 +181,20 @@ double AlsaDevice::getVolume()
 		snd_mixer_t *handle = getMixerHanlde(id_);
 		snd_mixer_elem_t *elem = initMixerElement(handle, currentMixerName_.c_str());
 		long minv, maxv, outvol;
+		double min, max, volume;
 		snd_mixer_selem_channel_id_t chanelid = checkMixerChannels(elem);
 		if (snd_mixer_selem_has_playback_volume(elem) || snd_mixer_selem_has_playback_volume_joined(elem)) {
 			checkError(snd_mixer_selem_get_playback_volume_range(elem, &minv, &maxv));
 			if (snd_mixer_selem_has_playback_channel(elem, chanelid)) {
 				checkError(snd_mixer_selem_get_playback_volume(elem, chanelid, &outvol));
 			}
-			if ((maxv - minv) != 0) {
-				return double(100*(outvol - minv)/(maxv-minv));
+			min = (double)minv;
+			max = (double)maxv;
+			volume = (double)outvol;
+			if ((max - min) != 0) {
+				double delta = 100/(max - min);
+				volume = (volume - min)/delta;
+				return volume;
 			}
 		}
 		if (snd_mixer_selem_has_capture_volume(elem) || snd_mixer_selem_has_capture_volume_joined(elem)) {
@@ -176,8 +202,13 @@ double AlsaDevice::getVolume()
 			if (snd_mixer_selem_has_capture_channel(elem, chanelid)) {
 				checkError(snd_mixer_selem_get_capture_volume(elem, chanelid, &outvol));
 			}
-			if ((maxv - minv) != 0) {
-				return double(100*(outvol - minv)/(maxv-minv));
+			min = (double)minv;
+			max = (double)maxv;
+			volume = (double)outvol;
+			if ((max - min) != 0) {
+				double delta = 100/(max - min);
+				volume = (volume - min)/delta;
+				return volume;
 			}
 		}
 		checkError(snd_mixer_close(handle));
@@ -261,6 +292,7 @@ void AlsaDevice::setCurrentMixer(int id)
 	if(id >= 0 && id < (int)mixers_.size()) {
 		currentMixerId_ = id;
 		currentMixerName_ = mixers_.at(id);
+		std::cout << currentMixerName_ << std::endl;
 	}
 }
 
@@ -313,4 +345,14 @@ bool AlsaDevice::haveMixers()
 MixerSwitches AlsaDevice::switches()
 {
 	return *switches_;
+}
+
+int AlsaDevice::currentMixerId()
+{
+	return currentMixerId_;
+}
+
+const std::string &AlsaDevice::currentMixer() const
+{
+	return currentMixerName_;
 }

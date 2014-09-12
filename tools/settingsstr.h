@@ -35,9 +35,12 @@ public:
 	int pulseDeviceId();
 	bool notebookOrientation();
 	bool isAutorun();
-	std::string &externalMixer();
-	std::vector<std::string> &cardList();
-	std::vector<std::string> &mixerList();
+	bool usePulse();
+	const std::string &pulseDeviceName() const;
+	const std::string &pulseDeviceDesc() const;
+	const std::vector<std::string> &cardList() const;
+	const std::vector<std::string> &mixerList() const;
+	const std::vector<std::string> &pulseDevices() const;
 	MixerSwitches &switchList();
 	void setCardId(unsigned int id);
 	void setMixerId(unsigned int id);
@@ -48,19 +51,25 @@ public:
 	void setList(ListType listType, const std::vector<std::string> &list);
 	void clear(ListType listType);
 	void clearSwitches();
-	void setExternalMixer(const std::string &name);
 	void setPulseDeviceId(int id);
+	void setPulseDeviceName(const std::string &name);
+	void setPulseDeviceDesc(const std::string &description);
+	void setPulseDevices(const std::vector<std::string> &devices);
+	void setUsePulse(bool use);
 
 private:
 	unsigned int cardId_;
 	unsigned int mixerId_;
-	int pulseDeviceId_;
 	bool notebookOrientation_;
 	bool isAutorun_;
+	bool usePulse_;
 	std::vector<std::string> cardList_;
 	std::vector<std::string> mixerList_;
 	MixerSwitches switchList_;
-	std::string extMixer_;
+	std::vector<std::string> pulseDevices_;
+	int pulseDeviceId_;
+	std::string pulseDeviceName_;
+	std::string pulseDeviceDesc_;
 };
 
 #endif // SETTINGSSTR_H

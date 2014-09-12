@@ -25,7 +25,7 @@ settingsStr::settingsStr()
   mixerId_(0),
   notebookOrientation_(false),
   isAutorun_(false),
-  extMixer_(std::string())
+  usePulse_(false)
 {
 }
 
@@ -38,7 +38,11 @@ settingsStr::settingsStr(settingsStr &str)
 	cardList_ = str.cardList();
 	mixerList_ = str.mixerList();
 	switchList_ = str.switchList();
-	extMixer_ = str.externalMixer();
+	usePulse_ = str.usePulse();
+	pulseDeviceId_ = str.pulseDeviceId();
+	pulseDeviceName_ = str.pulseDeviceName();
+	pulseDevices_ = str.pulseDevices();
+
 }
 
 unsigned int settingsStr::cardId() const
@@ -61,19 +65,39 @@ bool settingsStr::isAutorun()
 	return isAutorun_;
 }
 
-std::string &settingsStr::externalMixer()
-{
-	return extMixer_;
-}
-
-std::vector<std::string> &settingsStr::cardList()
+const std::vector<std::string> &settingsStr::cardList() const
 {
 	return cardList_;
 }
 
-std::vector<std::string> &settingsStr::mixerList()
+const std::vector<std::string> &settingsStr::mixerList() const
 {
 	return mixerList_;
+}
+
+int settingsStr::pulseDeviceId()
+{
+	return pulseDeviceId_;
+}
+
+const std::string &settingsStr::pulseDeviceName() const
+{
+	return pulseDeviceName_;
+}
+
+const std::string &settingsStr::pulseDeviceDesc() const
+{
+	return pulseDeviceDesc_;
+}
+
+const std::vector<std::string> &settingsStr::pulseDevices() const
+{
+	return pulseDevices_;
+}
+
+bool settingsStr::usePulse()
+{
+	return usePulse_;
 }
 
 void settingsStr::setCardId(unsigned int id)
@@ -153,17 +177,29 @@ void settingsStr::clearSwitches()
 	switchList_.clear(ENUM);
 }
 
-void settingsStr::setExternalMixer(const std::string &name)
-{
-	extMixer_ = name;
-}
-
-int settingsStr::pulseDeviceId()
-{
-	return pulseDeviceId_;
-}
-
 void settingsStr::setPulseDeviceId(int id)
 {
 	pulseDeviceId_ = id;
+}
+
+void settingsStr::setPulseDeviceName(const std::string &name)
+{
+	pulseDeviceName_ = name;
+}
+
+void settingsStr::setPulseDeviceDesc(const std::string &description)
+{
+	pulseDeviceDesc_ = description;
+}
+
+void settingsStr::setPulseDevices(const std::vector<std::string> &devices)
+{
+	if(!pulseDevices_.empty() && !devices.empty())
+		pulseDevices_.clear();
+	pulseDevices_.assign(devices.begin(), devices.end());
+}
+
+void settingsStr::setUsePulse(bool use)
+{
+	usePulse_ = use;
 }

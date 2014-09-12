@@ -53,6 +53,7 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	builder->get_widget("tabspos", tabPos_);
 	builder->get_widget("tabwidget", tabWidget_);
 	builder->get_widget("pulseBox", pulseHBox_);
+	builder->get_widget("alsaBox", alsaHBox_);
 	builder->get_widget("usePulse", usePulse_);
 #ifdef HAVE_PULSE
 	builder->get_widget("pulseDevices", pulseBox_);
@@ -80,7 +81,9 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	if (usePulse_) {
 		usePulse_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onPulseToggled));
 	}
-
+	if (pulseBox_) {
+		pulseBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::onPulseDeviceChanged));
+	}
 #else
 	pulseHBox_->set_visible(false);
 	usePulse_->set_visible(false);
@@ -89,6 +92,7 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	settings_ = new settingsStr();
 	mixerId_ = 0;
 	cardId_ = 0;
+	pulseHBox_->set_visible(false);
 }
 
 SettingsFrame::~SettingsFrame()
@@ -123,6 +127,12 @@ void SettingsFrame::initParms(settingsStr &str)
 	if (isAutoRun_) {
 		isAutoRun_->set_active(settings_->isAutorun());
 	}
+#ifdef HAVE_PULSE
+	if (usePulse_) {
+		usePulse_->set_active(settings_->usePulse());
+	}
+	pulseDev_ = settings_->pulseDeviceId();
+#endif
 	mixerId_ = settings_->mixerId();
 	cardId_ = settings_->cardId();
 	setupTreeModels();
@@ -188,13 +198,14 @@ void SettingsFrame::setupTreeModels()
 void SettingsFrame::setupSoundCards()
 {
 	if (sndCardBox_){
+		std::vector<std::string> cards = settings_->cardList();
 		sndCardBox_->clear();
 		cards_ = Gtk::ListStore::create(m_Columns);
 		sndCardBox_->set_model(cards_);
 		Gtk::TreeModel::Row row;
-		std::vector<std::string>::iterator it = settings_->cardList().begin();
+		std::vector<std::string>::iterator it = cards.begin();
 		uint i = 0;
-		while (it != settings_->cardList().end()) {
+		while (it != cards.end()) {
 			row = *(cards_->append());
 			row[m_Columns.m_col_name] = Glib::ustring(*it);
 			if (i == (uint)cardId_) {
@@ -205,6 +216,28 @@ void SettingsFrame::setupSoundCards()
 		}
 		sndCardBox_->pack_start(m_Columns.m_col_name);
 	}
+#ifdef HAVE_PULSE
+	if(pulseBox_) {
+		std::cout << pulseDev_ << std::endl;
+		pulseBox_->clear();
+		pulseCards_ = Gtk::ListStore::create(m_Columns);
+		pulseBox_->set_model(pulseCards_);
+		Gtk::TreeModel::Row row;
+		std::vector<std::string> cards(settings_->pulseDevices());
+		std::vector<std::string>::iterator it = cards.begin();
+		uint i = 0;
+		while (it != cards.end()) {
+			row = *(pulseCards_->append());
+			row[m_Columns.m_col_name] = Glib::ustring(*it);
+			if (i == (uint)pulseDev_) {
+				pulseBox_->set_active(row);
+			}
+			++it;
+			++i;
+		}
+		pulseBox_->pack_start(m_Columns.m_col_name);
+	}
+#endif
 }
 
 void SettingsFrame::setupMixers()
@@ -215,9 +248,10 @@ void SettingsFrame::setupMixers()
 		mixerBox_->set_model(mixers_);
 		if (settings_->mixerList().size() > 0) {
 			Gtk::TreeModel::Row row;
-			std::vector<std::string>::iterator it = settings_->mixerList().begin();
+			std::vector<std::string> mixers = settings_->mixerList();
+			std::vector<std::string>::iterator it = mixers.begin();
 			uint i = 0;
-			while (it != settings_->mixerList().end()) {
+			while (it != mixers.end()) {
 				row = *(mixers_->append());
 				row[m_Columns.m_col_name] = Glib::ustring(*it);
 				if (i == (uint)mixerId_) {
@@ -318,6 +352,15 @@ void SettingsFrame::sndBoxChanged()
 	m_signal_sndcard_changed(cardId_);
 }
 
+#ifdef HAVE_PULSE
+void SettingsFrame::onPulseDeviceChanged()
+{
+	pulseDev_ = pulseBox_->get_active_row_number();
+	settings_->setPulseDeviceId(pulseDev_);
+	m_signal_pulsedev_changed(pulseDev_);
+}
+#endif
+
 void SettingsFrame::updateMixers(const std::vector<std::string> &mixers)
 {
 	settings_->setList(MIXERS, mixers);
@@ -333,7 +376,11 @@ void SettingsFrame::updateSwitches(const MixerSwitches &slist)
 
 void SettingsFrame::mixerBoxChanged()
 {
-	mixerId_ = mixerBox_->get_active_row_number();
+	int row = mixerBox_->get_active_row_number();
+	if (mixerId_ != row && row >=0) {
+		mixerId_ = row;
+		m_signal_mixer_changed(row);
+	}
 }
 
 void SettingsFrame::onPlaybackCellToggled(const Glib::ustring& path)
@@ -393,7 +440,10 @@ void SettingsFrame::onAutorunToggled()
 #ifdef HAVE_PULSE
 void SettingsFrame::onPulseToggled()
 {
-	m_signal_pulse_toggled(usePulse_->get_active());
+	isPulse_ = usePulse_->get_active();
+	alsaHBox_->set_visible(!isPulse_);
+	pulseHBox_->set_visible(isPulse_);
+	m_signal_pulse_toggled(isPulse_);
 }
 #endif
 
@@ -416,3 +466,20 @@ SettingsFrame::type_int_signal SettingsFrame::signal_sndcard_changed()
 {
 	return m_signal_sndcard_changed;
 }
+
+SettingsFrame::type_int_signal SettingsFrame::signal_mixer_changed()
+{
+	return m_signal_mixer_changed;
+}
+
+#ifdef HAVE_PULSE
+SettingsFrame::type_int_signal SettingsFrame::signal_pulsedevices_changed()
+{
+	return m_signal_pulsedev_changed;
+}
+
+SettingsFrame::type_bool_signal SettingsFrame::signal_pulsdev_toggled()
+{
+	return m_signal_pulse_toggled;
+}
+#endif

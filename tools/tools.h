@@ -47,6 +47,7 @@ namespace Tools {
 	void saveFile(const std::string &fileName, const std::string &fileData);
 	std::pair<bool, int> itemExists(const std::vector<std::string> &vector_, const std::string& item);
 	std::string pathToFileName(const std::string &path);
+	void printList(const std::vector<std::string> &list);
 	//Constatnts
 	const std::string PathSuffix = "/share/alsavolume/";
 }

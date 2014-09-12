@@ -1,3 +1,9 @@
+2014-09-12
+v0.2.0
+  - Added initial pulseaudio support
+  - Changed work with alsa
+  - Fixed errors
+
 2014-07-13
 v0.1.9
   - Updated gladefiles

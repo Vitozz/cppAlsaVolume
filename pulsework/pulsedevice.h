@@ -21,9 +21,6 @@
 
 #include "pulse/pulseaudio.h"
 #include <iostream>
-#ifdef QT_VESRION
-#include <QString>
-#endif
 
 enum device_type {
 	SOURCE,
@@ -38,13 +35,8 @@ public:
 	PulseDevice(const pa_sink_info* i);
 	uint32_t index() const;
 	device_type type() const;
-#ifdef QT_VESRION
-	const QString &name() const;
-	const QString &description() const;
-#else
 	const std::string &name() const;
 	const std::string &description() const;
-#endif
 	pa_cvolume volume;
 	int volume_percent() const;
 	bool mute() const;
@@ -54,13 +46,8 @@ private:
 private:
 	uint32_t index_;
 	device_type type_;
-#ifdef QT_VESRION
-	QString name_;
-	QString description_;
-#else
 	std::string name_;
 	std::string description_;
-#endif
 	int volume_percent_;
 	bool mute_;
 };

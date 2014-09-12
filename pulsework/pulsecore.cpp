@@ -18,6 +18,7 @@
 
 #include "pulsecore.h"
 #include "pulse/pulseaudio.h"
+#include "../tools/tools.h"
 
 #include "glibmm/fileutils.h"
 #include "glib.h"
@@ -295,7 +296,7 @@ void PulseCore::setVolume(int value)
 
 void PulseCore::setMute(bool mute)
 {
-	setMute_((*currentDevice_), mute);
+	setMute_((*currentDevice_), !mute);
 }
 
 void PulseCore::updateDevices()
@@ -312,14 +313,32 @@ void PulseCore::updateDevices()
 	if(!sourcesDescriptions_.empty()) {
 		sourcesDescriptions_.clear();
 	}
-	std::vector<PulseDevice> sinkDevices = std::vector<PulseDevice>(getSinks());
-	sinks_.assign(sinkDevices.begin(), sinkDevices.end());
-	std::vector<PulseDevice> sourceDevices = std::vector<PulseDevice>(getSources());
-	sources_.assign(sourceDevices.begin(), sourceDevices.end());
-	std::vector<std::string> sinksDescs = std::vector<std::string>(getSinksDescriptions());
-	sinksDescriptions_.assign(sinksDescs.begin(), sinksDescs.end());
-	std::vector<std::string> sourcesDescs = std::vector<std::string>(getSinksDescriptions());
-	sourcesDescriptions_.assign(sourcesDescs.begin(), sourcesDescs.end());
+	if(!devicesNames_.empty()) {
+		devicesNames_.clear();
+	}
+	if(!devicesDescs_.empty()) {
+		devicesDescs_.clear();
+	}
+	std::vector<PulseDevice> sinkDevices(getSinks());
+	sinks_.insert(sinks_.end(), sinkDevices.begin(), sinkDevices.end());
+	std::vector<PulseDevice> sourceDevices(getSources());
+	sources_.insert(sources_.end(), sourceDevices.begin(), sourceDevices.end());
+	std::vector<PulseDevice>::iterator it = sinks_.begin();
+	while(it != sinks_.end()) {
+		PulseDevice device = *it;
+		devicesNames_.push_back(device.name());
+		sinksDescriptions_.push_back(device.description());
+		++it;
+	}
+	std::vector<PulseDevice>::iterator it1 = sources_.begin();
+	while(it1 != sources_.end()) {
+		PulseDevice device = *it1;
+		devicesNames_.push_back(device.name());
+		sourcesDescriptions_.push_back(device.description());
+		++it1;
+	}
+	devicesDescs_.insert(devicesDescs_.end(), sinksDescriptions_.begin(), sinksDescriptions_.end());
+	devicesDescs_.insert(devicesDescs_.end(), sourcesDescriptions_.begin(), sourcesDescriptions_.end());
 }
 
 int PulseCore::getVolume()
@@ -332,24 +351,28 @@ bool PulseCore::getMute()
 	return currentDevice_->mute();
 }
 
-std::vector<std::string> PulseCore::getCardList() const
+const std::vector<std::string> &PulseCore::getCardList() const
 {
-	std::vector<std::string> devices = std::vector<std::string>();
-	devices.assign(sinksDescriptions_.begin(), sinksDescriptions_.end());
-	devices.insert(devices.end(), sourcesDescriptions_.begin(), sourcesDescriptions_.end());
-	return devices;
+	return devicesDescs_;
+}
+
+const std::vector<std::string> &PulseCore::getCardNames() const
+{
+	return devicesNames_;
 }
 
 PulseDevice PulseCore::getDeviceByIndex(int index)
 {
 	PulseDevice device = getDefaultSink();
-	int sinksSize = sinksDescriptions_.size();
-	int deltaIndex = sinksSize - index;
-	if (index < sinksSize) {
-		device = getSink(index);
-	}
-	else if ((uint)deltaIndex < sourcesDescriptions_.size()){
-		device = getSource(deltaIndex);
+	if (index >=0 && index < (int)(sinksDescriptions_.size() + sourcesDescriptions_.size())) {
+		int sinksSize = sinksDescriptions_.size();
+		int deltaIndex = sinksSize - index;
+		if (index < sinksSize) {
+			device = getSink(index);
+		}
+		else if ((uint)deltaIndex < sourcesDescriptions_.size()){
+			device = getSource(deltaIndex);
+		}
 	}
 	return device;
 }
@@ -365,4 +388,14 @@ int PulseCore::getCurrentDeviceIndex()
 		return (sinksSize + absIndex);
 	}
 	return getDefaultSink().index();
+}
+
+bool PulseCore::deviceNameExists(const std::string &name)
+{
+	return Tools::itemExists(devicesNames_, name).first;
+}
+
+bool PulseCore::deviceDescriptionExists(const std::string &description)
+{
+	return Tools::itemExists(devicesDescs_, description).first;
 }

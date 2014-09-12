@@ -30,17 +30,15 @@ SOURCES += main.cpp \
 	gui/sliderwindow.cpp \
 	gui/settingsframe.cpp \
 	alsawork/alsawork.cpp \
-	alsawork/volumemixers.cpp \
 	alsawork/mixerswitches.cpp \
 	tools/settings.cpp \
 	tools/tools.cpp \
 	tools/settingsstr.cpp \
 	tools/core.cpp \
-    alsawork/alsadevice.cpp
+	alsawork/alsadevice.cpp
 
 HEADERS += \
 	alsawork/alsawork.h \
-	alsawork/volumemixers.h \
 	alsawork/mixerswitches.h \
 	gui/trayicon.h \
 	gui/sliderwindow.h \
@@ -49,7 +47,7 @@ HEADERS += \
 	tools/tools.h \
 	tools/settingsstr.h \
 	tools/core.h \
-    alsawork/alsadevice.h
+	alsawork/alsadevice.h
 
 INCLUDEPATH += \
 	/usr/include/gtkmm-3.0 \

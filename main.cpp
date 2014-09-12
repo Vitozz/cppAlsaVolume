@@ -66,6 +66,7 @@ int main (int argc, char *argv[])
 					  core->getActiveMixer(),
 					  core->getMuted());
 	if (trayIcon && sliderWindow) {
+		sliderWindow->setVolumeValue(core->getVolumeValue());
 		core->signal_value_changed().connect(sigc::mem_fun(*trayIcon, &TrayIcon::on_signal_volume_changed));
 		core->signal_mixer_muted().connect(sigc::mem_fun(*trayIcon, &TrayIcon::setMuted));
 		core->signal_volume_changed().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::setVolumeValue));
@@ -74,10 +75,8 @@ int main (int argc, char *argv[])
 		trayIcon->signal_ask_settings().connect(sigc::mem_fun(*core, &Core::runSettings));
 		trayIcon->signal_on_restore().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::setWindowPosition));
 		trayIcon->signal_save_settings().connect(sigc::mem_fun(*core, &Core::saveSettings));
-		trayIcon->signal_value_changed().connect(sigc::mem_fun(*core, &Core::onTrayIconScroll));
 		trayIcon->signal_on_mute().connect(sigc::mem_fun(*core, &Core::soundMuted));
 		trayIcon->signal_value_changed().connect(sigc::mem_fun(*core, &Core::onTrayIconScroll));
-		core->onTrayIconScroll(core->getVolumeValue());
 		sliderWindow->set_visible(false);
 		return app->run();
 	}

@@ -28,7 +28,7 @@
 #include "settingsstr.h"
 #include <vector>
 #ifdef HAVE_PULSE
-#include "pulsework/pulsecore.h"
+#include "../pulsework/pulsecore.h"
 #endif
 
 class Core
@@ -40,7 +40,6 @@ public:
 	void runAboutDialog();
 	std::string getSoundCardName() const;
 	std::string getActiveMixer() const;
-	void setActiveCard(int card);
 	void setActiveMixer(int index);
 	void saveSettings();
 	void runSettings();
@@ -53,6 +52,7 @@ public:
 	void onVolumeSlider(double value);
 	void onSettingsDialogOk(settingsStr &str);
 	void onSettingsDialogAutostart(bool isAutorun);
+	void onSettingsDialogUsePulse(bool isPulse);
 
 	typedef sigc::signal<void, double> type_double_signal;
 	type_double_signal signal_volume_changed();
@@ -66,7 +66,12 @@ private:
 	type_volumevalue_signal m_signal_value_changed;
 	type_bool_signal m_signal_mixer_muted;
 	void updateControls(int cardId);
+#ifdef HAVE_PULSE
+	void updatePulseDevices(int deviceId);
+#endif
 	void updateSettings(int cardId);
+	void mixerChanged(int mixerId);
+	void updateTrayIcon(double value);
 
 private:
 	Settings *settings_;
@@ -76,12 +81,12 @@ private:
 	double volumeValue_;
 	SettingsFrame *settingsDialog_;
 	bool isPulse_;
+	std::vector<std::string> alsaCards_;
 #ifdef HAVE_PULSE
 	PulseCore *pulse_;
 	std::string pulseDevice_;
 	std::string pulseDeviceDesc_;
-	int pulseVolume_;
-	bool pulseMuted_;
+	std::vector<std::string> pulseDevices_;
 #endif
 };
 
