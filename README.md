@@ -7,6 +7,7 @@ Build Deps:
 	- gtkmm-3.0 (libgtkmm-3.0-dev package in Ubuntu)
 	- glib (libglibmm-2.4-dev package in Ubuntu)
 	- alsa/asoundlib (libasound2-dev package in Ubuntu)
+	- libpulse (only for pulseaudio support)
 
 Howto build application:
 
@@ -16,19 +17,33 @@ if You have Qt installed:
 
 >make
 
+to build wiht pulseaudio support:
+
+>qmake CONFIG+=pulseaudio
+
+>make
+
 if You have cmake installed
 
->mkdir build
-
->cd build
+>mkdir build && cd build
 
 >cmake ..
+
+>make
+
+to build wiht pulseaudio support:
+
+>cmake -DUSE_PULSE=ON ..
 
 >make
 
 else:
 
 >g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa \` \`pkg-config --libs gtkmm-3.0 alsa \`
+
+to build wiht pulseaudio support:
+
+>g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp pulsework/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa libpulse \` \`pkg-config --libs gtkmm-3.0 alsa libpulse \` 
 
 What features available:
 
@@ -38,7 +53,4 @@ What features available:
 	- volume control using popup window with slider
 	- mute sound on middleclick and by checkbox selection
 	- enable or disable sound card switches in settings dialog
-
-KNOWN ISSUES:
-	- on newer versions of pulseaudio (4.0) sound mute (switch) does not work correctly (recomended to use original
-	pulseaudio control tool (pavucontrol)).
+	- use PulseAaudio volume controll (optionally)

@@ -222,10 +222,6 @@ void Core::updateControls(int cardId)
 	settingsStr_->clearSwitches();
 	int soundCardId = (alsaWork_->cardExists(cardId)) ? cardId : alsaWork_->getFirstCardWithMixers();
 	alsaWork_->setCurrentCard(soundCardId);
-	if (!alsaWork_->haveVolumeMixers()) {
-		soundCardId = alsaWork_->getFirstCardWithMixers();
-		alsaWork_->setCurrentCard(soundCardId);
-	}
 	if (!mixerName_.empty()) {
 		alsaWork_->setCurrentMixer(mixerName_);
 	}
@@ -289,7 +285,6 @@ void Core::onTrayIconScroll(double value)
 	else if (volumeValue_ <= 0){
 		volumeValue_ = 0;
 	}
-	std::cout << "294" << volumeValue_ <<std::endl;
 	m_signal_volume_changed(volumeValue_);
 }
 
@@ -310,7 +305,13 @@ void Core::onVolumeSlider(double value)
 void Core::updateTrayIcon(double value)
 {
 	if (!isPulse_) {
-		m_signal_value_changed(value, getSoundCardName(), getActiveMixer());
+		std::string mixer = getActiveMixer();
+		if (!mixer.empty()) {
+			m_signal_value_changed(value, getSoundCardName(), mixer);
+		}
+		else {
+			m_signal_value_changed(value, getSoundCardName(), std::string("N/A"));
+		}
 	}
 	else {
 		m_signal_value_changed(value, getSoundCardName(), "Volume: ");
@@ -320,8 +321,6 @@ void Core::updateTrayIcon(double value)
 void Core::mixerChanged(int mixerId)
 {
 	alsaWork_->setCurrentMixer(mixerId);
-	std::cout << mixerId << std::endl;
-	std::cout << alsaWork_->getCurrentMixerName() << std::endl;
 	if (!isPulse_) {
 		volumeValue_ = alsaWork_->getAlsaVolume();
 	}

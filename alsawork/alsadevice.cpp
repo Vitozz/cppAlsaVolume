@@ -180,7 +180,9 @@ double AlsaDevice::getVolume()
 	if (!currentMixerName_.empty()) {
 		snd_mixer_t *handle = getMixerHanlde(id_);
 		snd_mixer_elem_t *elem = initMixerElement(handle, currentMixerName_.c_str());
-		long minv, maxv, outvol;
+		long minv = 0L;
+		long maxv = 0L;
+		long outvol = 0L;
 		double min, max, volume;
 		snd_mixer_selem_channel_id_t chanelid = checkMixerChannels(elem);
 		if (snd_mixer_selem_has_playback_volume(elem) || snd_mixer_selem_has_playback_volume_joined(elem)) {
@@ -279,7 +281,7 @@ bool AlsaDevice::getMute()
 	return true;
 }
 
-std::string AlsaDevice::formatCardName(int id)
+std::string AlsaDevice::formatCardName(int id) const
 {
 	size_t size = 64;
 	char *name = (char*)malloc(size);
@@ -292,7 +294,6 @@ void AlsaDevice::setCurrentMixer(int id)
 	if(id >= 0 && id < (int)mixers_.size()) {
 		currentMixerId_ = id;
 		currentMixerName_ = mixers_.at(id);
-		std::cout << currentMixerName_ << std::endl;
 	}
 }
 
@@ -342,7 +343,7 @@ bool AlsaDevice::haveMixers()
 	return !mixers_.empty();
 }
 
-MixerSwitches AlsaDevice::switches()
+const MixerSwitches &AlsaDevice::switches() const
 {
 	return *switches_;
 }

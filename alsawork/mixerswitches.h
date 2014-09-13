@@ -27,14 +27,15 @@ class MixerSwitches
 {
 public:
 	MixerSwitches();
+	MixerSwitches(const MixerSwitches &ms);
 	void pushBack(SwitchType sType, switchcap &item);
 	void setCaptureSwitchList(const std::vector<switchcap> &list);
 	void setPlaybackSwitchList(const std::vector<switchcap> &list);
 	void setEnumSwitchList(const std::vector<switchcap> &list);
 	void clear(SwitchType sType);
-	std::vector<switchcap> &captureSwitchList();
-	std::vector<switchcap> &playbackSwitchList();
-	std::vector<switchcap> &enumSwitchList();
+	const std::vector<switchcap> &captureSwitchList() const;
+	const std::vector<switchcap> &playbackSwitchList() const;
+	const std::vector<switchcap> &enumSwitchList() const;
 
 private:
 	std::vector<switchcap> captureSwitchList_;

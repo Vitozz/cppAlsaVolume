@@ -25,24 +25,36 @@ settingsStr::settingsStr()
   mixerId_(0),
   notebookOrientation_(false),
   isAutorun_(false),
-  usePulse_(false)
+  usePulse_(false),
+  cardList_(std::vector<std::string>()),
+  mixerList_(std::vector<std::string>()),
+  switchList_(new MixerSwitches()),
+  pulseDevices_(std::vector<std::string>()),
+  pulseDeviceId_(0),
+  pulseDeviceName_(std::string()),
+  pulseDeviceDesc_(std::string())
 {
 }
 
 settingsStr::settingsStr(settingsStr &str)
+: cardId_(str.cardId()),
+  mixerId_(str.mixerId()),
+  notebookOrientation_(str.notebookOrientation()),
+  isAutorun_(str.isAutorun()),
+  cardList_(str.cardList()),
+  mixerList_(str.mixerList()),
+  switchList_(new MixerSwitches(str.switchList())),
+  pulseDevices_(str.pulseDevices()),
+  usePulse_(str.usePulse()),
+  pulseDeviceId_(str.pulseDeviceId()),
+  pulseDeviceName_(str.pulseDeviceName()),
+  pulseDeviceDesc_(str.pulseDeviceDesc())
 {
-	cardId_ = str.cardId();
-	mixerId_ = str.mixerId();
-	notebookOrientation_ = str.notebookOrientation();
-	isAutorun_ = str.isAutorun();
-	cardList_ = str.cardList();
-	mixerList_ = str.mixerList();
-	switchList_ = str.switchList();
-	usePulse_ = str.usePulse();
-	pulseDeviceId_ = str.pulseDeviceId();
-	pulseDeviceName_ = str.pulseDeviceName();
-	pulseDevices_ = str.pulseDevices();
+}
 
+settingsStr::~settingsStr()
+{
+	delete switchList_;
 }
 
 unsigned int settingsStr::cardId() const
@@ -134,7 +146,8 @@ void settingsStr::pushBack(ListType listType, const std::string &item)
 
 void settingsStr::addMixerSwitch(const MixerSwitches &switchItem)
 {
-	switchList_ = switchItem;
+	switchList_ = 0;
+	switchList_ = new MixerSwitches(switchItem);
 }
 
 void settingsStr::setList(ListType listType,const  std::vector<std::string> &list)
@@ -150,9 +163,9 @@ void settingsStr::setList(ListType listType,const  std::vector<std::string> &lis
 
 }
 
-MixerSwitches &settingsStr::switchList()
+const MixerSwitches &settingsStr::switchList() const
 {
-	return switchList_;
+	return *switchList_;
 }
 
 void settingsStr::clear(ListType listType)
@@ -172,9 +185,9 @@ void settingsStr::clear(ListType listType)
 
 void settingsStr::clearSwitches()
 {
-	switchList_.clear(PLAYBACK);
-	switchList_.clear(CAPTURE);
-	switchList_.clear(ENUM);
+	switchList_->clear(PLAYBACK);
+	switchList_->clear(CAPTURE);
+	switchList_->clear(ENUM);
 }
 
 void settingsStr::setPulseDeviceId(int id)

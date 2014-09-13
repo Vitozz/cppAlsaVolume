@@ -10,7 +10,4 @@ What features available:
 	- volume control using popup window with slider
 	- mute sound on middleclick and by checkbox selection
 	- enable or disable sound card switches in settings dialog
-
-KNOWN ISSUES:
-	- on newer versions of pulseaudio (4.0) sound mute (switch) does not work correctly (recomended to use original
-	pulseaudio control tool (pavucontrol)).
+	- use PulseAudio volume control (optionally)

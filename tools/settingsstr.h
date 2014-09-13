@@ -30,6 +30,7 @@ class settingsStr
 public:
 	settingsStr();
 	settingsStr(settingsStr &str);
+	~settingsStr();
 	unsigned int cardId() const;
 	unsigned int mixerId() const;
 	int pulseDeviceId();
@@ -41,7 +42,7 @@ public:
 	const std::vector<std::string> &cardList() const;
 	const std::vector<std::string> &mixerList() const;
 	const std::vector<std::string> &pulseDevices() const;
-	MixerSwitches &switchList();
+	const MixerSwitches &switchList() const;
 	void setCardId(unsigned int id);
 	void setMixerId(unsigned int id);
 	void setNotebookOrientation(bool orient);
@@ -65,7 +66,7 @@ private:
 	bool usePulse_;
 	std::vector<std::string> cardList_;
 	std::vector<std::string> mixerList_;
-	MixerSwitches switchList_;
+	MixerSwitches *switchList_;
 	std::vector<std::string> pulseDevices_;
 	int pulseDeviceId_;
 	std::string pulseDeviceName_;

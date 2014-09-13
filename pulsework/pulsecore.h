@@ -38,6 +38,7 @@ class PulseCore
 public:
 	PulseCore(const char *clientName);
 	~PulseCore();
+	PulseCore(PulseCore const &);
 	state pState;
 	std::string defaultSink();
 	const std::vector<std::string> &getCardList() const;

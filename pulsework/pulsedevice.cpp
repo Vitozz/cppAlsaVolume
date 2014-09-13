@@ -31,10 +31,10 @@ PulseDevice::PulseDevice()
 
 PulseDevice::PulseDevice(const pa_source_info* i)
 : index_(i->index),
-  type_(SOURCE)
+  type_(SOURCE),
+  name_(std::string(i->name)),
+  description_(std::string(i->description))
 {
-	name_ = std::string(i->name);
-	description_ = std::string(i->description);
 	volume.channels = i->volume.channels;
 	int n;
 	for (n = 0; n < volume.channels; ++n) {
@@ -47,10 +47,10 @@ PulseDevice::PulseDevice(const pa_source_info* i)
 
 PulseDevice::PulseDevice(const pa_sink_info* i)
 : index_(i->index),
-  type_(SINK)
+  type_(SINK),
+  name_(std::string(i->name)),
+  description_(std::string(i->description))
 {
-	name_ = std::string(i->name);
-	description_ = std::string(i->description);
 	volume.channels = i->volume.channels;
 	int n;
 	for (n = 0; n < volume.channels; ++n) {

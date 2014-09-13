@@ -32,10 +32,11 @@ class AlsaDevice
 public:
 	AlsaDevice(int id, const std::string &card);
 	~AlsaDevice();
+	AlsaDevice(AlsaDevice const &);
 	const std::string &name() const;
 	int id();
 	const std::vector<std::string> &mixers() const;
-	MixerSwitches switches();
+	const MixerSwitches &switches() const;
 	const std::string &currentMixer() const;
 	int currentMixerId();
 	bool havePlaybackMixers();
@@ -51,7 +52,7 @@ public:
 
 private:
 	snd_mixer_t *getMixerHanlde(int id);
-	std::string formatCardName(int id);
+	std::string formatCardName(int id) const;
 	snd_mixer_selem_channel_id_t checkMixerChannels(snd_mixer_elem_t *element);
 	snd_mixer_elem_t *initMixerElement(snd_mixer_t *handle, const char *mixer);
 	void checkError (int errorIndex);

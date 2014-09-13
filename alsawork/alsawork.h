@@ -41,9 +41,9 @@ public:
 	double getAlsaVolume();
 	std::string getCardName(int index);
 	std::string getCurrentMixerName() const;
-	std::vector<std::string> &getCardsList();
-	std::vector<std::string> getVolumeMixers();
-	MixerSwitches getSwitchList();
+	const std::vector<std::string> &getCardsList() const;
+	const std::vector<std::string> &getVolumeMixers() const;
+	const MixerSwitches &getSwitchList() const;
 	void setSwitch(const std::string& mixer, int id, bool enabled);
 	void setMute(bool enabled);
 	bool getMute();
@@ -59,7 +59,7 @@ private:
 	snd_mixer_t *getMixerHanlde(int id);
 	snd_mixer_elem_t *initMixerElement(snd_mixer_t *handle, const char *mixer);
 	void setVolume(snd_mixer_elem_t *element, snd_mixer_t *handle, double volume);
-	std::string formatCardName(int id);
+	std::string formatCardName(int id) const;
 	void checkError (int errorIndex);
 	void getCards();
 	void updateMixers(int cardIndex);

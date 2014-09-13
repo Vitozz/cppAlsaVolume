@@ -72,7 +72,7 @@ std::string Tools::getResPath(const char *resName)
 void Tools::createDirectory(const std::string &dirName)
 {
 	if (!g_file_test(dirName.c_str(), G_FILE_TEST_IS_DIR)) {
-		std::cout << "Directory " << dirName << " not found. Attempting to create it.." << std::endl;
+		std::cerr << "Directory " << dirName << " not found. Attempting to create it.." << std::endl;
 		gint err = 0;
 		err = g_mkdir_with_parents(dirName.c_str(), 0755);
 		if (err < 0) {
@@ -89,7 +89,7 @@ void Tools::saveFile(const std::string &fileName, const std::string &fileData)
 		ofile.close();
 	}
 	catch ( const std::exception & ex ) {
-		std::cout << "settings.cpp::57::Parsing failed:: " << ex.what() << std::endl;
+		std::cerr << "settings.cpp::57::Parsing failed:: " << ex.what() << std::endl;
 	}
 }
 

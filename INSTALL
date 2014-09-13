@@ -3,22 +3,31 @@ Build Deps:
 - gtkmm-3.0 (libgtkmm-3.0-dev package in Ubuntu)
 - glib (libglibmm-2.4-dev package in Ubuntu)
 - alsa/asoundlib (libasound2-dev package in Ubuntu)
+- libpule (only for build with pulseaudio support)
 
+------------------------
 Howto build application:
-
+------------------------
+------------------------
 if You have Qt installed:
+------------------------
 
 $ qmake
+
+to build with pulseaudio support:
+$ qmake CONFIG+=pulseaudio
+
+and than:
 
 $ make
 
 $ make install
 
+----------------------------
 if You have cmake installed:
+----------------------------
 
-$ mkdir build
-
-$ cd build
+$ mkdir build && cd build
 
 $ cmake ..
 
@@ -26,10 +35,21 @@ You can use
 $ cmake -DCMAKE_INSTALL_PREFIX=/dir ..
 to set install prefix to /dir
 
+to build with pulseaudio support:
+$ cmake -DUSE_PULSE=ON ..
+
+and than:
+
 $ make
 
 $ make install
 
-Or you may build alsavolume executable by runing:
+-------------------------------------------------
+Or you can build alsavolume executable by runing:
+-------------------------------------------------
 
 $ g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa \` \`pkg-config --libs gtkmm-3.0 alsa \` 
+
+For pulseaudio support:
+
+$ g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp pulsework/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa libpulse \` \`pkg-config --libs gtkmm-3.0 alsa libpulse \` 

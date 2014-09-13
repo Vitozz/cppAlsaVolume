@@ -218,7 +218,6 @@ void SettingsFrame::setupSoundCards()
 	}
 #ifdef HAVE_PULSE
 	if(pulseBox_) {
-		std::cout << pulseDev_ << std::endl;
 		pulseBox_->clear();
 		pulseCards_ = Gtk::ListStore::create(m_Columns);
 		pulseBox_->set_model(pulseCards_);
@@ -282,8 +281,9 @@ void SettingsFrame::updateSwitchTree()
 		if (colsCount) {
 			pColumn->add_attribute(pcell->property_active(), m_TColumns.m_col_toggle);
 		}
-		std::vector<switchcap>::iterator it = settings_->switchList().playbackSwitchList().begin();
-		while (it != settings_->switchList().playbackSwitchList().end()) {
+		std::vector<switchcap> pbsl(settings_->switchList().playbackSwitchList());
+		std::vector<switchcap>::iterator it = pbsl.begin();
+		while (it != pbsl.end()) {
 			row = *(pbSwitches_->append());
 			row[m_TColumns.m_col_toggle] = (*it).second;
 			row[m_TColumns.m_col_name] = (*it).first;
@@ -308,8 +308,9 @@ void SettingsFrame::updateSwitchTree()
 		if (colsCount) {
 			pColumn->add_attribute(rcell->property_active(), m_TColumns.m_col_toggle);
 		}
-		std::vector<switchcap>::iterator it = settings_->switchList().captureSwitchList().begin();
-		while (it != settings_->switchList().captureSwitchList().end()) {
+		std::vector<switchcap> ctsl(settings_->switchList().captureSwitchList());
+		std::vector<switchcap>::iterator it = ctsl.begin();
+		while (it != ctsl.end()) {
 			row = *(capSwitches_->append());
 			row[m_TColumns.m_col_toggle] = (*it).second;
 			row[m_TColumns.m_col_name] = (*it).first;
@@ -333,8 +334,9 @@ void SettingsFrame::updateSwitchTree()
 		if (colsCount) {
 			pColumn->add_attribute(ecell->property_active(), m_TColumns.m_col_toggle);
 		}
-		std::vector<switchcap>::iterator it = settings_->switchList().enumSwitchList().begin();
-		while (it != settings_->switchList().enumSwitchList().end()) {
+		std::vector<switchcap> ensl(settings_->switchList().enumSwitchList());
+		std::vector<switchcap>::iterator it = ensl.begin();
+		while (it != ensl.end()) {
 			row = *(enumSwitches_->append());
 			row[m_TColumns.m_col_toggle] = (*it).second;
 			row[m_TColumns.m_col_name] = (*it).first;

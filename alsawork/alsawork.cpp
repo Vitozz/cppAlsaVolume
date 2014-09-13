@@ -90,18 +90,17 @@ std::string AlsaWork::getCurrentMixerName() const
 	return currentAlsaDevice_->currentMixer();
 }
 
-std::vector<std::string> &AlsaWork::getCardsList()
+const std::vector<std::string> &AlsaWork::getCardsList() const
 {
-	getCards();
 	return cardList_;
 }
 
-std::vector<std::string> AlsaWork::getVolumeMixers()
+const std::vector<std::string> &AlsaWork::getVolumeMixers() const
 {
 	return currentAlsaDevice_->mixers();
 }
 
-MixerSwitches AlsaWork::getSwitchList()
+const MixerSwitches &AlsaWork::getSwitchList() const
 {
 	return currentAlsaDevice_->switches();
 }
@@ -142,7 +141,7 @@ void AlsaWork::checkError (int errorIndex)
 	}
 }
 
-std::string AlsaWork::formatCardName(int id)
+std::string AlsaWork::formatCardName(int id) const
 {
 	size_t size = 64;
 	char *name = (char*)malloc(size);

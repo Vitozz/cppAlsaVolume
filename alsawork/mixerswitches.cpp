@@ -24,6 +24,13 @@ MixerSwitches::MixerSwitches()
 {
 }
 
+MixerSwitches::MixerSwitches(const MixerSwitches &ms)
+: playbackSwitchList_(ms.playbackSwitchList()),
+  captureSwitchList_(ms.captureSwitchList()),
+  enumSwitchList_(ms.enumSwitchList())
+{
+}
+
 void MixerSwitches::setCaptureSwitchList(const std::vector<switchcap> &list)
 {
 	captureSwitchList_.assign(list.begin(), list.end());
@@ -72,17 +79,17 @@ void MixerSwitches::clear(SwitchType sType)
 	}
 }
 
-std::vector<switchcap> &MixerSwitches::captureSwitchList()
+const std::vector<switchcap> &MixerSwitches::captureSwitchList() const
 {
 	return captureSwitchList_;
 }
 
-std::vector<switchcap> &MixerSwitches::playbackSwitchList()
+const std::vector<switchcap> &MixerSwitches::playbackSwitchList() const
 {
 	return playbackSwitchList_;
 }
 
-std::vector<switchcap> &MixerSwitches::enumSwitchList()
+const std::vector<switchcap> &MixerSwitches::enumSwitchList() const
 {
 	return enumSwitchList_;
 }
