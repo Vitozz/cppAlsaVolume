@@ -41,11 +41,11 @@ settingsStr::settingsStr(settingsStr &str)
   mixerId_(str.mixerId()),
   notebookOrientation_(str.notebookOrientation()),
   isAutorun_(str.isAutorun()),
+  usePulse_(str.usePulse()),
   cardList_(str.cardList()),
   mixerList_(str.mixerList()),
   switchList_(new MixerSwitches(str.switchList())),
   pulseDevices_(str.pulseDevices()),
-  usePulse_(str.usePulse()),
   pulseDeviceId_(str.pulseDeviceId()),
   pulseDeviceName_(str.pulseDeviceName()),
   pulseDeviceDesc_(str.pulseDeviceDesc())

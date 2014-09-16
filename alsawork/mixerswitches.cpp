@@ -25,8 +25,8 @@ MixerSwitches::MixerSwitches()
 }
 
 MixerSwitches::MixerSwitches(const MixerSwitches &ms)
-: playbackSwitchList_(ms.playbackSwitchList()),
-  captureSwitchList_(ms.captureSwitchList()),
+: captureSwitchList_(ms.captureSwitchList()),
+  playbackSwitchList_(ms.playbackSwitchList()),
   enumSwitchList_(ms.enumSwitchList())
 {
 }
