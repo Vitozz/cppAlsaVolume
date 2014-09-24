@@ -369,9 +369,11 @@ PulseDevice PulseCore::getDeviceByIndex(int index)
 		int deltaIndex = sinksSize - index;
 		if (index < sinksSize) {
 			device = getSink(index);
+			return device;
 		}
-		else if ((uint)deltaIndex < sourcesDescriptions_.size()){
+		else if (deltaIndex < (int)sourcesDescriptions_.size()){
 			device = getSource(deltaIndex);
+			return device;
 		}
 	}
 	return device;

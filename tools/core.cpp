@@ -88,6 +88,7 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 	settings_->setVersion(VERSION);
 	//connect signals
 	if (settingsDialog_) {
+		settingsDialog_->initParms(*settingsStr_);
 		settingsDialog_->signal_ok_pressed().connect(sigc::mem_fun(*this, &Core::onSettingsDialogOk));
 		settingsDialog_->signal_switches_toggled().connect(sigc::mem_fun(*this, &Core::switchChanged));
 		settingsDialog_->signal_autorun_toggled().connect(sigc::mem_fun(*this, &Core::onSettingsDialogAutostart));
@@ -97,9 +98,6 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 		settingsDialog_->signal_pulsdev_toggled().connect(sigc::mem_fun(*this, &Core::onSettingsDialogUsePulse));
 		settingsDialog_->signal_pulsedevices_changed().connect(sigc::mem_fun(*this, &Core::updatePulseDevices));
 #endif
-	}
-	if (settingsDialog_) {
-		settingsDialog_->initParms(*settingsStr_);
 	}
 }
 
