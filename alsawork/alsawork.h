@@ -38,8 +38,8 @@ public:
 	void setCurrentMixer(const std::string &mixer);
 	void setCurrentMixer(int id);
 	void setAlsaVolume(double volume);
-	double getAlsaVolume();
-	std::string getCardName(int index);
+	double getAlsaVolume() const;
+	const std::string getCardName(int index);
 	std::string getCurrentMixerName() const;
 	const std::vector<std::string> &getCardsList() const;
 	const std::vector<std::string> &getVolumeMixers() const;
@@ -51,11 +51,11 @@ public:
 	bool cardExists(int id);
 	bool mixerExists(const std::string &name);
 	bool mixerExists(int id);
-	int getFirstCardWithMixers();
-	int getCurrentMixerId();
+	const int getFirstCardWithMixers();
+	int getCurrentMixerId() const;
 private:
 	bool checkCardId(int cardId);
-	int getTotalCards();
+	const int getTotalCards();
 	snd_mixer_t *getMixerHanlde(int id);
 	snd_mixer_elem_t *initMixerElement(snd_mixer_t *handle, const char *mixer);
 	void setVolume(snd_mixer_elem_t *element, snd_mixer_t *handle, double volume);

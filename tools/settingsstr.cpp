@@ -87,7 +87,7 @@ const std::vector<std::string> &settingsStr::mixerList() const
 	return mixerList_;
 }
 
-int settingsStr::pulseDeviceId()
+int settingsStr::pulseDeviceId() const
 {
 	return pulseDeviceId_;
 }

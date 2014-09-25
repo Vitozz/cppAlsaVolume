@@ -34,15 +34,15 @@ public:
 	~AlsaDevice();
 	AlsaDevice(AlsaDevice const &);
 	const std::string &name() const;
-	int id();
+	int id() const;
 	const std::vector<std::string> &mixers() const;
 	const MixerSwitches &switches() const;
 	const std::string &currentMixer() const;
-	int currentMixerId();
+	int currentMixerId() const;
 	bool havePlaybackMixers();
 	bool haveCaptureMixers();
 	bool haveMixers();
-	double getVolume();
+	const double getVolume();
 	bool getMute();
 	void setDeviceVolume(double volume);
 	void setCurrentMixer(int id);

@@ -33,7 +33,7 @@ public:
 	~settingsStr();
 	unsigned int cardId() const;
 	unsigned int mixerId() const;
-	int pulseDeviceId();
+	int pulseDeviceId() const;
 	bool notebookOrientation();
 	bool isAutorun();
 	bool usePulse();

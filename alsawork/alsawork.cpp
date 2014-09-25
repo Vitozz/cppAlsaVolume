@@ -68,12 +68,12 @@ void AlsaWork::setAlsaVolume(double volume)
 	currentAlsaDevice_->setDeviceVolume(volume);
 }
 
-double AlsaWork::getAlsaVolume()
+double AlsaWork::getAlsaVolume() const
 {
 	return currentAlsaDevice_->getVolume();
 }
 
-std::string AlsaWork::getCardName(int index)
+const std::string AlsaWork::getCardName(int index)
 {
 	std::string card(formatCardName(index));
 	snd_ctl_t *ctl;
@@ -149,7 +149,7 @@ std::string AlsaWork::formatCardName(int id) const
 	return std::string(name);
 }
 
-int AlsaWork::getTotalCards()
+const int AlsaWork::getTotalCards()
 {
 	int cards = 0;
 	int index = -1;
@@ -199,7 +199,7 @@ bool AlsaWork::mixerExists(int id)
 	return bool(id >=0 && id < (int)currentAlsaDevice_->mixers().size());
 }
 
-int AlsaWork::getFirstCardWithMixers()
+const int AlsaWork::getFirstCardWithMixers()
 {
 	std::vector< AlsaDevice* >::iterator it = devices_.begin();
 	int inc = 0;
@@ -216,7 +216,7 @@ int AlsaWork::getFirstCardWithMixers()
 	return 0;
 }
 
-int AlsaWork::getCurrentMixerId()
+int AlsaWork::getCurrentMixerId() const
 {
 	return currentAlsaDevice_->currentMixerId();
 }

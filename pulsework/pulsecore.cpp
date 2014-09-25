@@ -113,7 +113,7 @@ void PulseCore::iterate(pa_operation *op)
 	}
 }
 
-std::vector<PulseDevice> PulseCore::getSinks()
+const std::vector<PulseDevice> PulseCore::getSinks()
 {
 	std::vector<PulseDevice> sinks;
 	pa_operation* op = pa_context_get_sink_info_list(context_, &sink_list_cb, &sinks);
@@ -122,7 +122,7 @@ std::vector<PulseDevice> PulseCore::getSinks()
 	return sinks;
 }
 
-std::vector<PulseDevice> PulseCore::getSources()
+const std::vector<PulseDevice> PulseCore::getSources()
 {
 	std::vector<PulseDevice> sources;
 	pa_operation* op = pa_context_get_source_info_list(context_, &source_list_cb, &sources);
@@ -207,7 +207,7 @@ const std::vector<std::string> &PulseCore::getSourcesDescriptions() const
 	return sourcesDescriptions_;
 }
 
-std::string PulseCore::getDeviceDescription(const std::string &name)
+const std::string PulseCore::getDeviceDescription(const std::string &name)
 {
 	std::string desc = getDeviceByName(name).description();
 	if (desc.empty()) {
@@ -238,12 +238,12 @@ PulseDevice PulseCore::getDeviceByName(const std::string &name)
 	return result;
 }
 
-std::string PulseCore::getDeviceNameByIndex(int index)
+const std::string PulseCore::getDeviceNameByIndex(int index)
 {
 	return getDeviceByIndex(index).name();
 }
 
-std::string PulseCore::defaultSink()
+const std::string PulseCore::defaultSink()
 {
 	return getDefaultSink().name();
 }
@@ -341,7 +341,7 @@ void PulseCore::updateDevices()
 	devicesDescs_.insert(devicesDescs_.end(), sourcesDescriptions_.begin(), sourcesDescriptions_.end());
 }
 
-int PulseCore::getVolume()
+int PulseCore::getVolume() const
 {
 	return currentDevice_->volume_percent();
 }
@@ -379,7 +379,7 @@ PulseDevice PulseCore::getDeviceByIndex(int index)
 	return device;
 }
 
-int PulseCore::getCurrentDeviceIndex()
+const int PulseCore::getCurrentDeviceIndex()
 {
 	int sinksSize = sinksDescriptions_.size();
 	int absIndex = currentDevice_->index();
