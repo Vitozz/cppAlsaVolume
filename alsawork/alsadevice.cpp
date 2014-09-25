@@ -175,7 +175,7 @@ void AlsaDevice::setDeviceVolume(double volume)
 	}
 }
 
-const double AlsaDevice::getVolume()
+double AlsaDevice::getVolume()
 {
 	if (!currentMixerName_.empty()) {
 		snd_mixer_t *handle = getMixerHanlde(id_);

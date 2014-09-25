@@ -149,7 +149,7 @@ std::string AlsaWork::formatCardName(int id) const
 	return std::string(name);
 }
 
-const int AlsaWork::getTotalCards()
+int AlsaWork::getTotalCards()
 {
 	int cards = 0;
 	int index = -1;
@@ -199,7 +199,7 @@ bool AlsaWork::mixerExists(int id)
 	return bool(id >=0 && id < (int)currentAlsaDevice_->mixers().size());
 }
 
-const int AlsaWork::getFirstCardWithMixers()
+int AlsaWork::getFirstCardWithMixers()
 {
 	std::vector< AlsaDevice* >::iterator it = devices_.begin();
 	int inc = 0;

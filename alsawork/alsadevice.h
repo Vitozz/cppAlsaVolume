@@ -42,7 +42,7 @@ public:
 	bool havePlaybackMixers();
 	bool haveCaptureMixers();
 	bool haveMixers();
-	const double getVolume();
+	double getVolume();
 	bool getMute();
 	void setDeviceVolume(double volume);
 	void setCurrentMixer(int id);

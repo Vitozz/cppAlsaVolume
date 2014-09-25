@@ -51,11 +51,11 @@ public:
 	bool cardExists(int id);
 	bool mixerExists(const std::string &name);
 	bool mixerExists(int id);
-	const int getFirstCardWithMixers();
+	int getFirstCardWithMixers();
 	int getCurrentMixerId() const;
 private:
 	bool checkCardId(int cardId);
-	const int getTotalCards();
+	int getTotalCards();
 	snd_mixer_t *getMixerHanlde(int id);
 	snd_mixer_elem_t *initMixerElement(snd_mixer_t *handle, const char *mixer);
 	void setVolume(snd_mixer_elem_t *element, snd_mixer_t *handle, double volume);
