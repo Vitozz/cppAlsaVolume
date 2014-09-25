@@ -45,7 +45,7 @@ public:
 	const std::vector<std::string> &getCardNames() const;
 	const std::string getDeviceDescription(const std::string &name);
 	const std::string getDeviceNameByIndex(int index);
-	const int getCurrentDeviceIndex();
+	int getCurrentDeviceIndex();
 	int getVolume() const;
 	bool getMute();
 	bool deviceNameExists(const std::string &name);

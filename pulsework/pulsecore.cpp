@@ -133,7 +133,7 @@ const std::vector<PulseDevice> PulseCore::getSources()
 
 PulseDevice PulseCore::getSink(u_int32_t index)
 {
-	if (index >= 0 && index < sinks_.size()) {
+	if (index < sinks_.size()) {
 		return sinks_.at(index);
 	}
 	else {
@@ -158,7 +158,7 @@ PulseDevice PulseCore::getSink(const std::string &name)
 
 PulseDevice PulseCore::getSource(u_int32_t index)
 {
-	if (index >= 0 && index < sources_.size()) {
+	if (index < sources_.size()) {
 		return sources_.at(index);
 	}
 	else {
@@ -381,7 +381,7 @@ PulseDevice PulseCore::getDeviceByIndex(int index)
 	return device;
 }
 
-const int PulseCore::getCurrentDeviceIndex()
+int PulseCore::getCurrentDeviceIndex()
 {
 	int sinksSize = sinksDescriptions_.size();
 	int absIndex = currentDevice_->index();
