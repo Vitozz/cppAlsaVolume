@@ -1,3 +1,8 @@
+2014-09-25
+v0.2.1
+  - Fixed errors in PulseCore
+  - Code optimisations
+
 2014-09-12
 v0.2.0
   - Added initial pulseaudio support

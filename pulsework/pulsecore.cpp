@@ -133,50 +133,52 @@ const std::vector<PulseDevice> PulseCore::getSources()
 
 PulseDevice PulseCore::getSink(u_int32_t index)
 {
-	std::vector<PulseDevice> sinks;
-	pa_operation* op = pa_context_get_sink_info_by_index(context_, index, &sink_list_cb, &sinks);
-	iterate(op);
-	pa_operation_unref(op);
-	if (sinks.empty()) {
-		onError("The sink doesn't exit");
+	if (index >= 0 && index < sinks_.size()) {
+		return sinks_.at(index);
 	}
-	return *(sinks.begin());
+	else {
+		onError("This pulseaudio sink does not exits. Default sink will be used");
+	}
+	return getDefaultSink();
 }
 
 PulseDevice PulseCore::getSink(const std::string &name)
 {
-	std::vector<PulseDevice> sinks;
-	pa_operation* op = pa_context_get_sink_info_by_name(context_, name.c_str(), &sink_list_cb, &sinks);
-	iterate(op);
-	pa_operation_unref(op);
-	if (sinks.empty()) {
-		onError("The sink doesn't exit");
+	std::vector<PulseDevice>::iterator it = sinks_.begin();
+	while(it != sinks_.end()) {
+		PulseDevice device = *it;
+		if (device.name() == name) {
+			return device;
+		}
+		++it;
 	}
-	return *(sinks.begin());
+	onError("This pulseaudio sink does not exits. Default sink will be used");
+	return getDefaultSink();
 }
 
 PulseDevice PulseCore::getSource(u_int32_t index)
 {
-	std::vector<PulseDevice> sources;
-	pa_operation* op = pa_context_get_source_info_by_index(context_, index, &source_list_cb, &sources);
-	iterate(op);
-	pa_operation_unref(op);
-	if (sources.empty()) {
-		onError("The source doesn't exit");
+	if (index >= 0 && index < sources_.size()) {
+		return sources_.at(index);
 	}
-	return *(sources.begin());
+	else {
+		onError("This pulseaudio source does not exits. Default source will be used");
+	}
+	return getDefaultSource();
 }
 
 PulseDevice PulseCore::getSource(const std::string &name)
 {
-	std::vector<PulseDevice> sources;
-	pa_operation* op = pa_context_get_source_info_by_name(context_, name.c_str(), &source_list_cb, &sources);
-	iterate(op);
-	pa_operation_unref(op);
-	if (sources.empty()) {
-		onError("The source doesn't exit");
+	std::vector<PulseDevice>::iterator it = sources_.begin();
+	while(it != sources_.end()) {
+		PulseDevice device = *it;
+		if (device.name() == name) {
+			return device;
+		}
+		++it;
 	}
-	return *(sources.begin());
+	onError("This pulseaudio source does not exits. Default source will be used");
+	return getDefaultSource();
 }
 
 PulseDevice PulseCore::getDefaultSink()
@@ -366,7 +368,7 @@ PulseDevice PulseCore::getDeviceByIndex(int index)
 	PulseDevice device = getDefaultSink();
 	if (index >=0 && index < (int)(sinksDescriptions_.size() + sourcesDescriptions_.size())) {
 		int sinksSize = sinksDescriptions_.size();
-		int deltaIndex = sinksSize - index;
+		int deltaIndex = abs(sinksSize - index);
 		if (index < sinksSize) {
 			device = getSink(index);
 			return device;
