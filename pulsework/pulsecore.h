@@ -22,6 +22,7 @@
 #include "pulsedevice.h"
 #include "pulse/pulseaudio.h"
 #include <vector>
+#include <memory>
 
 struct ServerInfo {
 	std::string defaultSourceName;
@@ -32,6 +33,9 @@ enum state {
 	CONNECTED,
 	ERROR
 };
+
+typedef std::shared_ptr<PulseDevice> PulseDevicePtr;
+typedef std::vector<PulseDevicePtr> PulseDevicePtrList;
 
 class PulseCore
 {
@@ -54,20 +58,20 @@ public:
 	void setMute(bool mute);
 	void setCurrentDevice(const std::string &name);
 private:
-	const std::vector<PulseDevice> getSinks();
-	const std::vector<PulseDevice> getSources();
-	PulseDevice getSink(u_int32_t);
-	PulseDevice getSink(const std::string &name);
-	PulseDevice getSource(u_int32_t);
-	PulseDevice getSource(const std::string &name);
-	PulseDevice getDefaultSink();
-	PulseDevice getDefaultSource();
-	PulseDevice getDeviceByName(const std::string &name);
-	PulseDevice getDeviceByIndex(int index);
+	void getSinks();
+	void getSources();
+	PulseDevicePtr getSink(u_int32_t);
+	PulseDevicePtr getSink(const std::string &name);
+	PulseDevicePtr getSource(u_int32_t);
+	PulseDevicePtr getSource(const std::string &name);
+	PulseDevicePtr getDefaultSink();
+	PulseDevicePtr getDefaultSource();
+	PulseDevicePtr getDeviceByName(const std::string &name);
+	PulseDevicePtr getDeviceByIndex(int index);
 	const std::vector<std::string> &getSinksDescriptions() const;
 	const std::vector<std::string> &getSourcesDescriptions() const;
-	void setVolume_(PulseDevice &device, int value);
-	void setMute_(PulseDevice &device, bool mute);
+	void setVolume_(PulseDevicePtr device, int value);
+	void setMute_(PulseDevicePtr device, bool mute);
 	void iterate(pa_operation* op);
 	void onError(const std::string &message);
 	void updateDevices();
@@ -76,9 +80,9 @@ private:
 	pa_mainloop_api* mainLoopApi_;
 	pa_context* context_;
 	int retval_;
-	std::vector<PulseDevice> sources_;
-	std::vector<PulseDevice> sinks_;
-	PulseDevice *currentDevice_;
+	PulseDevicePtrList sources_;
+	PulseDevicePtrList sinks_;
+	PulseDevicePtr currentDevice_;
 	std::vector<std::string> sinksDescriptions_;
 	std::vector<std::string> sourcesDescriptions_;
 	std::vector<std::string> devicesNames_;

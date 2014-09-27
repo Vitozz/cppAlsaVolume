@@ -20,7 +20,6 @@
 
 #ifndef SETTINGSFRAME_H
 #define SETTINGSFRAME_H
-#include "../tools/tools.h"
 #include "../tools/settingsstr.h"
 #include "gtkmm/dialog.h"
 #include "gtkmm/builder.h"

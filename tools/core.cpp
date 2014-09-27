@@ -122,12 +122,10 @@ void Core::runAboutDialog()
 	dialog->set_copyright(COPYRIGHT);
 	dialog->set_website(WEBSITE);
 	dialog->set_website_label(WEBSITELABEL);
-	Glib::RefPtr<Gdk::Pixbuf> logo, icon;
-	std::string iconName, logoName;
-	logoName = Tools::getResPath("icons/volume.png");
-	iconName = Tools::getResPath("icons/tb_icon100.png");
-	logo = Gdk::Pixbuf::create_from_file(logoName);
-	icon = Gdk::Pixbuf::create_from_file(iconName);
+	const std::string logoName = Tools::getResPath("icons/volume.png");
+	const std::string iconName = Tools::getResPath("icons/tb_icon100.png");
+	Glib::RefPtr<Gdk::Pixbuf> logo = Gdk::Pixbuf::create_from_file(logoName);
+	Glib::RefPtr<Gdk::Pixbuf> icon = Gdk::Pixbuf::create_from_file(iconName);
 	dialog->set_icon(icon);
 	dialog->set_logo(logo);
 	dialog->run();
@@ -218,7 +216,7 @@ void Core::updateControls(int cardId)
 {
 	settingsStr_->clear(MIXERS);
 	settingsStr_->clearSwitches();
-	int soundCardId = (alsaWork_->cardExists(cardId)) ? cardId : alsaWork_->getFirstCardWithMixers();
+	const int soundCardId = (alsaWork_->cardExists(cardId)) ? cardId : alsaWork_->getFirstCardWithMixers();
 	alsaWork_->setCurrentCard(soundCardId);
 	if (!mixerName_.empty()) {
 		alsaWork_->setCurrentMixer(mixerName_);
@@ -237,7 +235,7 @@ void Core::updateControls(int cardId)
 void Core::updatePulseDevices(int deviceId)
 {
 	if (isPulse_) {
-		std::string currDev = pulse_->getDeviceNameByIndex(deviceId);
+		const std::string currDev = pulse_->getDeviceNameByIndex(deviceId);
 		pulse_->setCurrentDevice(currDev);
 		pulseDevice_ = currDev;
 		pulseDeviceDesc_ = pulse_->getDeviceDescription(pulseDevice_);
@@ -303,7 +301,7 @@ void Core::onVolumeSlider(double value)
 void Core::updateTrayIcon(double value)
 {
 	if (!isPulse_) {
-		std::string mixer = getActiveMixer();
+		const std::string mixer = getActiveMixer();
 		if (!mixer.empty()) {
 			m_signal_value_changed(value, getSoundCardName(), mixer);
 		}

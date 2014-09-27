@@ -45,11 +45,42 @@ namespace Tools {
 	bool checkDirExists(const std::string &fileName);
 	void createDirectory(const std::string &dirName);
 	void saveFile(const std::string &fileName, const std::string &fileData);
-	std::pair<bool, int> itemExists(const std::vector<std::string> &vector_, const std::string& item);
 	std::string pathToFileName(const std::string &path);
 	void printList(const std::vector<std::string> &list);
 	//Constatnts
 	const std::string PathSuffix = "/share/alsavolume/";
+	//Template functions
+	template <class T>
+	int itemIndex(const std::vector<T> &vect, const T &item) {
+		int index = 0;
+		int i = 0;
+		typename std::vector<T>::const_iterator it = vect.begin();
+		while (it != vect.end()) {
+			const T answ(*it);
+			if (answ == item) {
+				index = i;
+				break;
+			}
+			++it;
+			++i;
+		}
+		return index;
+	}
+	template <class T>
+	bool itemExists(const std::vector<T> &vect, const T &item) {
+		typename std::vector<T>::const_iterator it = vect.begin();
+		while (it != vect.end()) {
+			const T answ(*it);
+			if (answ == item) {
+				return true;
+			}
+			++it;
+
+		}
+		return false;
+	}
 }
+
+
 
 #endif // FILEWORK_H

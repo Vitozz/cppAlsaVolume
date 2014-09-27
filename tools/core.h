@@ -24,7 +24,6 @@
 #include "settings.h"
 #include "../alsawork/alsawork.h"
 #include "../gui/settingsframe.h"
-#include "tools.h"
 #include "settingsstr.h"
 #include <vector>
 #ifdef HAVE_PULSE

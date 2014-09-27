@@ -93,26 +93,6 @@ void Tools::saveFile(const std::string &fileName, const std::string &fileData)
 	}
 }
 
-std::pair<bool, int> Tools::itemExists(const std::vector<std::string> &vector_, const std::string& item)
-{
-	int index = 0;
-	int i = 0;
-	bool exists = false;
-	std::vector<std::string>::const_iterator it = vector_.begin();
-	while (it != vector_.end()) {
-		std::string answ(*it);
-		if (answ == item) {
-			index = i;
-			exists = true;
-			break;
-		}
-		++it;
-		++i;
-	}
-	std::pair<bool, int> result(exists, index);
-	return result;
-}
-
 std::string Tools::pathToFileName(const std::string &path)
 {
 	return g_path_get_basename(path.c_str());
@@ -121,8 +101,8 @@ std::string Tools::pathToFileName(const std::string &path)
 void Tools::printList(const std::vector<std::string> &list)
 {
 	std::cout << "Printing vector contents" << std::endl;
-	std::vector<std::string> vector(list);
-	std::vector<std::string>::iterator it = vector.begin();
+	const std::vector<std::string> vector(list);
+	std::vector<std::string>::const_iterator it = vector.begin();
 	while (it != vector.end()) {
 		std::cout << std::string(*it) << std::endl;
 		++it;

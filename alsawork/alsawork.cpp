@@ -29,8 +29,8 @@ AlsaWork::AlsaWork()
 	int id = 0;
 	std::vector<std::string>::iterator it = cardList_.begin();
 	while (it != cardList_.end()) {
-		std::string name = *it;
-		devices_.push_back(new AlsaDevice(id, name));
+		const std::string name = *it;
+		devices_.push_back(AlsaDevicePtr(new AlsaDevice(id, name)));
 		++it;
 		++id;
 	}
@@ -39,9 +39,9 @@ AlsaWork::AlsaWork()
 
 AlsaWork::~AlsaWork()
 {
-	if(!devices_.empty())
+	if (!devices_.empty())
 		devices_.clear();
-	delete currentAlsaDevice_;
+	currentAlsaDevice_.reset();
 	snd_config_update_free_global();
 }
 
@@ -170,7 +170,7 @@ void AlsaWork::getCards()
 	totalCards_ = getTotalCards();
 	if (totalCards_ >= 1) {
 		for (int card = 0; card < totalCards_; card++) {
-			std::string cname(getCardName(card));
+			const std::string cname(getCardName(card));
 			cardList_.push_back(cname);
 		}
 	}
@@ -191,7 +191,7 @@ bool AlsaWork::cardExists(int id)
 
 bool AlsaWork::mixerExists(const std::string &name)
 {
-	return Tools::itemExists(currentAlsaDevice_->mixers(), name).first;
+	return Tools::itemExists(currentAlsaDevice_->mixers(), name);
 }
 
 bool AlsaWork::mixerExists(int id)
@@ -201,17 +201,15 @@ bool AlsaWork::mixerExists(int id)
 
 int AlsaWork::getFirstCardWithMixers()
 {
-	std::vector< AlsaDevice* >::iterator it = devices_.begin();
+	AlsaDevicePtrList::iterator it = devices_.begin();
 	int inc = 0;
 	while (it != devices_.end()) {
-		AlsaDevice *dev = *it;
+		AlsaDevicePtr dev = *it;
 		if(dev->haveMixers()) {
-			delete dev;
 			return inc;
 		}
 		++it;
 		++inc;
-		delete dev;
 	}
 	return 0;
 }

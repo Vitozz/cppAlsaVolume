@@ -72,10 +72,10 @@ void TrayIcon::onHideRestore()
 	Gdk::Rectangle area;
 	Gtk::Orientation orientation;
 	if (get_geometry(screen, area, orientation)) {
-		int aY = area.get_y();
-		int aX = area.get_x();
-		int aH = area.get_height();
-		int aW = area.get_width();
+		const int aY = area.get_y();
+		const int aX = area.get_x();
+		const int aH = area.get_height();
+		const int aW = area.get_width();
 		m_signal_on_restore(aX, aY, aH, aW);
 	}
 }
@@ -134,9 +134,8 @@ Glib::ustring TrayIcon::getIconName(double value) const
 
 void TrayIcon::setIcon(double value)
 {
-	Glib::ustring iconPath;
 	const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(value);
-	iconPath = Tools::getResPath(searchPath.c_str());
+	const Glib::ustring iconPath = Tools::getResPath(searchPath.c_str());
 	if (!iconPath.empty()) {
 		try {
 			set_from_file(iconPath);
@@ -200,12 +199,12 @@ void TrayIcon::on_signal_volume_changed(double volume, const std::string &cardNa
 	else {
 		setIcon(0);
 	}
-	Glib::ustring tip = Glib::ustring("Card: ")
-			  + Glib::ustring(cardName_)
-			  + Glib::ustring("\n")
-			  + Glib::ustring(mixerName_)
-			  + Glib::ustring(" - ")
-			  + Glib::ustring::format(volumeValue_,"%");
+	const Glib::ustring tip = Glib::ustring("Card: ")
+				  + Glib::ustring(cardName_)
+				  + Glib::ustring("\n")
+				  + Glib::ustring(mixerName_)
+				  + Glib::ustring(" - ")
+				  + Glib::ustring::format(volumeValue_,"%");
 	setTooltip(tip);
 }
 

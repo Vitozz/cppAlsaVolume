@@ -19,13 +19,6 @@
 #include "pulsecore.h"
 #include "pulse/pulseaudio.h"
 #include "../tools/tools.h"
-
-#include "glibmm/fileutils.h"
-#include "glib.h"
-#include "glib/gstdio.h"
-#include "unistd.h"
-#include <fstream>
-#include <cstdlib>
 #include <vector>
 #include <cmath>
 
@@ -51,16 +44,16 @@ void state_cb(pa_context* context, void* raw) {
 void sink_list_cb(pa_context *c, const pa_sink_info *i, int eol, void *raw) {
 	(void)c;
 	if (eol != 0) return;
-	std::vector<PulseDevice>* sinks = (std::vector<PulseDevice>*) raw;
-	PulseDevice s(i);
+	PulseDevicePtrList *sinks = (PulseDevicePtrList*) raw;
+	const PulseDevicePtr s(new PulseDevice(i));
 	sinks->push_back(s);
 }
 
 void source_list_cb(pa_context *c, const pa_source_info *i, int eol, void *raw) {
 	(void)c;
 	if (eol != 0) return;
-	std::vector<PulseDevice>* sources = (std::vector<PulseDevice>*) raw;
-	PulseDevice s(i);
+	PulseDevicePtrList *sources = (PulseDevicePtrList*) raw;
+	const PulseDevicePtr s(new PulseDevice(i));
 	sources->push_back(s);
 }
 
@@ -94,15 +87,18 @@ PulseCore::PulseCore(const char *clientName)
 		onError("Connection Error");
 	}
 	updateDevices();
-	currentDevice_ = new PulseDevice(getDefaultSink());
+	currentDevice_ = getDefaultSink();
 }
 
 PulseCore::~PulseCore()
 {
-	delete currentDevice_;
-	if (pState == CONNECTED) {
+	if (!sinks_.empty())
+		sinks_.clear();
+	if (!sources_.empty())
+		sources_.clear();
+	currentDevice_.reset();
+	if (pState == CONNECTED)
 		pa_context_disconnect(context_);
-	}
 	pa_mainloop_free(mainLoop_);
 }
 
@@ -113,25 +109,21 @@ void PulseCore::iterate(pa_operation *op)
 	}
 }
 
-const std::vector<PulseDevice> PulseCore::getSinks()
+void PulseCore::getSinks()
 {
-	std::vector<PulseDevice> sinks;
-	pa_operation* op = pa_context_get_sink_info_list(context_, &sink_list_cb, &sinks);
+	pa_operation* op = pa_context_get_sink_info_list(context_, &sink_list_cb, &sinks_);
 	iterate(op);
 	pa_operation_unref(op);
-	return sinks;
 }
 
-const std::vector<PulseDevice> PulseCore::getSources()
+void PulseCore::getSources()
 {
-	std::vector<PulseDevice> sources;
-	pa_operation* op = pa_context_get_source_info_list(context_, &source_list_cb, &sources);
+	pa_operation* op = pa_context_get_source_info_list(context_, &source_list_cb, &sources_);
 	iterate(op);
 	pa_operation_unref(op);
-	return sources;
 }
 
-PulseDevice PulseCore::getSink(u_int32_t index)
+PulseDevicePtr PulseCore::getSink(u_int32_t index)
 {
 	if (index < sinks_.size()) {
 		return sinks_.at(index);
@@ -142,12 +134,12 @@ PulseDevice PulseCore::getSink(u_int32_t index)
 	return getDefaultSink();
 }
 
-PulseDevice PulseCore::getSink(const std::string &name)
+PulseDevicePtr PulseCore::getSink(const std::string &name)
 {
-	std::vector<PulseDevice>::iterator it = sinks_.begin();
+	PulseDevicePtrList::iterator it = sinks_.begin();
 	while(it != sinks_.end()) {
-		PulseDevice device = *it;
-		if (device.name() == name) {
+		PulseDevicePtr device = *it;
+		if (device->name() == name) {
 			return device;
 		}
 		++it;
@@ -156,7 +148,7 @@ PulseDevice PulseCore::getSink(const std::string &name)
 	return getDefaultSink();
 }
 
-PulseDevice PulseCore::getSource(u_int32_t index)
+PulseDevicePtr PulseCore::getSource(u_int32_t index)
 {
 	if (index < sources_.size()) {
 		return sources_.at(index);
@@ -167,12 +159,12 @@ PulseDevice PulseCore::getSource(u_int32_t index)
 	return getDefaultSource();
 }
 
-PulseDevice PulseCore::getSource(const std::string &name)
+PulseDevicePtr PulseCore::getSource(const std::string &name)
 {
-	std::vector<PulseDevice>::iterator it = sources_.begin();
+	PulseDevicePtrList::iterator it = sources_.begin();
 	while(it != sources_.end()) {
-		PulseDevice device = *it;
-		if (device.name() == name) {
+		PulseDevicePtr device = *it;
+		if (device->name() == name) {
 			return device;
 		}
 		++it;
@@ -181,7 +173,7 @@ PulseDevice PulseCore::getSource(const std::string &name)
 	return getDefaultSource();
 }
 
-PulseDevice PulseCore::getDefaultSink()
+PulseDevicePtr PulseCore::getDefaultSink()
 {
 	ServerInfo info;
 	pa_operation* op = pa_context_get_server_info(context_, &server_info_cb, &info);
@@ -190,7 +182,7 @@ PulseDevice PulseCore::getDefaultSink()
 	return getSink(info.defaultSinkName);
 }
 
-PulseDevice PulseCore::getDefaultSource()
+PulseDevicePtr PulseCore::getDefaultSource()
 {
 	ServerInfo info;
 	pa_operation* op = pa_context_get_server_info(context_, &server_info_cb, &info);
@@ -211,28 +203,28 @@ const std::vector<std::string> &PulseCore::getSourcesDescriptions() const
 
 const std::string PulseCore::getDeviceDescription(const std::string &name)
 {
-	std::string desc = getDeviceByName(name).description();
+	std::string desc = getDeviceByName(name)->description();
 	if (desc.empty()) {
-		desc = getDefaultSink().description();
+		desc = getDefaultSink()->description();
 	}
 	return desc;
 }
 
-PulseDevice PulseCore::getDeviceByName(const std::string &name)
+PulseDevicePtr PulseCore::getDeviceByName(const std::string &name)
 {
-	PulseDevice result = PulseDevice();
-	std::vector<PulseDevice>::iterator it = sinks_.begin();
+	PulseDevicePtr result = PulseDevicePtr(new PulseDevice());
+	PulseDevicePtrList::iterator it = sinks_.begin();
 	while (it != sinks_.end()) {
-		PulseDevice device = *it;
-		if(device.name() == name) {
+		PulseDevicePtr device = *it;
+		if(device->name() == name) {
 			result = device;
 		}
 		++it;
 	}
 	it = sources_.begin();
 	while (it != sources_.end()) {
-		PulseDevice device = *it;
-		if (device.name() == name) {
+		PulseDevicePtr device = *it;
+		if (device->name() == name) {
 			result = device;
 		}
 		++it;
@@ -242,39 +234,39 @@ PulseDevice PulseCore::getDeviceByName(const std::string &name)
 
 const std::string PulseCore::getDeviceNameByIndex(int index)
 {
-	return getDeviceByIndex(index).name();
+	return getDeviceByIndex(index)->name();
 }
 
 const std::string PulseCore::defaultSink()
 {
-	return getDefaultSink().name();
+	return getDefaultSink()->name();
 }
 
-void PulseCore::setVolume_(PulseDevice &device, int value)
+void PulseCore::setVolume_(PulseDevicePtr device, int value)
 {
-	pa_cvolume* new_cvolume = pa_cvolume_set(&device.volume,
-						 device.volume.channels,
-						 (pa_volume_t) device.round(MAX(((double)value * PA_VOLUME_NORM) / 100, 0.0))
+	pa_cvolume* new_cvolume = pa_cvolume_set(&device->volume,
+						 device->volume.channels,
+						 (pa_volume_t) device->round(MAX(((double)value * PA_VOLUME_NORM) / 100, 0.0))
 						 );
 	pa_operation* op;
-	if (device.type() == SINK) {
-		op = pa_context_set_sink_volume_by_index(context_, device.index(), new_cvolume, success_cb, NULL);
+	if (device->type() == SINK) {
+		op = pa_context_set_sink_volume_by_index(context_, device->index(), new_cvolume, success_cb, NULL);
 	}
 	else {
-		op = pa_context_set_source_volume_by_index(context_, device.index(), new_cvolume, success_cb, NULL);
+		op = pa_context_set_source_volume_by_index(context_, device->index(), new_cvolume, success_cb, NULL);
 	}
 	iterate(op);
 	pa_operation_unref(op);
 }
 
-void PulseCore::setMute_(PulseDevice &device, bool mute)
+void PulseCore::setMute_(PulseDevicePtr device, bool mute)
 {
 	pa_operation* op;
-	if (device.type() == SINK) {
-		op = pa_context_set_sink_mute_by_index(context_, device.index(), (int) mute, success_cb, NULL);
+	if (device->type() == SINK) {
+		op = pa_context_set_sink_mute_by_index(context_, device->index(), (int) mute, success_cb, NULL);
 	}
 	else {
-		op = pa_context_set_source_mute_by_index(context_, device.index(), (int) mute, success_cb, NULL);
+		op = pa_context_set_source_mute_by_index(context_, device->index(), (int) mute, success_cb, NULL);
 	}
 	iterate(op);
 	pa_operation_unref(op);
@@ -287,18 +279,17 @@ void PulseCore::onError(const std::string &message)
 
 void PulseCore::setCurrentDevice(const std::string &name)
 {
-	currentDevice_ = 0;
-	currentDevice_ = new PulseDevice(getDeviceByName(name));
+	currentDevice_ = getDeviceByName(name);
 }
 
 void PulseCore::setVolume(int value)
 {
-	setVolume_((*currentDevice_), value);
+	setVolume_(currentDevice_, value);
 }
 
 void PulseCore::setMute(bool mute)
 {
-	setMute_((*currentDevice_), !mute);
+	setMute_(currentDevice_, !mute);
 }
 
 void PulseCore::updateDevices()
@@ -321,22 +312,20 @@ void PulseCore::updateDevices()
 	if(!devicesDescs_.empty()) {
 		devicesDescs_.clear();
 	}
-	std::vector<PulseDevice> sinkDevices(getSinks());
-	sinks_.insert(sinks_.end(), sinkDevices.begin(), sinkDevices.end());
-	std::vector<PulseDevice> sourceDevices(getSources());
-	sources_.insert(sources_.end(), sourceDevices.begin(), sourceDevices.end());
-	std::vector<PulseDevice>::iterator it = sinks_.begin();
+	getSinks();
+	getSources();
+	PulseDevicePtrList::iterator it = sinks_.begin();
 	while(it != sinks_.end()) {
-		PulseDevice device = *it;
-		devicesNames_.push_back(device.name());
-		sinksDescriptions_.push_back(device.description());
+		PulseDevicePtr device = *it;
+		devicesNames_.push_back(device->name());
+		sinksDescriptions_.push_back(device->description());
 		++it;
 	}
-	std::vector<PulseDevice>::iterator it1 = sources_.begin();
+	PulseDevicePtrList::iterator it1 = sources_.begin();
 	while(it1 != sources_.end()) {
-		PulseDevice device = *it1;
-		devicesNames_.push_back(device.name());
-		sourcesDescriptions_.push_back(device.description());
+		PulseDevicePtr device = *it1;
+		devicesNames_.push_back(device->name());
+		sourcesDescriptions_.push_back(device->description());
 		++it1;
 	}
 	devicesDescs_.insert(devicesDescs_.end(), sinksDescriptions_.begin(), sinksDescriptions_.end());
@@ -363,43 +352,32 @@ const std::vector<std::string> &PulseCore::getCardNames() const
 	return devicesNames_;
 }
 
-PulseDevice PulseCore::getDeviceByIndex(int index)
+PulseDevicePtr PulseCore::getDeviceByIndex(int index)
 {
-	PulseDevice device = getDefaultSink();
-	if (index >=0 && index < (int)(sinksDescriptions_.size() + sourcesDescriptions_.size())) {
-		int sinksSize = sinksDescriptions_.size();
-		int deltaIndex = abs(sinksSize - index);
-		if (index < sinksSize) {
-			device = getSink(index);
-			return device;
-		}
-		else if (deltaIndex < (int)sourcesDescriptions_.size()){
-			device = getSource(deltaIndex);
-			return device;
-		}
+	PulseDevicePtr device = getDefaultSink();
+	const int sinksSize = sinksDescriptions_.size();
+	const int sourcesSize = sourcesDescriptions_.size();
+	if (index >=0 && index < (sinksSize + sourcesSize)) {
+		const int deltaIndex = sinksSize - index;
+		device = (deltaIndex != 0 && deltaIndex > 0) ? getSink(index) : getSource(abs(deltaIndex));
 	}
 	return device;
 }
 
 int PulseCore::getCurrentDeviceIndex()
 {
-	int sinksSize = sinksDescriptions_.size();
-	int absIndex = currentDevice_->index();
-	if (currentDevice_->type() == SINK) {
-		return absIndex;
-	}
-	else {
-		return (sinksSize + absIndex);
-	}
-	return getDefaultSink().index();
+	const int sinksSize = sinksDescriptions_.size();
+	const int absIndex = currentDevice_->index();
+	const int result = (currentDevice_->type() == SINK) ? absIndex : (sinksSize + absIndex);
+	return result;
 }
 
 bool PulseCore::deviceNameExists(const std::string &name)
 {
-	return Tools::itemExists(devicesNames_, name).first;
+	return Tools::itemExists(devicesNames_, name);
 }
 
 bool PulseCore::deviceDescriptionExists(const std::string &description)
 {
-	return Tools::itemExists(devicesDescs_, description).first;
+	return Tools::itemExists(devicesDescs_, description);
 }

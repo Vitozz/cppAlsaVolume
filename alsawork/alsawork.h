@@ -27,6 +27,10 @@
 #include "alsadevice.h"
 #include <iostream>
 #include <vector>
+#include <memory>
+
+typedef std::shared_ptr<AlsaDevice> AlsaDevicePtr;
+typedef std::vector<AlsaDevicePtr> AlsaDevicePtrList;
 
 class AlsaWork
 {
@@ -68,7 +72,7 @@ private:
 private:
 	std::vector<std::string> cardList_;
 	int totalCards_;
-	AlsaDevice *currentAlsaDevice_;
-	std::vector< AlsaDevice* > devices_;
+	AlsaDevicePtr currentAlsaDevice_;
+	AlsaDevicePtrList devices_;
 };
 #endif // ALSAWORK_H

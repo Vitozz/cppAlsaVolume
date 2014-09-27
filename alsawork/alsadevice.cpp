@@ -299,9 +299,8 @@ void AlsaDevice::setCurrentMixer(int id)
 
 void AlsaDevice::setCurrentMixer(const std::string &mixer)
 {
-	std::pair<bool, int> exists = Tools::itemExists(mixers_, mixer);
-	if(exists.first){
-		currentMixerId_ = exists.second;
+	if(Tools::itemExists(mixers_, mixer)){
+		currentMixerId_ = Tools::itemIndex(mixers_, mixer);
 		currentMixerName_ = mixer;
 	}
 }

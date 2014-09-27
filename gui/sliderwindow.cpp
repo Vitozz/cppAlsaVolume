@@ -46,8 +46,8 @@ void SliderWindow::setWindowPosition(int x_, int y_, int height_, int width_)
 	if (!get_visible()) {
 		int wX = 0;
 		int wY = 0;
-		int wWidth = get_width();
-		int wHeight = get_height();
+		const int wWidth = get_width();
+		const int wHeight = get_height();
 		if (y_ <= 200) { //check tray up/down position
 			wY = y_ + height_ + 2;
 		}

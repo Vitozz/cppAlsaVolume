@@ -378,7 +378,7 @@ void SettingsFrame::updateSwitches(const MixerSwitches &slist)
 
 void SettingsFrame::mixerBoxChanged()
 {
-	int row = mixerBox_->get_active_row_number();
+	const int row = mixerBox_->get_active_row_number();
 	if (mixerId_ != row && row >=0) {
 		mixerId_ = row;
 		m_signal_mixer_changed(row);

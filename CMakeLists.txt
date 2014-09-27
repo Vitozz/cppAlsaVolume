@@ -12,9 +12,11 @@ find_package( PkgConfig REQUIRED )
 pkg_check_modules( GTKMM REQUIRED gtkmm-3.0 )
 pkg_check_modules( ALSA REQUIRED alsa )
 
+set( CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 add_definitions(
 	${GTKMM_CFLAGS_OTHER}
-	${ALSA_CFLAGS_OTHER} 
+	${ALSA_CFLAGS_OTHER}
+
 )
 link_directories(
     ${GTKMM_LIBRARY_DIRS}
