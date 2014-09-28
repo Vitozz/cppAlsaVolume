@@ -25,33 +25,37 @@
 #include "glibmm.h"
 #include <iostream>
 
-const uint MIDDLE_BUTTON = 2;
 const int OFFSET = 2;
 const std::string ICON_PREFIX = "tb_icon";
 
 TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string &mixerName, bool muted)
-: volumeValue_(volume)
+: volumeValue_(volume),
+  cardName_(cardName),
+  mixerName_(mixerName),
+  muted_(muted),
+  menu_(Gtk::manage(new Gtk::Menu())),
+  restoreItem_(Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::GO_UP))),
+  settingsItem_(Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::PREFERENCES))),
+  aboutItem_(Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::ABOUT))),
+  quitItem_(Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::QUIT))),
+  muteItem_(Gtk::manage(new Gtk::CheckMenuItem("Mute"))),
+  mouseX_(0),
+  mouseY_(0),
+  pixbufWidth_(0)
 {
-	menu_ = Gtk::manage(new Gtk::Menu());
-	//menu creation
-	restoreItem_ = Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::GO_UP));
 	restoreItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onHideRestore));
 	menu_->append(*Gtk::manage(restoreItem_));
 	restoreItem_->set_label("Restore");
 	Gtk::SeparatorMenuItem *separator1 = Gtk::manage(new Gtk::SeparatorMenuItem());
 	Gtk::SeparatorMenuItem *separator2 = Gtk::manage(new Gtk::SeparatorMenuItem());
 	menu_->append(*Gtk::manage(separator1));
-	settingsItem_ = Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::PREFERENCES));
 	settingsItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::runSettings));
 	menu_->append(*Gtk::manage(settingsItem_));
-	muteItem_ = Gtk::manage(new Gtk::CheckMenuItem("Mute"));
 	muteItem_->signal_toggled().connect(sigc::mem_fun(*this, &TrayIcon::onMute));
 	menu_->append(*Gtk::manage(muteItem_));
-	aboutItem_ = Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::ABOUT));
 	aboutItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onAbout));
 	menu_->append(*Gtk::manage(aboutItem_));
 	menu_->append(*Gtk::manage(separator2));
-	quitItem_ = Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::QUIT));
 	quitItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onQuit));
 	menu_->append(*Gtk::manage(quitItem_));
 	menu_->show_all_children();
@@ -62,7 +66,6 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 	signal_button_press_event().connect(sigc::mem_fun(*this, &TrayIcon::onButtonClick));
 	//
 	on_signal_volume_changed(volumeValue_, cardName, mixerName);
-	muted_ = muted;
 	muteItem_->set_active(muted_);
 }
 
@@ -71,12 +74,21 @@ void TrayIcon::onHideRestore()
 	Glib::RefPtr<Gdk::Screen> screen;
 	Gdk::Rectangle area;
 	Gtk::Orientation orientation;
+	iconPosition pos;
 	if (get_geometry(screen, area, orientation)) {
-		const int aY = area.get_y();
-		const int aX = area.get_x();
-		const int aH = area.get_height();
-		const int aW = area.get_width();
-		m_signal_on_restore(aX, aY, aH, aW);
+		pos.iconX_ = area.get_x();
+		pos.iconY_ = area.get_y();
+		pos.iconHeight_ = area.get_height();
+		pos.iconWidth_ = pixbufWidth_;
+		pos.screenHeight_ = screen->get_height();
+		pos.screenWidth_ = screen->get_width();
+		pos.geometryAvailable_ = bool(pos.iconX_ > 0 || pos.iconY_ > 0);
+		if (!pos.geometryAvailable_) {
+			pos.iconX_ = mouseX_;
+			pos.iconY_ = mouseY_;
+		}
+		pos.trayAtTop_ = bool(pos.iconY_ < pos.screenHeight_/2);
+		m_signal_on_restore(pos);
 	}
 }
 
@@ -137,8 +149,10 @@ void TrayIcon::setIcon(double value)
 	const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(value);
 	const Glib::ustring iconPath = Tools::getResPath(searchPath.c_str());
 	if (!iconPath.empty()) {
+		const Glib::RefPtr<Gdk::Pixbuf> pixbuf = Glib::RefPtr<Gdk::Pixbuf>(Gdk::Pixbuf::create_from_file(iconPath));
+		pixbufWidth_ = pixbuf->get_width();
 		try {
-			set_from_file(iconPath);
+			this->set(pixbuf);
 		}
 		catch (Glib::FileError &err) {
 			std::cerr << "FileError::trayicon.cpp::161:: " << err.what() << std::endl;
@@ -181,11 +195,20 @@ bool TrayIcon::onScrollEvent(GdkEventScroll* event)
 
 bool TrayIcon::onButtonClick(GdkEventButton* event)
 {
-	if (event->button == MIDDLE_BUTTON) {
+	if (event->button == GDK_BUTTON_MIDDLE) {
 		muteItem_->set_active(!muteItem_->get_active());
 		onMute();
 	}
+	if (event->button == GDK_BUTTON_PRIMARY) {
+		setMousePos(event->x_root, event->y_root);
+	}
 	return false;
+}
+
+void TrayIcon::setMousePos(const int X, const int Y)
+{
+	mouseX_ = X;
+	mouseY_ = Y;
 }
 
 void TrayIcon::on_signal_volume_changed(double volume, const std::string &cardName, const std::string &mixerName)

@@ -27,6 +27,7 @@
 #include "gtkmm/imagemenuitem.h"
 #include "gtkmm/checkmenuitem.h"
 #include "gtkmm/aboutdialog.h"
+#include "../tools/tools.h"
 
 class TrayIcon : public Gtk::StatusIcon
 {
@@ -40,7 +41,7 @@ public:
 	type_trayicon_simple_signal signal_ask_settings();
 	type_trayicon_simple_signal signal_save_settings();
 	type_trayicon_simple_signal signal_ask_extmixer();
-	typedef sigc::signal<void, int, int, int ,int> type_trayicon_4int_signal;
+	typedef sigc::signal<void, iconPosition> type_trayicon_4int_signal;
 	type_trayicon_4int_signal signal_on_restore();
 	typedef sigc::signal<void, double> type_trayicon_double_signal;
 	type_trayicon_double_signal signal_value_changed();
@@ -70,6 +71,7 @@ private:
 	void setIcon(double value);
 	void setTooltip(const Glib::ustring &message);
 	Glib::ustring getIconName(double value) const;
+	void setMousePos(const int X, const int Y);
 
 private:
 	double volumeValue_;
@@ -77,8 +79,11 @@ private:
 	std::string mixerName_;
 	bool muted_;
 	Gtk::Menu *menu_;
-	Gtk::ImageMenuItem *restoreItem_, *mixerItem_, *settingsItem_, *aboutItem_, *quitItem_;
+	Gtk::ImageMenuItem *restoreItem_, *settingsItem_, *aboutItem_, *quitItem_;
 	Gtk::CheckMenuItem* muteItem_;
+	int mouseX_;
+	int mouseY_;
+	int pixbufWidth_;
 
 };
 

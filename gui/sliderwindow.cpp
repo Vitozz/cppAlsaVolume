@@ -30,9 +30,11 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	builder->get_widget("volume_slider", volumeSlider_);
 	if (volumeSlider_) {
 		volumeSlider_->signal_value_changed().connect(sigc::mem_fun(*this, &SliderWindow::on_volume_slider));
+		set_default_size(volumeSlider_->get_width(), volumeSlider_->get_width());
 	}
 	set_events(Gdk::LEAVE_NOTIFY_MASK);
 	signal_leave_notify_event().connect(sigc::mem_fun(*this, &SliderWindow::on_focus_out));
+	set_border_width(0);
 	set_keep_above(true);
 }
 
@@ -41,27 +43,21 @@ SliderWindow::~SliderWindow()
 	delete volumeSlider_;
 }
 
-void SliderWindow::setWindowPosition(int x_, int y_, int height_, int width_)
+void SliderWindow::setWindowPosition(const iconPosition &pos)
 {
 	if (!get_visible()) {
-		int wX = 0;
-		int wY = 0;
-		const int wWidth = get_width();
-		const int wHeight = get_height();
-		if (y_ <= 200) { //check tray up/down position
-			wY = y_ + height_ + 2;
+		const int wWidth = volumeSlider_->get_allocated_width();
+		const int wHeight = volumeSlider_->get_allocated_height();
+		const int wY = pos.trayAtTop_ ? pos.iconHeight_ + 4 : pos.screenHeight_ - wHeight - pos.iconHeight_ - 4;
+		int wX;
+		if (pos.geometryAvailable_) {
+			wX = (wWidth > 1) ? pos.iconX_ - (wWidth/2 - pos.iconWidth_/2) : pos.iconX_ - pos.iconWidth_/2;
 		}
-		else {
-			wY = y_ - wHeight - 4;
+		else{
+			wX = (wWidth > 1) ? pos.iconX_ - wWidth/2 : pos.iconX_ - pos.iconWidth_;
 		}
-		if (wWidth > 1) {//at first run window widht = 1
-			wX = (x_ + width_/2) - wWidth/2;
-		}
-		else {
-			wX = x_;
-		}
-		move(wX,wY);
 		show_all();
+		this->move(wX, wY);
 	}
 	else {
 		hide();

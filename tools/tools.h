@@ -35,6 +35,17 @@ enum ListType {
 	MIXERS = 1
 };
 
+struct iconPosition {
+	int iconX_;
+	int iconY_;
+	int iconWidth_;
+	int iconHeight_;
+	int screenHeight_;
+	int screenWidth_;
+	bool geometryAvailable_;
+	bool trayAtTop_;
+};
+
 typedef std::pair<std::string, bool> switchcap;
 
 namespace Tools {

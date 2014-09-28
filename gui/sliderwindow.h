@@ -25,13 +25,14 @@
 #include "gtkmm/window.h"
 #include "gtkmm/builder.h"
 #include "gtkmm/scale.h"
+#include "../tools/tools.h"
 
 class SliderWindow : public Gtk::Window
 {
 public:
 	SliderWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>&refGlade);
 	~SliderWindow();
-	void setWindowPosition(int x_, int y_, int height_, int width_);
+	void setWindowPosition(const iconPosition& pos);
 	void setVolumeValue(double value);
 	//signal
 	typedef sigc::signal<void, double> type_sliderwindow_signal;
