@@ -79,7 +79,7 @@ private:
 	std::string mixerName_;
 	bool muted_;
 	Gtk::Menu *menu_;
-	Gtk::ImageMenuItem *restoreItem_, *settingsItem_, *aboutItem_, *quitItem_;
+	Gtk::ImageMenuItem *settingsItem_, *aboutItem_, *quitItem_;
 	Gtk::CheckMenuItem* muteItem_;
 	int mouseX_;
 	int mouseY_;

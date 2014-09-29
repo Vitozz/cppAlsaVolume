@@ -34,7 +34,6 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
   mixerName_(mixerName),
   muted_(muted),
   menu_(Gtk::manage(new Gtk::Menu())),
-  restoreItem_(Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::GO_UP))),
   settingsItem_(Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::PREFERENCES))),
   aboutItem_(Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::ABOUT))),
   quitItem_(Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::QUIT))),
@@ -43,12 +42,7 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
   mouseY_(0),
   pixbufWidth_(0)
 {
-	restoreItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onHideRestore));
-	menu_->append(*Gtk::manage(restoreItem_));
-	restoreItem_->set_label("Restore");
-	Gtk::SeparatorMenuItem *separator1 = Gtk::manage(new Gtk::SeparatorMenuItem());
 	Gtk::SeparatorMenuItem *separator2 = Gtk::manage(new Gtk::SeparatorMenuItem());
-	menu_->append(*Gtk::manage(separator1));
 	settingsItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::runSettings));
 	menu_->append(*Gtk::manage(settingsItem_));
 	muteItem_->signal_toggled().connect(sigc::mem_fun(*this, &TrayIcon::onMute));
