@@ -91,7 +91,4 @@ namespace Tools {
 		return false;
 	}
 }
-
-
-
 #endif // FILEWORK_H

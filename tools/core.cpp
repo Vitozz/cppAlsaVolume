@@ -114,7 +114,7 @@ Core::~Core()
 
 void Core::runAboutDialog()
 {
-	Gtk::AboutDialog *dialog = new Gtk::AboutDialog();
+	Glib::RefPtr<Gtk::AboutDialog> dialog (new Gtk::AboutDialog());
 	dialog->set_title(TITLE);
 	dialog->set_program_name(PROGNAME);
 	dialog->set_comments(COMMENTS);
@@ -129,7 +129,6 @@ void Core::runAboutDialog()
 	dialog->set_icon(icon);
 	dialog->set_logo(logo);
 	dialog->run();
-	delete dialog;
 }
 
 void Core::runSettings()

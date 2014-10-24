@@ -198,12 +198,12 @@ void SettingsFrame::setupTreeModels()
 void SettingsFrame::setupSoundCards()
 {
 	if (sndCardBox_){
-		std::vector<std::string> cards = settings_->cardList();
+		const std::vector<std::string> cards = settings_->cardList();
 		sndCardBox_->clear();
 		cards_ = Gtk::ListStore::create(m_Columns);
 		sndCardBox_->set_model(cards_);
 		Gtk::TreeModel::Row row;
-		std::vector<std::string>::iterator it = cards.begin();
+		std::vector<std::string>::const_iterator it = cards.begin();
 		uint i = 0;
 		while (it != cards.end()) {
 			row = *(cards_->append());
@@ -222,8 +222,8 @@ void SettingsFrame::setupSoundCards()
 		pulseCards_ = Gtk::ListStore::create(m_Columns);
 		pulseBox_->set_model(pulseCards_);
 		Gtk::TreeModel::Row row;
-		std::vector<std::string> cards(settings_->pulseDevices());
-		std::vector<std::string>::iterator it = cards.begin();
+		const std::vector<std::string> cards(settings_->pulseDevices());
+		std::vector<std::string>::const_iterator it = cards.begin();
 		uint i = 0;
 		while (it != cards.end()) {
 			row = *(pulseCards_->append());
@@ -247,8 +247,8 @@ void SettingsFrame::setupMixers()
 		mixerBox_->set_model(mixers_);
 		if (settings_->mixerList().size() > 0) {
 			Gtk::TreeModel::Row row;
-			std::vector<std::string> mixers = settings_->mixerList();
-			std::vector<std::string>::iterator it = mixers.begin();
+			const std::vector<std::string> mixers = settings_->mixerList();
+			std::vector<std::string>::const_iterator it = mixers.begin();
 			uint i = 0;
 			while (it != mixers.end()) {
 				row = *(mixers_->append());
@@ -276,13 +276,13 @@ void SettingsFrame::updateSwitchTree()
 		pbSwitches_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_TColumns));
 		playbackSwitchTree_->set_model(pbSwitches_);
 		Gtk::TreeModel::Row row;
-		int colsCount = playbackSwitchTree_->append_column(STATUS, *pcell);
+		const int colsCount = playbackSwitchTree_->append_column(STATUS, *pcell);
 		Gtk::TreeViewColumn* pColumn = playbackSwitchTree_->get_column(colsCount -1);
 		if (colsCount) {
 			pColumn->add_attribute(pcell->property_active(), m_TColumns.m_col_toggle);
 		}
-		std::vector<switchcap> pbsl(settings_->switchList().playbackSwitchList());
-		std::vector<switchcap>::iterator it = pbsl.begin();
+		const std::vector<switchcap> pbsl(settings_->switchList().playbackSwitchList());
+		std::vector<switchcap>::const_iterator it = pbsl.begin();
 		while (it != pbsl.end()) {
 			row = *(pbSwitches_->append());
 			row[m_TColumns.m_col_toggle] = (*it).second;
@@ -303,13 +303,13 @@ void SettingsFrame::updateSwitchTree()
 		capSwitches_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_TColumns));
 		captureSwitchTree_->set_model(capSwitches_);
 		Gtk::TreeModel::Row row;
-		int colsCount = captureSwitchTree_->append_column(STATUS, *rcell);
+		const int colsCount = captureSwitchTree_->append_column(STATUS, *rcell);
 		Gtk::TreeViewColumn* pColumn = captureSwitchTree_->get_column(colsCount -1);
 		if (colsCount) {
 			pColumn->add_attribute(rcell->property_active(), m_TColumns.m_col_toggle);
 		}
-		std::vector<switchcap> ctsl(settings_->switchList().captureSwitchList());
-		std::vector<switchcap>::iterator it = ctsl.begin();
+		const std::vector<switchcap> ctsl(settings_->switchList().captureSwitchList());
+		std::vector<switchcap>::const_iterator it = ctsl.begin();
 		while (it != ctsl.end()) {
 			row = *(capSwitches_->append());
 			row[m_TColumns.m_col_toggle] = (*it).second;
@@ -329,13 +329,13 @@ void SettingsFrame::updateSwitchTree()
 		enumSwitches_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_TColumns));
 		otherSwitchTree_->set_model(enumSwitches_);
 		Gtk::TreeModel::Row row;
-		int colsCount = otherSwitchTree_->append_column(STATUS, *ecell);
+		const int colsCount = otherSwitchTree_->append_column(STATUS, *ecell);
 		Gtk::TreeViewColumn* pColumn = otherSwitchTree_->get_column(colsCount -1);
 		if (colsCount) {
 			pColumn->add_attribute(ecell->property_active(), m_TColumns.m_col_toggle);
 		}
-		std::vector<switchcap> ensl(settings_->switchList().enumSwitchList());
-		std::vector<switchcap>::iterator it = ensl.begin();
+		const std::vector<switchcap> ensl(settings_->switchList().enumSwitchList());
+		std::vector<switchcap>::const_iterator it = ensl.begin();
 		while (it != ensl.end()) {
 			row = *(enumSwitches_->append());
 			row[m_TColumns.m_col_toggle] = (*it).second;
