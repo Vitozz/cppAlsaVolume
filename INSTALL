@@ -1,6 +1,7 @@
 Build Deps:
 
 - gtkmm-3.0 (libgtkmm-3.0-dev package in Ubuntu)
+- gtkmm-2.4 (only for build with gtkmm-2.4 instead of gtkmm-3.0)
 - glib (libglibmm-2.4-dev package in Ubuntu)
 - alsa/asoundlib (libasound2-dev package in Ubuntu)
 - libpule (only for build with pulseaudio support)
@@ -16,6 +17,8 @@ $ qmake
 
 to build with pulseaudio support:
 $ qmake CONFIG+=pulseaudio
+to build with gtkmm-2.4 support:
+$ qmake CONFIG+=gtk2
 
 and than:
 
@@ -37,6 +40,8 @@ to set install prefix to /dir
 
 to build with pulseaudio support:
 $ cmake -DUSE_PULSE=ON ..
+to build with gtkmm-2.4 support:
+$ cmake -DUSE_GTK3=OFF ..
 
 and than:
 
@@ -53,3 +58,11 @@ $ g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-conf
 For pulseaudio support:
 
 $ g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp pulsework/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa libpulse \` \`pkg-config --libs gtkmm-3.0 alsa libpulse \` 
+
+For gtkmm-2.4 support:
+
+$ g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-config --cflags gtkmm-2.4 alsa \` \`pkg-config --libs gtkmm-2.4 alsa \`
+
+For pulseaudio and gtkmm-2.4 support:
+
+$ g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp pulsework/*.cpp \`pkg-config --cflags gtkmm-2.4 alsa libpulse \` \`pkg-config --libs gtkmm-2.4 alsa libpulse \` 

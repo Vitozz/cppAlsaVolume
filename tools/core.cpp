@@ -32,7 +32,7 @@
 #define COPYRIGHT "2012-2014 (c) Vitaly Tonkacheyev (thetvg@gmail.com)"
 #define WEBSITE "http://sites.google.com/site/thesomeprojects/"
 #define WEBSITELABEL "Program Website"
-#define VERSION "0.2.1"
+#define VERSION "0.2.2"
 
 Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 : settings_(new Settings()),

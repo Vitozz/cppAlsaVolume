@@ -1,6 +1,6 @@
 This is a simple application to control one of the Alsa's mixers volume in tray.
 
-Application uses GTK+3 interface via gtkmm library
+Application uses GTK+2/GTK+3 interface via gtkmm library
 
 What features available:
 

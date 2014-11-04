@@ -5,6 +5,7 @@ Application uses GTK+ interface via gtkmm library
 Build Deps:
 
 	- gtkmm-3.0 (libgtkmm-3.0-dev package in Ubuntu)
+	- gtkmm-2.4 (only for gtkmm-2.4 support) 
 	- glib (libglibmm-2.4-dev package in Ubuntu)
 	- alsa/asoundlib (libasound2-dev package in Ubuntu)
 	- libpulse (only for pulseaudio support)
@@ -23,6 +24,12 @@ to build wiht pulseaudio support:
 
 >make
 
+to build wiht gtkmm-2.4 support:
+
+>qmake CONFIG+=gtk2
+
+>make
+
 if You have cmake installed
 
 >mkdir build && cd build
@@ -31,9 +38,15 @@ if You have cmake installed
 
 >make
 
-to build wiht pulseaudio support:
+to build with pulseaudio support:
 
 >cmake -DUSE_PULSE=ON ..
+
+>make
+
+to build with gtkmm-2.4 support:
+
+>cmake -DUSE_GTK3=OFF ..
 
 >make
 
@@ -41,9 +54,17 @@ else:
 
 >g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa \` \`pkg-config --libs gtkmm-3.0 alsa \`
 
+to build with gtkmm-2.4 support:
+
+>g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-config --cflags gtkmm-2.4 alsa \` \`pkg-config --libs gtkmm-2.4 alsa \`
+
 to build wiht pulseaudio support:
 
 >g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp pulsework/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa libpulse \` \`pkg-config --libs gtkmm-3.0 alsa libpulse \` 
+
+to build wiht pulseaudio and gtkmm-2.4 support:
+
+>g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp pulsework/*.cpp \`pkg-config --cflags gtkmm-2.4 alsa libpulse \` \`pkg-config --libs gtkmm-2.4 alsa libpulse \` 
 
 What features available:
 
