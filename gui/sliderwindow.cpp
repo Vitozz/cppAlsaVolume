@@ -46,8 +46,13 @@ SliderWindow::~SliderWindow()
 void SliderWindow::setWindowPosition(const iconPosition &pos)
 {
 	if (!get_visible()) {
+#ifndef IS_GTK_2
 		const int wWidth = volumeSlider_->get_allocated_width();
 		const int wHeight = volumeSlider_->get_allocated_height();
+#else
+		const int wWidth = volumeSlider_->get_width();
+		const int wHeight = volumeSlider_->get_height();
+#endif
 		const int wY = pos.trayAtTop_ ? pos.iconHeight_ + 4 : pos.screenHeight_ - wHeight - pos.iconHeight_ - 4;
 		int wX;
 		if (pos.geometryAvailable_) {

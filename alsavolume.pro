@@ -10,10 +10,10 @@ CONFIG -= qt
 QMAKE_CXXFLAGS = -std=c++0x
 
 #CONFIG += pulseaudio
+#CONFIG += gtk2
 
 CONFIG += link_pkgconfig
-PKGCONFIG += gtkmm-3.0 \
-	     alsa
+PKGCONFIG += alsa
 
 pulseaudio {
 	DEFINES += HAVE_PULSE
@@ -24,6 +24,14 @@ pulseaudio {
 		   pulsework/pulsedevice.h
 }
 
+gtk2 {
+	DEFINES += IS_GTK_2
+	PKGCONFIG += gtkmm-2.4
+}
+
+!gtk2 {
+	PKGCONFIG += gtkmm-3.0
+}
 
 
 SOURCES += main.cpp \

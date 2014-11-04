@@ -22,20 +22,29 @@
 #include "gui/sliderwindow.h"
 #include "gui/trayicon.h"
 #include "tools/tools.h"
+#ifndef IS_GTK_2
 #include "gtkmm/application.h"
+#else
+#include "gtkmm/main.h"
+#endif
 #include "gtkmm/builder.h"
 #include "glibmm.h"
 
 int main (int argc, char *argv[])
 {
+#ifndef IS_GTK_2
 	Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "org.gtkmm.alsavolume");
-
 	Glib::ustring slider_ui_ = Tools::getResPath("gladefiles/SliderFrame.glade");
+	Glib::ustring settings_ui_ = Tools::getResPath("gladefiles/SettingsFrame.glade");
+#else
+	Gtk::Main app(argc, argv);
+	Glib::ustring slider_ui_ = Tools::getResPath("gladefiles/SliderFrame_2.glade");
+	Glib::ustring settings_ui_ = Tools::getResPath("gladefiles/SettingsFrame_2.glade");
+#endif
 	if (slider_ui_.empty()) {
 		std::cerr << "No SliderFrame.glade file found" << std::endl;
 		return 1;
 	}
-	Glib::ustring settings_ui_ = Tools::getResPath("gladefiles/SettingsFrame.glade");
 	if (settings_ui_.empty()) {
 		std::cerr << "No SettingsFrame.glade file found" << std::endl;
 		return 1;
@@ -58,7 +67,9 @@ int main (int argc, char *argv[])
 		return 1;
 	}
 	Core *core = new Core(refBuilder);
+#ifndef IS_GTK_2
 	app->hold();
+#endif
 	SliderWindow *sliderWindow = 0;
 	refBuilder->get_widget_derived("volumeFrame", sliderWindow);
 	TrayIcon *trayIcon = new TrayIcon(core->getVolumeValue(),
@@ -78,7 +89,11 @@ int main (int argc, char *argv[])
 		trayIcon->signal_on_mute().connect(sigc::mem_fun(*core, &Core::soundMuted));
 		trayIcon->signal_value_changed().connect(sigc::mem_fun(*core, &Core::onTrayIconScroll));
 		sliderWindow->set_visible(false);
+#ifndef IS_GTK_2
 		return app->run();
+#else
+		Gtk::Main::run();
+#endif
 	}
 	delete sliderWindow;
 	delete trayIcon;

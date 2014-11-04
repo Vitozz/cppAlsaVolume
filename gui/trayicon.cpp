@@ -24,6 +24,11 @@
 #include "gtkmm/stock.h"
 #include "glibmm.h"
 #include <iostream>
+#ifdef IS_GTK_2
+#define GDK_BUTTON_MIDDLE 2
+#define GDK_BUTTON_PRIMARY 1
+#endif
+
 
 const int OFFSET = 2;
 const std::string ICON_PREFIX = "tb_icon";

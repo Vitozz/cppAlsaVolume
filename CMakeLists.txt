@@ -1,15 +1,21 @@
 set(PROJECT alsavolume)
-cmake_minimum_required( VERSION 2.8.11 )
+cmake_minimum_required( VERSION 2.8.6 )
 
 if( NOT UNIX )
 	message(FATAL_ERROR "Not Unix!")
 endif( NOT UNIX )
 
 set(USE_PULSE OFF CACHE BOOL "Set pulseaudio usage" )
+set(USE_GTK3 ON CACHE BOOL "Build with gtkmm-3.0 support" )
 
 find_package( PkgConfig REQUIRED )
 
-pkg_check_modules( GTKMM REQUIRED gtkmm-3.0 )
+if( ${USE_GTK3} )
+	pkg_check_modules( GTKMM REQUIRED gtkmm-3.0 )
+else( ${USE_GTK3} )
+	pkg_check_modules( GTKMM REQUIRED gtkmm-2.4 )
+	add_definitions( -DIS_GTK_2 )
+endif( ${USE_GTK3} )
 pkg_check_modules( ALSA REQUIRED alsa )
 
 set( CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
@@ -19,13 +25,13 @@ add_definitions(
 
 )
 link_directories(
-    ${GTKMM_LIBRARY_DIRS}
-    ${ALSA_LIBRARY_DIRS}
+	${GTKMM_LIBRARY_DIRS}
+	${ALSA_LIBRARY_DIRS}
 )
 
 include_directories(
-    ${GTKMM_INCLUDE_DIRS}
-    ${ALSA_INCLUDE_DIRS}
+	${GTKMM_INCLUDE_DIRS}
+	${ALSA_INCLUDE_DIRS}
 )
 set( DEPLIBS
 	${GTKMM_LIBRARIES}
@@ -96,10 +102,17 @@ set ( ICON_FILES
 	icons/volume.png
 	icons/volume_ico.png
 )
-set(GLADE_FILES 
-	gladefiles/SliderFrame.glade
-	gladefiles/SettingsFrame.glade
-)
+if( ${USE_GTK3} )
+	set(GLADE_FILES
+		gladefiles/SliderFrame.glade
+		gladefiles/SettingsFrame.glade
+	)
+else( ${USE_GTK3} )
+	set(GLADE_FILES
+		gladefiles/SliderFrame_2.glade
+		gladefiles/SettingsFrame_2.glade
+	)
+endif( ${USE_GTK3} )
 	
 add_executable( ${PROJECT}
 	${alsavolume_SRCS}
