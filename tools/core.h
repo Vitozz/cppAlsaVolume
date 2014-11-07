@@ -82,16 +82,16 @@ private:
 	SettingsFrame *settingsDialog_;
 	bool isPulse_;
 	std::vector<std::string> alsaCards_;
-#ifdef HAVE_PULSE
-	PulseCore *pulse_;
-	std::string pulseDevice_;
-	std::string pulseDeviceDesc_;
-	std::vector<std::string> pulseDevices_;
 	sigc::connection signal_ok_;
 	sigc::connection signal_switches_;
 	sigc::connection signal_autorun_;
 	sigc::connection signal_sndcard_;
 	sigc::connection signal_mixer_;
+#ifdef HAVE_PULSE
+	PulseCore *pulse_;
+	std::string pulseDevice_;
+	std::string pulseDeviceDesc_;
+	std::vector<std::string> pulseDevices_;
 	sigc::connection signal_pulsdev_;
 	sigc::connection signal_pulsedevices_;
 #endif
