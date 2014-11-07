@@ -193,6 +193,9 @@ void SettingsFrame::setupTreeModels()
 {
 	//treeview setup
 	setupSoundCards();
+#ifdef HAVE_PULSE
+	setupPulseDevices();
+#endif
 }
 
 void SettingsFrame::setupSoundCards()
@@ -216,7 +219,11 @@ void SettingsFrame::setupSoundCards()
 		}
 		sndCardBox_->pack_start(m_Columns.m_col_name);
 	}
+}
+
 #ifdef HAVE_PULSE
+void SettingsFrame::setupPulseDevices()
+{
 	if(pulseBox_) {
 		pulseBox_->clear();
 		pulseCards_ = Gtk::ListStore::create(m_Columns);
@@ -236,8 +243,8 @@ void SettingsFrame::setupSoundCards()
 		}
 		pulseBox_->pack_start(m_Columns.m_col_name);
 	}
-#endif
 }
+#endif
 
 void SettingsFrame::setupMixers()
 {

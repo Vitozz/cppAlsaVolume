@@ -98,6 +98,9 @@ protected:
 private:
 	void setupTreeModels();
 	void setupSoundCards();
+#ifdef HAVE_PULSE
+	void setupPulseDevices();
+#endif
 	void setupMixers();
 	void updateSwitchTree();
 	void setTabPos(bool orient);

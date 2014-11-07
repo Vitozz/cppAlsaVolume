@@ -77,6 +77,7 @@ PulseCore::PulseCore(const char *clientName)
   mainLoopApi_(pa_mainloop_get_api(mainLoop_)),
   context_(pa_context_new(mainLoopApi_,clientName))
 {
+	isAvailable_ = true;
 	pState = CONNECTING;
 	pa_context_set_state_callback(context_, &state_cb, this);
 	pa_context_connect(context_, NULL, PA_CONTEXT_NOFLAGS, NULL);
@@ -84,10 +85,13 @@ PulseCore::PulseCore(const char *clientName)
 		pa_mainloop_iterate(mainLoop_, 1, &retval_);
 	}
 	if (pState == ERROR) {
-		onError("Connection Error");
+		onError("Pulseaudio Connection Error");
+		isAvailable_ = false;
 	}
-	updateDevices();
-	currentDevice_ = getDefaultSink();
+	if (isAvailable_) {
+		updateDevices();
+		currentDevice_ = getDefaultSink();
+	}
 }
 
 PulseCore::~PulseCore()
@@ -129,7 +133,7 @@ PulseDevicePtr PulseCore::getSink(u_int32_t index)
 		return sinks_.at(index);
 	}
 	else {
-		onError("This pulseaudio sink does not exits. Default sink will be used");
+		onError("ERROR in pulsecore.cpp:136. This pulseaudio sink does not exits. Default sink will be used");
 	}
 	return getDefaultSink();
 }
@@ -144,7 +148,7 @@ PulseDevicePtr PulseCore::getSink(const std::string &name)
 		}
 		++it;
 	}
-	onError("This pulseaudio sink does not exits. Default sink will be used");
+	onError("ERROR in pulsecore.cpp:151. This pulseaudio sink does not exits. Default sink will be used");
 	return getDefaultSink();
 }
 
@@ -154,7 +158,7 @@ PulseDevicePtr PulseCore::getSource(u_int32_t index)
 		return sources_.at(index);
 	}
 	else {
-		onError("This pulseaudio source does not exits. Default source will be used");
+		onError("ERROR in pulsecore.cpp:161. This pulseaudio source does not exits. Default source will be used");
 	}
 	return getDefaultSource();
 }
@@ -169,7 +173,7 @@ PulseDevicePtr PulseCore::getSource(const std::string &name)
 		}
 		++it;
 	}
-	onError("This pulseaudio source does not exits. Default source will be used");
+	onError("ERROR in pulsecore.cpp:176.This pulseaudio source does not exits. Default source will be used");
 	return getDefaultSource();
 }
 
@@ -179,7 +183,11 @@ PulseDevicePtr PulseCore::getDefaultSink()
 	pa_operation* op = pa_context_get_server_info(context_, &server_info_cb, &info);
 	iterate(op);
 	pa_operation_unref(op);
-	return getSink(info.defaultSinkName);
+	if (!info.defaultSinkName.empty()) {
+		return getSink(info.defaultSinkName);
+	}
+	isAvailable_ = false;
+	return PulseDevicePtr();
 }
 
 PulseDevicePtr PulseCore::getDefaultSource()
@@ -188,7 +196,11 @@ PulseDevicePtr PulseCore::getDefaultSource()
 	pa_operation* op = pa_context_get_server_info(context_, &server_info_cb, &info);
 	iterate(op);
 	pa_operation_unref(op);
-	return getSource(info.defaultSourceName);
+	if (!info.defaultSourceName.empty()) {
+		return getSource(info.defaultSourceName);
+	}
+	isAvailable_ = false;
+	return PulseDevicePtr();
 }
 
 const std::vector<std::string> &PulseCore::getSinksDescriptions() const
@@ -366,10 +378,8 @@ PulseDevicePtr PulseCore::getDeviceByIndex(int index)
 
 int PulseCore::getCurrentDeviceIndex()
 {
-	const int sinksSize = sinksDescriptions_.size();
-	const int absIndex = currentDevice_->index();
-	const int result = (currentDevice_->type() == SINK) ? absIndex : (sinksSize + absIndex);
-	return result;
+	int index = Tools::itemIndex(devicesNames_, currentDevice_->name());
+	return ((index > 0) ? index : 0);
 }
 
 bool PulseCore::deviceNameExists(const std::string &name)
@@ -380,4 +390,14 @@ bool PulseCore::deviceNameExists(const std::string &name)
 bool PulseCore::deviceDescriptionExists(const std::string &description)
 {
 	return Tools::itemExists(devicesDescs_, description);
+}
+
+bool PulseCore::available()
+{
+	return isAvailable_;
+}
+
+void PulseCore::refreshDevices()
+{
+	updateDevices();
 }

@@ -71,6 +71,7 @@ private:
 	void updateSettings(int cardId);
 	void mixerChanged(int mixerId);
 	void updateTrayIcon(double value);
+	void blockAllSignals(bool isblock);
 
 private:
 	Settings *settings_;
@@ -86,6 +87,13 @@ private:
 	std::string pulseDevice_;
 	std::string pulseDeviceDesc_;
 	std::vector<std::string> pulseDevices_;
+	sigc::connection signal_ok_;
+	sigc::connection signal_switches_;
+	sigc::connection signal_autorun_;
+	sigc::connection signal_sndcard_;
+	sigc::connection signal_mixer_;
+	sigc::connection signal_pulsdev_;
+	sigc::connection signal_pulsedevices_;
 #endif
 };
 

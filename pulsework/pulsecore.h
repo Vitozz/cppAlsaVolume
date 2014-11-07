@@ -57,6 +57,8 @@ public:
 	void setVolume(int value);
 	void setMute(bool mute);
 	void setCurrentDevice(const std::string &name);
+	bool available();
+	void refreshDevices();
 private:
 	void getSinks();
 	void getSources();
@@ -87,6 +89,7 @@ private:
 	std::vector<std::string> sourcesDescriptions_;
 	std::vector<std::string> devicesNames_;
 	std::vector<std::string> devicesDescs_;
+	bool isAvailable_;
 };
 
 #endif // PULSECORE_H

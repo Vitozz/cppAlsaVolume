@@ -32,7 +32,7 @@
 #define COPYRIGHT "2012-2014 (c) Vitaly Tonkacheyev (thetvg@gmail.com)"
 #define WEBSITE "http://sites.google.com/site/thesomeprojects/"
 #define WEBSITELABEL "Program Website"
-#define VERSION "0.2.2"
+#define VERSION "0.2.3"
 
 Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 : settings_(new Settings()),
@@ -40,23 +40,29 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
   settingsStr_(new settingsStr()),
   mixerName_(settings_->getMixer()),
   volumeValue_(0.0),
-  settingsDialog_(0)
+  settingsDialog_(0),
+  isPulse_(false)
 {
 	refGlade->get_widget_derived("settingsDialog", settingsDialog_);
 #ifdef HAVE_PULSE
-	isPulse_ = settings_->usePulse();
-	settingsStr_->setUsePulse(isPulse_);
 	pulse_ = new PulseCore("alsavolume");
-	settingsStr_->setPulseDevices(pulse_->getCardList());
-	pulseDevice_ = settings_->pulseDeviceName();
-	if (pulseDevice_.empty() || pulse_->deviceNameExists(pulseDevice_)) {
-		pulseDevice_ = pulse_->defaultSink();
+	if (pulse_->available()) {
+		isPulse_ = settings_->usePulse();
+		settingsStr_->setUsePulse(isPulse_);
+		settingsStr_->setPulseDevices(pulse_->getCardList());
+		pulseDevice_ = settings_->pulseDeviceName();
+		if (pulseDevice_.empty() || !pulse_->deviceNameExists(pulseDevice_)) {
+			pulseDevice_ = pulse_->defaultSink();
+		}
+		pulse_->setCurrentDevice(pulseDevice_);
+		pulseDeviceDesc_ = pulse_->getDeviceDescription(pulseDevice_);
+		settingsStr_->setPulseDeviceName(pulseDevice_);
+		settingsStr_->setPulseDeviceDesc(pulseDeviceDesc_);
+		settingsStr_->setPulseDeviceId(pulse_->getCurrentDeviceIndex());
 	}
-	pulse_->setCurrentDevice(pulseDevice_);
-	pulseDeviceDesc_ = pulse_->getDeviceDescription(pulseDevice_);
-	settingsStr_->setPulseDeviceName(pulseDevice_);
-	settingsStr_->setPulseDeviceDesc(pulseDeviceDesc_);
-	settingsStr_->setPulseDeviceId(pulse_->getCurrentDeviceIndex());
+	else {
+		settingsStr_->setUsePulse(isPulse_);
+	}
 #else
 	isPulse_ = false;
 	settingsStr_->setUsePulse(isPulse_);
@@ -79,7 +85,7 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 		volumeValue_ = alsaWork_->getAlsaVolume();
 	}
 #ifdef HAVE_PULSE
-	else {
+	else if (pulse_->available()) {
 		volumeValue_ = pulse_->getVolume();
 	}
 #endif
@@ -88,15 +94,14 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 	settings_->setVersion(VERSION);
 	//connect signals
 	if (settingsDialog_) {
-		settingsDialog_->initParms(*settingsStr_);
-		settingsDialog_->signal_ok_pressed().connect(sigc::mem_fun(*this, &Core::onSettingsDialogOk));
-		settingsDialog_->signal_switches_toggled().connect(sigc::mem_fun(*this, &Core::switchChanged));
-		settingsDialog_->signal_autorun_toggled().connect(sigc::mem_fun(*this, &Core::onSettingsDialogAutostart));
-		settingsDialog_->signal_sndcard_changed().connect(sigc::mem_fun(*this, &Core::updateControls));
-		settingsDialog_->signal_mixer_changed().connect(sigc::mem_fun(*this, &Core::mixerChanged));
+		signal_ok_ = settingsDialog_->signal_ok_pressed().connect(sigc::mem_fun(*this, &Core::onSettingsDialogOk));
+		signal_switches_ = settingsDialog_->signal_switches_toggled().connect(sigc::mem_fun(*this, &Core::switchChanged));
+		signal_autorun_ = settingsDialog_->signal_autorun_toggled().connect(sigc::mem_fun(*this, &Core::onSettingsDialogAutostart));
+		signal_sndcard_ = settingsDialog_->signal_sndcard_changed().connect(sigc::mem_fun(*this, &Core::updateControls));
+		signal_mixer_ = settingsDialog_->signal_mixer_changed().connect(sigc::mem_fun(*this, &Core::mixerChanged));
 #ifdef HAVE_PULSE
-		settingsDialog_->signal_pulsdev_toggled().connect(sigc::mem_fun(*this, &Core::onSettingsDialogUsePulse));
-		settingsDialog_->signal_pulsedevices_changed().connect(sigc::mem_fun(*this, &Core::updatePulseDevices));
+		signal_pulsdev_ = settingsDialog_->signal_pulsdev_toggled().connect(sigc::mem_fun(*this, &Core::onSettingsDialogUsePulse));
+		signal_pulsedevices_ = settingsDialog_->signal_pulsedevices_changed().connect(sigc::mem_fun(*this, &Core::updatePulseDevices));
 #endif
 	}
 }
@@ -110,6 +115,19 @@ Core::~Core()
 	delete settings_;
 	delete settingsStr_;
 	delete settingsDialog_;
+}
+
+void Core::blockAllSignals(bool isblock)
+{
+	signal_ok_.block(isblock);
+	signal_switches_.block(isblock);
+	signal_autorun_.block(isblock);
+	signal_sndcard_.block(isblock);
+	signal_mixer_.block(isblock);
+#ifdef HAVE_PULSE
+	signal_pulsdev_.block(isblock);
+	signal_pulsedevices_.block(isblock);
+#endif
 }
 
 void Core::runAboutDialog()
@@ -134,6 +152,14 @@ void Core::runAboutDialog()
 void Core::runSettings()
 {
 	if (settingsDialog_) {
+#ifdef HAVE_PULSE
+		if (pulse_->available()) {
+			updatePulseDevices(pulse_->getCurrentDeviceIndex());
+		}
+#endif
+		blockAllSignals(true);
+		settingsDialog_->initParms(*settingsStr_);
+		blockAllSignals(false);
 		settingsDialog_->updateMixers(settingsStr_->mixerList());
 		settingsDialog_->updateSwitches(settingsStr_->switchList());
 		settingsDialog_->run();
@@ -147,7 +173,9 @@ void Core::saveSettings()
 	settings_->saveNotebookOrientation(settingsStr_->notebookOrientation());
 	settings_->setUsePulse(isPulse_);
 #ifdef HAVE_PULSE
-	settings_->savePulseDeviceName(pulseDevice_);
+	if (pulse_->available()) {
+		settings_->savePulseDeviceName(pulseDevice_);
+	}
 #endif
 }
 
@@ -159,7 +187,7 @@ void Core::onSettingsDialogOk(settingsStr &str)
 	settingsStr_->setIsAutorun(str.isAutorun());
 	updateControls(settingsStr_->cardId());
 #ifdef HAVE_PULSE
-	if (isPulse_) {
+	if (isPulse_ && pulse_->available()) {
 		volumeValue_ = pulse_->getVolume();
 	}
 #endif
@@ -174,10 +202,12 @@ void Core::onSettingsDialogAutostart(bool isAutorun)
 #ifdef HAVE_PULSE
 void Core::onSettingsDialogUsePulse(bool isPulse)
 {
-	isPulse_ = isPulse;
-	settingsStr_->setUsePulse(isPulse);
-	settings_->setUsePulse(isPulse);
-	updateTrayIcon(volumeValue_);
+	if (pulse_->available()) {
+		isPulse_ = isPulse;
+		settingsStr_->setUsePulse(isPulse);
+		settings_->setUsePulse(isPulse);
+		updateTrayIcon(volumeValue_);
+	}
 }
 #endif
 
@@ -192,7 +222,7 @@ void Core::soundMuted(bool mute)
 		alsaWork_->setMute(mute);
 	}
 #ifdef HAVE_PULSE
-	else {
+	else if (pulse_->available()) {
 		pulse_->setMute(mute);
 	}
 #endif
@@ -204,7 +234,7 @@ bool Core::getMuted()
 		return !bool(alsaWork_->getMute());
 	}
 #ifdef HAVE_PULSE
-	else {
+	else if (pulse_->available()) {
 		return pulse_->getMute();
 	}
 #endif
@@ -233,7 +263,9 @@ void Core::updateControls(int cardId)
 #ifdef HAVE_PULSE
 void Core::updatePulseDevices(int deviceId)
 {
-	if (isPulse_) {
+	if (isPulse_ && pulse_->available()) {
+		pulse_->refreshDevices();
+		settingsStr_->setPulseDevices(pulse_->getCardList());
 		const std::string currDev = pulse_->getDeviceNameByIndex(deviceId);
 		pulse_->setCurrentDevice(currDev);
 		pulseDevice_ = currDev;
@@ -254,7 +286,7 @@ std::string Core::getSoundCardName() const
 		result = alsaWork_->getCardName(settingsStr_->cardId());
 	}
 #ifdef HAVE_PULSE
-	else {
+	else if (pulse_->available()) {
 		result = pulseDeviceDesc_;
 	}
 #endif
@@ -290,7 +322,7 @@ void Core::onVolumeSlider(double value)
 		alsaWork_->setAlsaVolume(value);
 	}
 #ifdef HAVE_PULSE
-	else {
+	else if (pulse_->available()) {
 		pulse_->setVolume((int)value);
 	}
 #endif
@@ -320,7 +352,7 @@ void Core::mixerChanged(int mixerId)
 		volumeValue_ = alsaWork_->getAlsaVolume();
 	}
 #ifdef HAVE_PULSE
-	else {
+	else if (pulse_->available()) {
 		volumeValue_ = pulse_->getVolume();
 	}
 #endif
