@@ -50,22 +50,6 @@ to build with gtkmm-2.4 support:
 
 >make
 
-else:
-
->g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa \` \`pkg-config --libs gtkmm-3.0 alsa \`
-
-to build with gtkmm-2.4 support:
-
->g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-config --cflags gtkmm-2.4 alsa \` \`pkg-config --libs gtkmm-2.4 alsa \`
-
-to build wiht pulseaudio support:
-
->g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp pulsework/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa libpulse \` \`pkg-config --libs gtkmm-3.0 alsa libpulse \` 
-
-to build wiht pulseaudio and gtkmm-2.4 support:
-
->g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp pulsework/*.cpp \`pkg-config --cflags gtkmm-2.4 alsa libpulse \` \`pkg-config --libs gtkmm-2.4 alsa libpulse \` 
-
 What features available:
 
 	- sound card selection
