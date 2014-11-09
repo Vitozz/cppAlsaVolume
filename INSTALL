@@ -48,21 +48,3 @@ and than:
 $ make
 
 $ make install
-
--------------------------------------------------
-Or you can build alsavolume executable by runing:
--------------------------------------------------
-
-$ g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa \` \`pkg-config --libs gtkmm-3.0 alsa \` 
-
-For pulseaudio support:
-
-$ g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp pulsework/*.cpp \`pkg-config --cflags gtkmm-3.0 alsa libpulse \` \`pkg-config --libs gtkmm-3.0 alsa libpulse \` 
-
-For gtkmm-2.4 support:
-
-$ g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp \`pkg-config --cflags gtkmm-2.4 alsa \` \`pkg-config --libs gtkmm-2.4 alsa \`
-
-For pulseaudio and gtkmm-2.4 support:
-
-$ g++ -W -o alsavolume main.cpp  gui/*.cpp alsawork/*.cpp tools/*.cpp pulsework/*.cpp \`pkg-config --cflags gtkmm-2.4 alsa libpulse \` \`pkg-config --libs gtkmm-2.4 alsa libpulse \` 
