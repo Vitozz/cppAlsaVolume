@@ -25,14 +25,17 @@
 #include "glibmm/fileutils.h"
 #include "../gui/settingsframe.h"
 #include <iostream>
+#include "libintl.h"
+#define _(String) gettext(String)
+#define N_(String) gettext_noop (String)
 
-#define TITLE "About AlsaVolume"
-#define PROGNAME "Alsa Volume Changer"
-#define COMMENTS "Tray Alsa Volume Changer written using gtkmm"
-#define COPYRIGHT "2012-2014 (c) Vitaly Tonkacheyev (thetvg@gmail.com)"
+#define TITLE _("About AlsaVolume")
+#define PROGNAME _("Alsa Volume Changer")
+#define COMMENTS _("Tray Alsa Volume Changer written using gtkmm")
+#define COPYRIGHT _("2012-2014 (c) Vitaly Tonkacheyev (thetvg@gmail.com)")
 #define WEBSITE "http://sites.google.com/site/thesomeprojects/"
-#define WEBSITELABEL "Program Website"
-#define VERSION "0.2.3"
+#define WEBSITELABEL _("Program Website")
+#define VERSION "0.2.4"
 
 Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 : settings_(new Settings()),
@@ -341,7 +344,7 @@ void Core::updateTrayIcon(double value)
 		}
 	}
 	else {
-		m_signal_value_changed(value, getSoundCardName(), "Volume: ");
+		m_signal_value_changed(value, getSoundCardName(), std::string(""));
 	}
 }
 

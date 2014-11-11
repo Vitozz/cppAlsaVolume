@@ -1,3 +1,14 @@
+2014-11-11
+v0.2.4
+  - Added Russian and Ukrainian locales
+  - Added locale generating section to Cmake build
+  - Few fixes in tools
+
+2014-11-07
+v0.2.3
+  - Try to fix pulseaudio. Using alsa if pulseaudio not available
+  - Changed work with settings dialog
+
 2014-11-04
 v0.2.2
   - Added gtkmm-2.4 support

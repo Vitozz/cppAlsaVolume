@@ -23,11 +23,18 @@
 #include "gtkmm/separatormenuitem.h"
 #include "gtkmm/stock.h"
 #include "glibmm.h"
+#include "libintl.h"
 #include <iostream>
 #ifdef IS_GTK_2
 #define GDK_BUTTON_MIDDLE 2
 #define GDK_BUTTON_PRIMARY 1
 #endif
+#define _(String) gettext(String)
+#define N_(String) gettext_noop (String)
+#define MUTEITEM _("Mute")
+#define CARDL _("Card: ")
+#define VOLUMEL _("Volume: ")
+#define MIXERL _("Mixer: ")
 
 
 const int OFFSET = 2;
@@ -42,7 +49,7 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
   settingsItem_(Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::PREFERENCES))),
   aboutItem_(Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::ABOUT))),
   quitItem_(Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::QUIT))),
-  muteItem_(Gtk::manage(new Gtk::CheckMenuItem("Mute"))),
+  muteItem_(Gtk::manage(new Gtk::CheckMenuItem(MUTEITEM))),
   mouseX_(0),
   mouseY_(0),
   pixbufWidth_(0)
@@ -221,12 +228,19 @@ void TrayIcon::on_signal_volume_changed(double volume, const std::string &cardNa
 	else {
 		setIcon(0);
 	}
-	const Glib::ustring tip = Glib::ustring("Card: ")
-				  + Glib::ustring(cardName_)
-				  + Glib::ustring("\n")
-				  + Glib::ustring(mixerName_)
-				  + Glib::ustring(" - ")
-				  + Glib::ustring::format(volumeValue_,"%");
+	const Glib::ustring tip = (!mixerName.empty()) ? Glib::ustring(CARDL)
+							 + Glib::ustring(cardName_)
+							 + Glib::ustring("\n")
+							 + Glib::ustring(MIXERL)
+							 + Glib::ustring(mixerName_)
+							 + Glib::ustring("\n")
+							 + Glib::ustring(VOLUMEL)
+							 + Glib::ustring::format(volumeValue_,"%")
+							 : Glib::ustring(CARDL)
+							 + Glib::ustring(cardName_)
+							 + Glib::ustring("\n")
+							 + Glib::ustring(VOLUMEL)
+							 + Glib::ustring::format(volumeValue_,"%");
 	setTooltip(tip);
 }
 

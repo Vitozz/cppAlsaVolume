@@ -29,9 +29,22 @@
 #endif
 #include "gtkmm/builder.h"
 #include "glibmm.h"
+#include "libintl.h"
+#define _(String) gettext(String)
+#define N_(String) gettext_noop (String)
+#define PACKAGE "alsavolume"
+#define CODEC "UTF-8"
 
 int main (int argc, char *argv[])
 {
+	gchar *str=NULL;
+	const char* packageLocalesDir = Tools::getDirPath("locale").c_str();
+#ifdef IS_DEBUG
+	std::cout << packageLocalesDir << std::endl;
+#endif
+	str = bindtextdomain(PACKAGE, packageLocalesDir);
+	str = bind_textdomain_codeset(PACKAGE, CODEC);
+	str = textdomain(PACKAGE);
 #ifndef IS_GTK_2
 	Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "org.gtkmm.alsavolume");
 	Glib::ustring slider_ui_ = Tools::getResPath("gladefiles/SliderFrame.glade");
@@ -55,15 +68,15 @@ int main (int argc, char *argv[])
 		refBuilder->add_from_file(settings_ui_);
 	}
 	catch(const Gtk::BuilderError& ex) {
-		std::cerr << "BuilderError::main.cpp::39 " << ex.what() << std::endl;
+		std::cerr << "BuilderError::main.cpp::66 " << ex.what() << std::endl;
 		return 1;
 	}
 	catch(const Glib::MarkupError& ex) {
-		std::cerr << "MarkupError::main.cpp::39 " << ex.what() << std::endl;
+		std::cerr << "MarkupError::main.cpp::66 " << ex.what() << std::endl;
 		return 1;
 	}
 	catch(const Glib::FileError& ex) {
-		std::cerr << "FileError::main.cpp::39 " << ex.what() << std::endl;
+		std::cerr << "FileError::main.cpp::66 " << ex.what() << std::endl;
 		return 1;
 	}
 	Core *core = new Core(refBuilder);

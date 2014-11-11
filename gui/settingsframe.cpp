@@ -19,9 +19,15 @@
  */
 
 #include "settingsframe.h"
+#include "libintl.h"
 #include <iostream>
 
-const std::string STATUS = "Status";
+#define _(String) gettext(String)
+#define N_(String) gettext_noop (String)
+#define STATUS _("Status")
+#define PB_SWITCH_NAME _("Playback Switch")
+#define CP_SWITCH_NAME _("Capture Switch")
+#define EN_SWITCH_NAME _("Enumerated Control")
 
 SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 			     const Glib::RefPtr<Gtk::Builder>& refGlade)
@@ -296,7 +302,7 @@ void SettingsFrame::updateSwitchTree()
 			row[m_TColumns.m_col_name] = (*it).first;
 			++it;
 		}
-		playbackSwitchTree_->append_column("Playback Switch", m_TColumns.m_col_name);
+		playbackSwitchTree_->append_column(PB_SWITCH_NAME, m_TColumns.m_col_name);
 		playbackSwitchTree_->show_all_children();
 	}
 	if (captureSwitchTree_) {
@@ -323,7 +329,7 @@ void SettingsFrame::updateSwitchTree()
 			row[m_TColumns.m_col_name] = (*it).first;
 			++it;
 		}
-		captureSwitchTree_->append_column("Capture Switch", m_TColumns.m_col_name);
+		captureSwitchTree_->append_column(CP_SWITCH_NAME, m_TColumns.m_col_name);
 		captureSwitchTree_->show_all_children();
 	}
 	if (otherSwitchTree_) {
@@ -349,7 +355,7 @@ void SettingsFrame::updateSwitchTree()
 			row[m_TColumns.m_col_name] = (*it).first;
 			++it;
 		}
-		otherSwitchTree_->append_column("Enumerated Control", m_TColumns.m_col_name);
+		otherSwitchTree_->append_column(EN_SWITCH_NAME, m_TColumns.m_col_name);
 		otherSwitchTree_->show_all_children();
 	}
 }

@@ -51,15 +51,17 @@ typedef std::pair<std::string, bool> switchcap;
 namespace Tools {
 	std::string getCWD();
 	std::string getHomePath();
+	std::vector<std::string> getProjectPathes();
 	std::string getResPath(const char *resName);
+	std::string getDirPath(const char *dirName);
 	bool checkFileExists(const std::string &fileName);
 	bool checkDirExists(const std::string &fileName);
 	void createDirectory(const std::string &dirName);
 	void saveFile(const std::string &fileName, const std::string &fileData);
 	std::string pathToFileName(const std::string &path);
+#ifdef IS_DEBUG
 	void printList(const std::vector<std::string> &list);
-	//Constatnts
-	const std::string PathSuffix = "/share/alsavolume/";
+#endif
 	//Template functions
 	template <class T>
 	int itemIndex(const std::vector<T> &vect, const T &item) {

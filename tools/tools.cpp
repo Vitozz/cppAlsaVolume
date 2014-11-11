@@ -26,6 +26,8 @@
 #include <fstream>
 #include <cstdlib>
 #include <vector>
+#define PATH_SUFFIX "/share/alsavolume/"
+#define MK_RIGTHS 0755
 
 bool Tools::checkFileExists(const std::string &fileName)
 {
@@ -46,35 +48,59 @@ std::string Tools::getCWD()
 
 std::string Tools::getHomePath()
 {
-	return std::string(getenv("HOME")) + "/.local" + PathSuffix;
+	return std::string(getenv("HOME")) + "/.local" + PATH_SUFFIX;
+}
+
+std::vector<std::string> Tools::getProjectPathes()
+{
+	const std::string cwd = getCWD();
+	std::vector<std::string> list;
+	list.push_back(getHomePath());
+	list.push_back(cwd + "/");
+	list.push_back(cwd.substr(0, cwd.find_last_of("/")) + PATH_SUFFIX);
+	list.push_back(std::string("/usr") + PATH_SUFFIX);
+	list.push_back(std::string("/usr/local") + PATH_SUFFIX);
+	return list;
 }
 
 std::string Tools::getResPath(const char *resName)
 {
 	const std::string resName_(resName);
-	std::vector<std::string> list;
-	list.push_back(getHomePath() + resName_);
-	list.push_back(getCWD() + "/" + resName_);
-	list.push_back("/usr"+ PathSuffix + resName_);
-	list.push_back("/usr/local" + PathSuffix + resName_);
-	std::vector<std::string>::iterator it = list.begin();
-	std::string result;
+	const std::vector<std::string> list = getProjectPathes();
+	std::vector<std::string>::const_iterator it = list.begin();
+	std::string fileName;
 	while (it != list.end()) {
-		if (checkFileExists(*it)) {
-			result = std::string(*it);
-			return result;
+		fileName = (*it) + resName_;
+		if (checkFileExists(fileName)) {
+			return fileName;
 		}
 		++it;
 	}
-	return result;
+	return fileName;
+}
+
+std::string Tools::getDirPath(const char *dirName)
+{
+	const std::string dirName_(dirName);
+	const std::vector<std::string> list = getProjectPathes();
+	std::vector<std::string>::const_iterator it = list.begin();
+	std::string directoryName;
+	while (it != list.end()) {
+		directoryName = (*it) + dirName_;
+		if (checkDirExists(directoryName)) {
+			return directoryName;
+		}
+		++it;
+	}
+	return directoryName;
 }
 
 void Tools::createDirectory(const std::string &dirName)
 {
-	if (!g_file_test(dirName.c_str(), G_FILE_TEST_IS_DIR)) {
+	if (!checkDirExists(dirName)) {
 		std::cerr << "Directory " << dirName << " not found. Attempting to create it.." << std::endl;
 		gint err = 0;
-		err = g_mkdir_with_parents(dirName.c_str(), 0755);
+		err = g_mkdir_with_parents(dirName.c_str(), MK_RIGTHS);
 		if (err < 0) {
 			std::cerr << g_file_error_from_errno(err) << std::endl;
 		}
@@ -98,6 +124,7 @@ std::string Tools::pathToFileName(const std::string &path)
 	return g_path_get_basename(path.c_str());
 }
 
+#ifdef IS_DEBUG
 void Tools::printList(const std::vector<std::string> &list)
 {
 	std::cout << "Printing vector contents" << std::endl;
@@ -108,3 +135,4 @@ void Tools::printList(const std::vector<std::string> &list)
 		++it;
 	}
 }
+#endif

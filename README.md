@@ -9,26 +9,9 @@ Build Deps:
 	- glib (libglibmm-2.4-dev package in Ubuntu)
 	- alsa/asoundlib (libasound2-dev package in Ubuntu)
 	- libpulse (only for pulseaudio support)
+	- cmake >= 2.8.0
 
 Howto build application:
-
-if You have Qt installed:
-
->qmake
-
->make
-
-to build wiht pulseaudio support:
-
->qmake CONFIG+=pulseaudio
-
->make
-
-to build wiht gtkmm-2.4 support:
-
->qmake CONFIG+=gtk2
-
->make
 
 if You have cmake installed
 

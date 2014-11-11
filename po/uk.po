@@ -1,0 +1,115 @@
+# Alsavolume pot file.
+# Copyright (C) 2014 KukuRuzo
+# This file is distributed under the same license as the PACKAGE package.
+# KukuRuzo <thetvg@gmail.com>, 2014.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: alsavolume Version 0.2.3\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-11-11 01:56+0200\n"
+"PO-Revision-Date: 2014-11-11 00:55+0300\n"
+"Last-Translator: Vitaly Tonkacheyev <thetvg@gmail.com>\n"
+"Language-Team: KukuRuzo-team <thetvg@gmail.com>\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.5\n"
+
+#: ../gladefiles/SettingsFrame.glade.h:1
+#: ../gladefiles/SettingsFrame_2.glade.h:1
+msgid "Settings"
+msgstr "Налаштування"
+
+#: ../gladefiles/SettingsFrame.glade.h:2
+#: ../gladefiles/SettingsFrame_2.glade.h:2
+msgid "Sound Card"
+msgstr "Звукова карта"
+
+#: ../gladefiles/SettingsFrame.glade.h:3
+#: ../gladefiles/SettingsFrame_2.glade.h:3
+msgid "Mixer"
+msgstr "Мікшер"
+
+#: ../gladefiles/SettingsFrame.glade.h:4
+#: ../gladefiles/SettingsFrame_2.glade.h:4
+msgid "Select PulseAudio device"
+msgstr "Оберіть пристрій PulseAudio"
+
+#: ../gladefiles/SettingsFrame.glade.h:5
+#: ../gladefiles/SettingsFrame_2.glade.h:5
+msgid "Use PulseAudio"
+msgstr "Використовувати PulseAudio"
+
+#: ../gladefiles/SettingsFrame.glade.h:6
+#: ../gladefiles/SettingsFrame_2.glade.h:6
+msgid "Autorun program on logon"
+msgstr "Запускати програму при старті системи"
+
+#: ../gladefiles/SettingsFrame.glade.h:7
+#: ../gladefiles/SettingsFrame_2.glade.h:7
+msgid "Place tabs horizontally"
+msgstr "Вкладинки горизонтально"
+
+#: ../gladefiles/SettingsFrame.glade.h:8
+#: ../gladefiles/SettingsFrame_2.glade.h:8
+msgid "Options"
+msgstr "Опції"
+
+#: ../gladefiles/SettingsFrame.glade.h:9
+#: ../gladefiles/SettingsFrame_2.glade.h:9
+msgid "Switchers"
+msgstr "Перемикачі"
+
+#: ../gui/settingsframe.cpp:27
+msgid "Status"
+msgstr "Статус"
+
+#: ../gui/settingsframe.cpp:28
+msgid "Playback Switch"
+msgstr "Перемикачі програвання"
+
+#: ../gui/settingsframe.cpp:29
+msgid "Capture Switch"
+msgstr "Перемикачі запису"
+
+#: ../gui/settingsframe.cpp:30
+msgid "Enumerated Control"
+msgstr "Інші перемикачі"
+
+#: ../gui/trayicon.cpp:34
+msgid "Mute"
+msgstr "Заглушити"
+
+#: ../gui/trayicon.cpp:35
+msgid "Card: "
+msgstr "Карта: "
+
+#: ../gui/trayicon.cpp:36
+msgid "Volume: "
+msgstr "Гучність: "
+
+#: ../gui/trayicon.cpp:37
+msgid "Mixer: "
+msgstr "Мікшер: "
+
+#: ../tools/core.cpp:32
+msgid "About AlsaVolume"
+msgstr "Про AlsaVolume"
+
+#: ../tools/core.cpp:33
+msgid "Alsa Volume Changer"
+msgstr "Регулятор гучності Alsa"
+
+#: ../tools/core.cpp:34
+msgid "Tray Alsa Volume Changer written using gtkmm"
+msgstr "Регулятор гучності Alsa в треї на gtkmm"
+
+#: ../tools/core.cpp:35
+msgid "2012-2014 (c) Vitaly Tonkacheyev (thetvg@gmail.com)"
+msgstr "2012-2014 (c) Віталій Тонкачеєв (thetvg@gmail.com)"
+
+#: ../tools/core.cpp:37
+msgid "Program Website"
+msgstr "Web-сторінка програми"
