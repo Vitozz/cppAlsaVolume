@@ -38,17 +38,19 @@ public:
 	SettingsFrame(BaseObjectType* cobject,
 		      const Glib::RefPtr<Gtk::Builder>& refGlade);
 	~SettingsFrame();
+	enum RESPONCES {
+		OK_RESPONSE = 1,
+		CANCEL_RESPONSE = 0
+	};
 	void initParms(settingsStr &str);
 	void updateControls(settingsStr &str);
 	void updateMixers(const std::vector<std::string> &mixers);
 	void updateSwitches(const MixerSwitches &slist);
+	settingsStr &getSettings() const;
 	//
-	typedef sigc::signal<void, settingsStr&> type_void_signal;
-	type_void_signal signal_ok_pressed();
 	typedef sigc::signal<void, std::string, int ,bool> type_toggled_signal;
 	type_toggled_signal signal_switches_toggled();
 	typedef sigc::signal<void, bool> type_bool_signal;
-	type_bool_signal signal_autorun_toggled();
 	typedef sigc::signal<void, int> type_int_signal;
 	type_int_signal signal_sndcard_changed();
 	type_int_signal signal_mixer_changed();
@@ -85,9 +87,7 @@ protected:
 	void onPulseDeviceChanged();
 #endif
 	//signals
-	type_void_signal m_signal_ok_pressed;
 	type_toggled_signal m_type_toggled_signal;
-	type_bool_signal m_signal_autorun_toggled;
 #ifdef HAVE_PULSE
 	type_bool_signal m_signal_pulse_toggled;
 	type_int_signal m_signal_pulsedev_changed;

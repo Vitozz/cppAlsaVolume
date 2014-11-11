@@ -22,17 +22,16 @@
 #include <iostream>
 
 SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade)
-: Gtk::Window(cobject)
+: Gtk::Window(cobject),
+  volumeSlider_(0)
 {
-	Glib::RefPtr<Gtk::Builder> builder = refGlade;
-	volumeSlider_ = 0;
 	volumeValue_ = 0;
-	builder->get_widget("volume_slider", volumeSlider_);
+	refGlade->get_widget("volume_slider", volumeSlider_);
 	if (volumeSlider_) {
 		volumeSlider_->signal_value_changed().connect(sigc::mem_fun(*this, &SliderWindow::on_volume_slider));
 		set_default_size(volumeSlider_->get_width(), volumeSlider_->get_width());
 	}
-	set_events(Gdk::LEAVE_NOTIFY_MASK);
+	add_events(Gdk::LEAVE_NOTIFY_MASK);
 	signal_leave_notify_event().connect(sigc::mem_fun(*this, &SliderWindow::on_focus_out));
 	set_border_width(0);
 	set_keep_above(true);
@@ -77,7 +76,7 @@ void SliderWindow::on_volume_slider()
 
 bool SliderWindow::on_focus_out(GdkEventCrossing* event)
 {
-	if ((event->type |(GDK_LEAVE_NOTIFY == 0))
+	if ((event->type == GDK_LEAVE_NOTIFY)
 			&& (event->x < 0
 			  ||event->x >= get_width()
 			  ||event->y < 0

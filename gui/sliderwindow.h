@@ -44,7 +44,6 @@ private:
 protected:
 	type_sliderwindow_signal m_signal_volume_changed;
 private:
-	Glib::RefPtr<Gtk::Builder> builder_;
 	Gtk::Scale *volumeSlider_;
 	double volumeValue_;
 };

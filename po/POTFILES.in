@@ -1,0 +1,8 @@
+gladefiles/SettingsFrame.glade
+gladefiles/SettingsFrame_2.glade
+gladefiles/SliderFrame.glade
+gladefiles/SliderFrame_2.glade
+gui/settingsframe.cpp
+gui/sliderwindow.cpp
+gui/trayicon.cpp
+tools/core.cpp

@@ -21,7 +21,7 @@ pkg_check_modules( ALSA REQUIRED alsa )
 set( CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 
 if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
-	add_definitions(-DIS_DEBUG)
+	add_definitions( -DIS_DEBUG )
 endif( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
 
 add_definitions(
@@ -153,22 +153,21 @@ set( LOCALES_WORKDIR
 set( LOCALES_INSTALLPATH
 	${DATADIR_PATH}/${PROJECT}/locale
 )
+#ADD SOURCES PREFIX
+file( STRINGS ${PO_FULL_DIR}/POTFILES.in POTFILES_LINES )
+set( POTFILES_CONTENTS )
+foreach( line ${POTFILES_LINES} )
+	set( POTFILES_CONTENTS
+		"${POTFILES_CONTENTS}
+${PROJECT_SOURCE_DIR}/${line}"
+	)
+endforeach( line ${POTFILES_LINES} )
+file( WRITE ${PO_FULL_DIR}/POTFILES.in "${POTFILES_CONTENTS}" )
+
 add_custom_target(alsavolume-update-sources
 	AV_INTLTOOL -m
 	WORKING_DIRECTORY ${PO_FULL_DIR}
 )
-set( POTFILES_CONTENTS
-	"${PROJECT_SOURCE_DIR}/gladefiles/SettingsFrame.glade
-${PROJECT_SOURCE_DIR}/gladefiles/SettingsFrame_2.glade
-${PROJECT_SOURCE_DIR}/gladefiles/SliderFrame.glade
-${PROJECT_SOURCE_DIR}/gladefiles/SliderFrame_2.glade
-${PROJECT_SOURCE_DIR}/gui/settingsframe.cpp
-${PROJECT_SOURCE_DIR}/gui/sliderwindow.cpp
-${PROJECT_SOURCE_DIR}/gui/trayicon.cpp
-${PROJECT_SOURCE_DIR}/tools/core.cpp"
-)
-file( WRITE ${PO_FULL_DIR}/POTFILES.in "${POTFILES_CONTENTS}" )
-
 add_custom_command(OUTPUT ${PO_FULL_DIR}/${PROJECT}.pot
 	COMMAND ${AV_XGETTEXT} --files-from ${PO_FULL_DIR}/POTFILES.in --keyword=_ -o ${PO_FULL_DIR}/${PROJECT}.pot --no-wrap --no-location
 	DEPENDS ${PO_FULL_DIR}/POTFILES.in

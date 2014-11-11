@@ -50,7 +50,6 @@ public:
 	void onTrayIconScroll(double value);
 	void onVolumeSlider(double value);
 	void onSettingsDialogOk(settingsStr &str);
-	void onSettingsDialogAutostart(bool isAutorun);
 	void onSettingsDialogUsePulse(bool isPulse);
 
 	typedef sigc::signal<void, double> type_double_signal;
@@ -82,9 +81,7 @@ private:
 	SettingsFrame *settingsDialog_;
 	bool isPulse_;
 	std::vector<std::string> alsaCards_;
-	sigc::connection signal_ok_;
 	sigc::connection signal_switches_;
-	sigc::connection signal_autorun_;
 	sigc::connection signal_sndcard_;
 	sigc::connection signal_mixer_;
 #ifdef HAVE_PULSE
@@ -94,6 +91,7 @@ private:
 	std::vector<std::string> pulseDevices_;
 	sigc::connection signal_pulsdev_;
 	sigc::connection signal_pulsedevices_;
+
 #endif
 };
 

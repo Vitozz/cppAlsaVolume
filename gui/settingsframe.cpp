@@ -164,28 +164,18 @@ void SettingsFrame::onTabPos()
 
 void SettingsFrame::onOkButton()
 {
-	if (mixerId_ < 0) {
-		mixerId_ = 0;
-		settings_->setMixerId(0);
-	}
-	else {
-		settings_->setMixerId(mixerId_);
-	}
-	if (cardId_ < 0) {
-		cardId_ = 0;
-		settings_->setCardId(0);
-	}
-	else {
-		settings_->setCardId(cardId_);
-	}
-	m_signal_ok_pressed(*settings_);
-	this->hide();
+	mixerId_ = (mixerId_ < 0) ? 0 : mixerId_;
+	settings_->setMixerId(mixerId_);
+	cardId_ = (cardId_ < 0) ? 0 : cardId_;
+	settings_->setCardId(cardId_);
+	response(OK_RESPONSE);
+	hide();
 }
 
 void SettingsFrame::onCancelButton()
 {
-	mixerId_ = ((uint)mixerId_ == settings_->mixerId()) ? mixerId_ : settings_->mixerId();
-	this->hide();
+	response(CANCEL_RESPONSE);
+	hide();
 }
 
 bool SettingsFrame::onDeleteEvent(GdkEventAny *event)
@@ -193,6 +183,11 @@ bool SettingsFrame::onDeleteEvent(GdkEventAny *event)
 	if (event->type == GDK_DESTROY || event->type == GDK_DELETE)
 		onCancelButton();
 	return true;
+}
+
+settingsStr &SettingsFrame::getSettings() const
+{
+	return *settings_;
 }
 
 void SettingsFrame::setupTreeModels()
@@ -449,7 +444,7 @@ void SettingsFrame::onEnumCellToggled(const Glib::ustring& path)
 
 void SettingsFrame::onAutorunToggled()
 {
-	m_signal_autorun_toggled(isAutoRun_->get_active());
+	settings_->setIsAutorun(isAutoRun_->get_active());
 }
 
 #ifdef HAVE_PULSE
@@ -465,16 +460,6 @@ void SettingsFrame::onPulseToggled()
 SettingsFrame::type_toggled_signal SettingsFrame::signal_switches_toggled()
 {
 	return m_type_toggled_signal;
-}
-
-SettingsFrame::type_void_signal SettingsFrame::signal_ok_pressed()
-{
-	return m_signal_ok_pressed;
-}
-
-SettingsFrame::type_bool_signal SettingsFrame::signal_autorun_toggled()
-{
-	return m_signal_autorun_toggled;
 }
 
 SettingsFrame::type_int_signal SettingsFrame::signal_sndcard_changed()

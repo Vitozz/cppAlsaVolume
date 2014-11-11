@@ -17,7 +17,6 @@
     <property name="focus_on_map">False</property>
     <property name="decorated">False</property>
     <property name="deletable">False</property>
-    <property name="has_resize_grip">False</property>
     <signal name="destroy-event" handler="on_volumeFrame_destroy_event" swapped="no"/>
     <child>
       <object class="GtkFrame" id="frame1">

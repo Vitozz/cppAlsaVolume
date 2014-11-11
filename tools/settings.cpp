@@ -36,9 +36,9 @@ Settings::Settings()
 : configFile_(new Glib::KeyFile()),
   desktopFile_(new Glib::KeyFile())
 {
-	const std::string configDir = std::string(std::string(getenv("HOME")) + "/.config/cppAlsaVolume");
+	const std::string configDir = std::string(Tools::getHomePath() + "/.config/cppAlsaVolume");
 	iniFileName_ = configDir + std::string("/config.ini");
-	desktopFilePath_ = std::string(std::string(getenv("HOME")) + "/.config/autostart/alsavolume.desktop");
+	desktopFilePath_ = std::string(Tools::getHomePath() + "/.config/autostart/alsavolume.desktop");
 	Tools::createDirectory(configDir);
 	loadConfig(iniFileName_);
 	loadDesktopFile(desktopFilePath_);

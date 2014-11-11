@@ -46,7 +46,6 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
   settingsDialog_(0),
   isPulse_(false)
 {
-	refGlade->get_widget_derived("settingsDialog", settingsDialog_);
 #ifdef HAVE_PULSE
 	pulse_ = new PulseCore("alsavolume");
 	if (pulse_->available()) {
@@ -95,11 +94,10 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 	settingsStr_->setNotebookOrientation(settings_->getNotebookOrientation());
 	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList());
 	settings_->setVersion(VERSION);
+	refGlade->get_widget_derived("settingsDialog", settingsDialog_);
 	//connect signals
 	if (settingsDialog_) {
-		signal_ok_ = settingsDialog_->signal_ok_pressed().connect(sigc::mem_fun(*this, &Core::onSettingsDialogOk));
 		signal_switches_ = settingsDialog_->signal_switches_toggled().connect(sigc::mem_fun(*this, &Core::switchChanged));
-		signal_autorun_ = settingsDialog_->signal_autorun_toggled().connect(sigc::mem_fun(*this, &Core::onSettingsDialogAutostart));
 		signal_sndcard_ = settingsDialog_->signal_sndcard_changed().connect(sigc::mem_fun(*this, &Core::updateControls));
 		signal_mixer_ = settingsDialog_->signal_mixer_changed().connect(sigc::mem_fun(*this, &Core::mixerChanged));
 #ifdef HAVE_PULSE
@@ -107,6 +105,7 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 		signal_pulsedevices_ = settingsDialog_->signal_pulsedevices_changed().connect(sigc::mem_fun(*this, &Core::updatePulseDevices));
 #endif
 	}
+
 }
 
 Core::~Core()
@@ -117,25 +116,13 @@ Core::~Core()
 	delete alsaWork_;
 	delete settings_;
 	delete settingsStr_;
-	delete settingsDialog_;
-}
-
-void Core::blockAllSignals(bool isblock)
-{
-	signal_ok_.block(isblock);
-	signal_switches_.block(isblock);
-	signal_autorun_.block(isblock);
-	signal_sndcard_.block(isblock);
-	signal_mixer_.block(isblock);
-#ifdef HAVE_PULSE
-	signal_pulsdev_.block(isblock);
-	signal_pulsedevices_.block(isblock);
-#endif
+	if (settingsDialog_)
+		delete settingsDialog_;
 }
 
 void Core::runAboutDialog()
 {
-	Glib::RefPtr<Gtk::AboutDialog> dialog (new Gtk::AboutDialog());
+	Gtk::AboutDialog *dialog = new Gtk::AboutDialog();
 	dialog->set_title(TITLE);
 	dialog->set_program_name(PROGNAME);
 	dialog->set_comments(COMMENTS);
@@ -150,6 +137,18 @@ void Core::runAboutDialog()
 	dialog->set_icon(icon);
 	dialog->set_logo(logo);
 	dialog->run();
+	delete dialog;
+}
+
+void Core::blockAllSignals(bool isblock)
+{
+	signal_switches_.block(isblock);
+	signal_sndcard_.block(isblock);
+	signal_mixer_.block(isblock);
+#ifdef HAVE_PULSE
+	signal_pulsdev_.block(isblock);
+	signal_pulsedevices_.block(isblock);
+#endif
 }
 
 void Core::runSettings()
@@ -165,7 +164,10 @@ void Core::runSettings()
 		blockAllSignals(false);
 		settingsDialog_->updateMixers(settingsStr_->mixerList());
 		settingsDialog_->updateSwitches(settingsStr_->switchList());
-		settingsDialog_->run();
+		int response = settingsDialog_->run();
+		if ( response == settingsDialog_->OK_RESPONSE ) {
+			onSettingsDialogOk(settingsDialog_->getSettings());
+		}
 	}
 }
 
@@ -175,6 +177,7 @@ void Core::saveSettings()
 	settings_->saveMixer(std::string(mixerName_.c_str()));
 	settings_->saveNotebookOrientation(settingsStr_->notebookOrientation());
 	settings_->setUsePulse(isPulse_);
+	settings_->setAutorun(settingsStr_->isAutorun());
 #ifdef HAVE_PULSE
 	if (pulse_->available()) {
 		settings_->savePulseDeviceName(pulseDevice_);
@@ -195,11 +198,6 @@ void Core::onSettingsDialogOk(settingsStr &str)
 	}
 #endif
 	saveSettings();
-}
-
-void Core::onSettingsDialogAutostart(bool isAutorun)
-{
-	settings_->setAutorun(isAutorun);
 }
 
 #ifdef HAVE_PULSE
@@ -256,7 +254,6 @@ void Core::updateControls(int cardId)
 	settingsStr_->setCardId(soundCardId);
 	settingsStr_->setList(MIXERS, alsaWork_->getVolumeMixers());
 	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList());
-	settingsStr_->setIsAutorun(settings_->getAutorun());
 	if(settingsDialog_) {
 		settingsDialog_->updateMixers(settingsStr_->mixerList());
 		settingsDialog_->updateSwitches(settingsStr_->switchList());
@@ -344,7 +341,7 @@ void Core::updateTrayIcon(double value)
 		}
 	}
 	else {
-		m_signal_value_changed(value, getSoundCardName(), std::string(""));
+		m_signal_value_changed(value, getSoundCardName(), std::string());
 	}
 }
 
