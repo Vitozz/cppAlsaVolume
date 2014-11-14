@@ -23,9 +23,9 @@
 #include "alsa/asoundlib.h"
 #include "../tools/tools.h"
 #include "mixerswitches.h"
-//#include "volumemixers.h"
 #include <iostream>
 #include <vector>
+#include <memory>
 
 class AlsaDevice
 {
@@ -33,6 +33,7 @@ public:
 	AlsaDevice(int id, const std::string &card);
 	~AlsaDevice();
 	AlsaDevice(AlsaDevice const &);
+	typedef std::shared_ptr<AlsaDevice> Ptr;
 	const std::string &name() const;
 	int id() const;
 	const std::vector<std::string> &mixers() const;

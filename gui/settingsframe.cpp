@@ -457,6 +457,11 @@ void SettingsFrame::onPulseToggled()
 }
 #endif
 
+void SettingsFrame::disablePulseCheckButton()
+{
+	usePulse_->set_visible(false);
+}
+
 SettingsFrame::type_toggled_signal SettingsFrame::signal_switches_toggled()
 {
 	return m_type_toggled_signal;

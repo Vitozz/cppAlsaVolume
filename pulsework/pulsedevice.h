@@ -21,6 +21,7 @@
 
 #include "pulse/pulseaudio.h"
 #include <iostream>
+#include <memory>
 
 enum device_type {
 	SOURCE,
@@ -33,6 +34,7 @@ public:
 	PulseDevice();
 	PulseDevice(const pa_source_info* i_);
 	PulseDevice(const pa_sink_info* i);
+	typedef std::shared_ptr<PulseDevice> Ptr;
 	uint32_t index() const;
 	device_type type() const;
 	const std::string &name() const;

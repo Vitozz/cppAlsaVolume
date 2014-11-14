@@ -30,7 +30,7 @@ AlsaWork::AlsaWork()
 	std::vector<std::string>::iterator it = cardList_.begin();
 	while (it != cardList_.end()) {
 		const std::string name = *it;
-		devices_.push_back(AlsaDevicePtr(new AlsaDevice(id, name)));
+		devices_.push_back(AlsaDevice::Ptr(new AlsaDevice(id, name)));
 		++it;
 		++id;
 	}
@@ -204,7 +204,7 @@ int AlsaWork::getFirstCardWithMixers()
 	AlsaDevicePtrList::iterator it = devices_.begin();
 	int inc = 0;
 	while (it != devices_.end()) {
-		AlsaDevicePtr dev = *it;
+		AlsaDevice::Ptr dev = *it;
 		if(dev->haveMixers()) {
 			return inc;
 		}

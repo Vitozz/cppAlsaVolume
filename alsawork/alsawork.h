@@ -29,8 +29,7 @@
 #include <vector>
 #include <memory>
 
-typedef std::shared_ptr<AlsaDevice> AlsaDevicePtr;
-typedef std::vector<AlsaDevicePtr> AlsaDevicePtrList;
+typedef std::vector<AlsaDevice::Ptr> AlsaDevicePtrList;
 
 class AlsaWork
 {
@@ -57,6 +56,7 @@ public:
 	bool mixerExists(int id);
 	int getFirstCardWithMixers();
 	int getCurrentMixerId() const;
+
 private:
 	bool checkCardId(int cardId);
 	int getTotalCards();
@@ -69,10 +69,11 @@ private:
 	void updateMixers(int cardIndex);
 	void updateMixerList(int cardIndex);
 	snd_mixer_selem_channel_id_t checkMixerChannels(snd_mixer_elem_t *element);
+
 private:
 	std::vector<std::string> cardList_;
 	int totalCards_;
-	AlsaDevicePtr currentAlsaDevice_;
+	AlsaDevice::Ptr currentAlsaDevice_;
 	AlsaDevicePtrList devices_;
 };
 #endif // ALSAWORK_H

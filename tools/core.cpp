@@ -21,6 +21,7 @@
 #include "core.h"
 #include "gtkmm/builder.h"
 #include "gtkmm/aboutdialog.h"
+#include "gtkmm/messagedialog.h"
 #include "glibmm/markup.h"
 #include "glibmm/fileutils.h"
 #include "../gui/settingsframe.h"
@@ -47,28 +48,12 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
   isPulse_(false)
 {
 #ifdef HAVE_PULSE
-	pulse_ = new PulseCore("alsavolume");
-	if (pulse_->available()) {
-		isPulse_ = settings_->usePulse();
-		settingsStr_->setUsePulse(isPulse_);
-		settingsStr_->setPulseDevices(pulse_->getCardList());
-		pulseDevice_ = settings_->pulseDeviceName();
-		if (pulseDevice_.empty() || !pulse_->deviceNameExists(pulseDevice_)) {
-			pulseDevice_ = pulse_->defaultSink();
-		}
-		pulse_->setCurrentDevice(pulseDevice_);
-		pulseDeviceDesc_ = pulse_->getDeviceDescription(pulseDevice_);
-		settingsStr_->setPulseDeviceName(pulseDevice_);
-		settingsStr_->setPulseDeviceDesc(pulseDeviceDesc_);
-		settingsStr_->setPulseDeviceId(pulse_->getCurrentDeviceIndex());
-	}
-	else {
-		settingsStr_->setUsePulse(isPulse_);
-	}
+	isPulse_ = settings_->usePulse();
+	initPulseAudio();
 #else
 	isPulse_ = false;
-	settingsStr_->setUsePulse(isPulse_);
 #endif
+	settingsStr_->setUsePulse(isPulse_);
 	alsaCards_ = alsaWork_->getCardsList();
 	settingsStr_->setList(CARDS, alsaCards_);
 	int cardId = settings_->getSoundCard();
@@ -87,7 +72,7 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 		volumeValue_ = alsaWork_->getAlsaVolume();
 	}
 #ifdef HAVE_PULSE
-	else if (pulse_->available()) {
+	else if (pulse_) {
 		volumeValue_ = pulse_->getVolume();
 	}
 #endif
@@ -110,9 +95,6 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 
 Core::~Core()
 {
-#ifdef HAVE_PULSE
-	delete pulse_;
-#endif
 	delete alsaWork_;
 	delete settings_;
 	delete settingsStr_;
@@ -140,6 +122,37 @@ void Core::runAboutDialog()
 	delete dialog;
 }
 
+#ifdef HAVE_PULSE
+void Core::initPulseAudio()
+{
+	if (!pulse_) {
+		pulse_ = PulseCore::Ptr(new PulseCore("alsavolume"));
+		if (pulse_->available()) {
+			pulseDevice_ = settings_->pulseDeviceName();
+			if (pulseDevice_.empty() || !pulse_->deviceNameExists(pulseDevice_)) {
+				pulseDevice_ = pulse_->defaultSink();
+			}
+			pulse_->setCurrentDevice(pulseDevice_);
+			updatePulseDevices(pulse_->getCurrentDeviceIndex());
+		}
+		else {
+			errorDialog(_("Can't start PulseAudio! Using Alsa by default"));
+			pulse_.reset();
+			isPulse_ = false;
+			settingsStr_->setUsePulse(isPulse_);
+			settings_->setUsePulse(isPulse_);
+		}
+	}
+}
+#endif
+
+void Core::errorDialog(const std::string &errorMessage)
+{
+	Gtk::MessageDialog *warn_ = new Gtk::MessageDialog(Glib::ustring(errorMessage));
+	warn_->run();
+	delete warn_;
+}
+
 void Core::blockAllSignals(bool isblock)
 {
 	signal_switches_.block(isblock);
@@ -155,8 +168,11 @@ void Core::runSettings()
 {
 	if (settingsDialog_) {
 #ifdef HAVE_PULSE
-		if (pulse_->available()) {
+		if (pulse_) {
 			updatePulseDevices(pulse_->getCurrentDeviceIndex());
+		}
+		else {
+			settingsDialog_->disablePulseCheckButton();
 		}
 #endif
 		blockAllSignals(true);
@@ -179,7 +195,7 @@ void Core::saveSettings()
 	settings_->setUsePulse(isPulse_);
 	settings_->setAutorun(settingsStr_->isAutorun());
 #ifdef HAVE_PULSE
-	if (pulse_->available()) {
+	if (pulse_) {
 		settings_->savePulseDeviceName(pulseDevice_);
 	}
 #endif
@@ -193,7 +209,7 @@ void Core::onSettingsDialogOk(settingsStr &str)
 	settingsStr_->setIsAutorun(str.isAutorun());
 	updateControls(settingsStr_->cardId());
 #ifdef HAVE_PULSE
-	if (isPulse_ && pulse_->available()) {
+	if (isPulse_ && pulse_) {
 		volumeValue_ = pulse_->getVolume();
 	}
 #endif
@@ -203,7 +219,7 @@ void Core::onSettingsDialogOk(settingsStr &str)
 #ifdef HAVE_PULSE
 void Core::onSettingsDialogUsePulse(bool isPulse)
 {
-	if (pulse_->available()) {
+	if (pulse_) {
 		isPulse_ = isPulse;
 		settingsStr_->setUsePulse(isPulse);
 		settings_->setUsePulse(isPulse);
@@ -223,7 +239,7 @@ void Core::soundMuted(bool mute)
 		alsaWork_->setMute(mute);
 	}
 #ifdef HAVE_PULSE
-	else if (pulse_->available()) {
+	else if (pulse_) {
 		pulse_->setMute(mute);
 	}
 #endif
@@ -235,7 +251,7 @@ bool Core::getMuted()
 		return !bool(alsaWork_->getMute());
 	}
 #ifdef HAVE_PULSE
-	else if (pulse_->available()) {
+	else if (pulse_) {
 		return pulse_->getMute();
 	}
 #endif
@@ -263,7 +279,7 @@ void Core::updateControls(int cardId)
 #ifdef HAVE_PULSE
 void Core::updatePulseDevices(int deviceId)
 {
-	if (isPulse_ && pulse_->available()) {
+	if (pulse_) {
 		pulse_->refreshDevices();
 		settingsStr_->setPulseDevices(pulse_->getCardList());
 		const std::string currDev = pulse_->getDeviceNameByIndex(deviceId);
@@ -273,20 +289,18 @@ void Core::updatePulseDevices(int deviceId)
 		settingsStr_->setPulseDeviceName(pulseDevice_);
 		settingsStr_->setPulseDeviceDesc(pulseDeviceDesc_);
 		settingsStr_->setPulseDeviceId(pulse_->getCurrentDeviceIndex());
-		isPulse_ = settings_->usePulse();
-		settingsStr_->setUsePulse(isPulse_);
 	}
 }
 #endif
 
 std::string Core::getSoundCardName() const
 {
-	std::string result = std::string();
+	std::string result;
 	if (!isPulse_) {
 		result = alsaWork_->getCardName(settingsStr_->cardId());
 	}
 #ifdef HAVE_PULSE
-	else if (pulse_->available()) {
+	else if (pulse_) {
 		result = pulseDeviceDesc_;
 	}
 #endif
@@ -295,7 +309,7 @@ std::string Core::getSoundCardName() const
 
 std::string Core::getActiveMixer() const
 {
-	return alsaWork_->getCurrentMixerName();
+	return ((!isPulse_) ? alsaWork_->getCurrentMixerName() : std::string());
 }
 
 double Core::getVolumeValue() const
@@ -322,7 +336,7 @@ void Core::onVolumeSlider(double value)
 		alsaWork_->setAlsaVolume(value);
 	}
 #ifdef HAVE_PULSE
-	else if (pulse_->available()) {
+	else if (pulse_) {
 		pulse_->setVolume((int)value);
 	}
 #endif
@@ -337,6 +351,7 @@ void Core::updateTrayIcon(double value)
 			m_signal_value_changed(value, getSoundCardName(), mixer);
 		}
 		else {
+			errorDialog(_("Sound card not contains any volume control mixers"));
 			m_signal_value_changed(value, getSoundCardName(), std::string("N/A"));
 		}
 	}
@@ -352,7 +367,7 @@ void Core::mixerChanged(int mixerId)
 		volumeValue_ = alsaWork_->getAlsaVolume();
 	}
 #ifdef HAVE_PULSE
-	else if (pulse_->available()) {
+	else if (pulse_) {
 		volumeValue_ = pulse_->getVolume();
 	}
 #endif

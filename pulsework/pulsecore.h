@@ -34,8 +34,7 @@ enum state {
 	ERROR
 };
 
-typedef std::shared_ptr<PulseDevice> PulseDevicePtr;
-typedef std::vector<PulseDevicePtr> PulseDevicePtrList;
+typedef std::vector<PulseDevice::Ptr> PulseDevicePtrList;
 
 class PulseCore
 {
@@ -43,6 +42,7 @@ public:
 	PulseCore(const char *clientName);
 	~PulseCore();
 	PulseCore(PulseCore const &);
+	typedef std::shared_ptr<PulseCore> Ptr;
 	state pState;
 	const std::string defaultSink();
 	const std::vector<std::string> &getCardList() const;
@@ -62,18 +62,18 @@ public:
 private:
 	void getSinks();
 	void getSources();
-	PulseDevicePtr getSink(u_int32_t);
-	PulseDevicePtr getSink(const std::string &name);
-	PulseDevicePtr getSource(u_int32_t);
-	PulseDevicePtr getSource(const std::string &name);
-	PulseDevicePtr getDefaultSink();
-	PulseDevicePtr getDefaultSource();
-	PulseDevicePtr getDeviceByName(const std::string &name);
-	PulseDevicePtr getDeviceByIndex(int index);
+	PulseDevice::Ptr getSink(u_int32_t);
+	PulseDevice::Ptr getSink(const std::string &name);
+	PulseDevice::Ptr getSource(u_int32_t);
+	PulseDevice::Ptr getSource(const std::string &name);
+	PulseDevice::Ptr getDefaultSink();
+	PulseDevice::Ptr getDefaultSource();
+	PulseDevice::Ptr getDeviceByName(const std::string &name);
+	PulseDevice::Ptr getDeviceByIndex(int index);
 	const std::vector<std::string> &getSinksDescriptions() const;
 	const std::vector<std::string> &getSourcesDescriptions() const;
-	void setVolume_(PulseDevicePtr device, int value);
-	void setMute_(PulseDevicePtr device, bool mute);
+	void setVolume_(const PulseDevice::Ptr &device, int value);
+	void setMute_(const PulseDevice::Ptr &device, bool mute);
 	void iterate(pa_operation* op);
 	void onError(const std::string &message);
 	void updateDevices();
@@ -84,7 +84,7 @@ private:
 	int retval_;
 	PulseDevicePtrList sources_;
 	PulseDevicePtrList sinks_;
-	PulseDevicePtr currentDevice_;
+	PulseDevice::Ptr currentDevice_;
 	std::vector<std::string> sinksDescriptions_;
 	std::vector<std::string> sourcesDescriptions_;
 	std::vector<std::string> devicesNames_;

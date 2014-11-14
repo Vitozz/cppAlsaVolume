@@ -66,11 +66,13 @@ private:
 	void updateControls(int cardId);
 #ifdef HAVE_PULSE
 	void updatePulseDevices(int deviceId);
+	void initPulseAudio();
 #endif
 	void updateSettings(int cardId);
 	void mixerChanged(int mixerId);
 	void updateTrayIcon(double value);
 	void blockAllSignals(bool isblock);
+	void errorDialog(const std::string &errorMessage);
 
 private:
 	Settings *settings_;
@@ -85,7 +87,7 @@ private:
 	sigc::connection signal_sndcard_;
 	sigc::connection signal_mixer_;
 #ifdef HAVE_PULSE
-	PulseCore *pulse_;
+	PulseCore::Ptr pulse_;
 	std::string pulseDevice_;
 	std::string pulseDeviceDesc_;
 	std::vector<std::string> pulseDevices_;

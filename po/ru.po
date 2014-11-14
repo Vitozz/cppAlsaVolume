@@ -6,9 +6,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: alsavolume Version 0.2.4\n"
-"Report-Msgid-Bugs-To: https://github.com/Vitozz/cppAlsaVolume/issues\n"
-"POT-Creation-Date: 2014-11-11 01:56+0200\n"
-"PO-Revision-Date: 2014-11-11 00:57+0300\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-11-15 01:06+0200\n"
+"PO-Revision-Date: 2014-11-15 01:08+0300\n"
 "Last-Translator: Vitaly Tonkacheyev <thetvg@gmail.com>\n"
 "Language-Team: KukuRuzo-team <thetvg@gmail.com>\n"
 "Language: ru\n"
@@ -94,22 +94,30 @@ msgstr "Громкость: "
 msgid "Mixer: "
 msgstr "Микшер: "
 
-#: ../tools/core.cpp:32
+#: ../tools/core.cpp:33
 msgid "About AlsaVolume"
 msgstr "О AlsaVolume"
 
-#: ../tools/core.cpp:33
+#: ../tools/core.cpp:34
 msgid "Alsa Volume Changer"
 msgstr "Регулятор громкости Alsa"
 
-#: ../tools/core.cpp:34
+#: ../tools/core.cpp:35
 msgid "Tray Alsa Volume Changer written using gtkmm"
 msgstr "Регулятор громкости Alsa в трее на gtkmm"
 
-#: ../tools/core.cpp:35
+#: ../tools/core.cpp:36
 msgid "2012-2014 (c) Vitaly Tonkacheyev (thetvg@gmail.com)"
 msgstr "2012-2014 (c) Виталий Тонкачеев (thetvg@gmail.com)"
 
-#: ../tools/core.cpp:37
+#: ../tools/core.cpp:38
 msgid "Program Website"
 msgstr "Web-сайт программы"
+
+#: ../tools/core.cpp:139
+msgid "Can't start PulseAudio! Using Alsa by default"
+msgstr "Не вышло запустить PulseAudio! Используем Alsa по-умолчанию"
+
+#: ../tools/core.cpp:354
+msgid "Sound card not contains any volume control mixers"
+msgstr "Звуковая карта не содержит каких-либо микшеров регулировки громкости"
