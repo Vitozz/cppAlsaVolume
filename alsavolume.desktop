@@ -6,7 +6,7 @@ Comment=Changes the volume of ALSA from the system tray
 Exec=alsavolume
 Terminal=false
 Type=Application
-Categories=Audio;AudioVideo;GTK;
+Categories=Audio;AudioVideo;Mixer;GTK;
 StartupNotify=false
 
 Comment[ru]=Регулятор громкости ALSA
