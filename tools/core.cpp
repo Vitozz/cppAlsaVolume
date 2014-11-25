@@ -36,7 +36,9 @@
 #define COPYRIGHT _("2012-2014 (c) Vitaly Tonkacheyev (thetvg@gmail.com)")
 #define WEBSITE "http://sites.google.com/site/thesomeprojects/"
 #define WEBSITELABEL _("Program Website")
-#define VERSION "0.2.4"
+#define VERSION "0.2.5"
+
+#define POLLING_INTERVAL 2000
 
 Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 : settings_(new Settings()),
@@ -45,7 +47,8 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
   mixerName_(settings_->getMixer()),
   volumeValue_(0.0),
   settingsDialog_(0),
-  isPulse_(false)
+  isPulse_(false),
+  isMuted_(false)
 {
 #ifdef HAVE_PULSE
 	isPulse_ = settings_->usePulse();
@@ -90,7 +93,7 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 		signal_pulsedevices_ = settingsDialog_->signal_pulsedevices_changed().connect(sigc::mem_fun(*this, &Core::updatePulseDevices));
 #endif
 	}
-
+	Glib::signal_timeout().connect(sigc::mem_fun(*this,&Core::onTimeout), POLLING_INTERVAL);
 }
 
 Core::~Core()
@@ -236,10 +239,12 @@ void Core::switchChanged(const std::string &name, int id, bool enabled)
 void Core::soundMuted(bool mute)
 {
 	if (!isPulse_) {
+		isMuted_ = mute;
 		alsaWork_->setMute(mute);
 	}
 #ifdef HAVE_PULSE
 	else if (pulse_) {
+		isMuted_ = mute;
 		pulse_->setMute(mute);
 	}
 #endif
@@ -248,11 +253,13 @@ void Core::soundMuted(bool mute)
 bool Core::getMuted()
 {
 	if (!isPulse_) {
-		return !bool(alsaWork_->getMute());
+		isMuted_ = !alsaWork_->getMute();
+		return isMuted_;
 	}
 #ifdef HAVE_PULSE
 	else if (pulse_) {
-		return pulse_->getMute();
+		isMuted_ = pulse_->getMute();
+		return isMuted_;
 	}
 #endif
 	return false;
@@ -337,7 +344,7 @@ void Core::onVolumeSlider(double value)
 	}
 #ifdef HAVE_PULSE
 	else if (pulse_) {
-		pulse_->setVolume((int)value);
+		pulse_->setVolume(static_cast<int>(value));
 	}
 #endif
 	updateTrayIcon(value);
@@ -374,6 +381,37 @@ void Core::mixerChanged(int mixerId)
 	m_signal_volume_changed(volumeValue_);
 	updateTrayIcon(volumeValue_);
 	m_signal_mixer_muted(getMuted());
+}
+
+bool Core::onTimeout()
+{
+	if (!isPulse_) {
+		const int volume = static_cast<int>(alsaWork_->getAlsaVolume());
+		bool ismute = !alsaWork_->getMute();
+		if (volumeValue_ != volume) {
+			volumeValue_ = volume;
+			onVolumeSlider(volumeValue_);
+		}
+		if (ismute != isMuted_) {
+			isMuted_ = ismute;
+			m_signal_mixer_muted(isMuted_);
+		}
+	}
+#ifdef HAVE_PULSE
+	if (isPulse_ && pulse_) {
+		const int volume = pulse_->getVolume();
+		bool ismute = pulse_->getMute();
+		if (volumeValue_ != volume) {
+			volumeValue_ = volume;
+			onVolumeSlider(volumeValue_);
+		}
+		if (ismute != isMuted_) {
+			isMuted_ = ismute;
+			m_signal_mixer_muted(isMuted_);
+		}
+	}
+#endif
+	return true;
 }
 
 Core::type_double_signal Core::signal_volume_changed()

@@ -73,6 +73,7 @@ private:
 	void updateTrayIcon(double value);
 	void blockAllSignals(bool isblock);
 	void errorDialog(const std::string &errorMessage);
+	bool onTimeout();
 
 private:
 	Settings *settings_;
@@ -82,6 +83,7 @@ private:
 	double volumeValue_;
 	SettingsFrame *settingsDialog_;
 	bool isPulse_;
+	bool isMuted_;
 	std::vector<std::string> alsaCards_;
 	sigc::connection signal_switches_;
 	sigc::connection signal_sndcard_;

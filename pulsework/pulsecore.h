@@ -50,7 +50,7 @@ public:
 	const std::string getDeviceDescription(const std::string &name);
 	const std::string getDeviceNameByIndex(int index);
 	int getCurrentDeviceIndex();
-	int getVolume() const;
+	int getVolume();
 	bool getMute();
 	bool deviceNameExists(const std::string &name);
 	bool deviceDescriptionExists(const std::string &description);
@@ -77,6 +77,7 @@ private:
 	void iterate(pa_operation* op);
 	void onError(const std::string &message);
 	void updateDevices();
+	void clearLists();
 private:
 	pa_mainloop* mainLoop_;
 	pa_mainloop_api* mainLoopApi_;
@@ -84,7 +85,8 @@ private:
 	int retval_;
 	PulseDevicePtrList sources_;
 	PulseDevicePtrList sinks_;
-	PulseDevice::Ptr currentDevice_;
+	std::string currentDeviceName_;
+	int currentDeviceIndex_;
 	std::vector<std::string> sinksDescriptions_;
 	std::vector<std::string> sourcesDescriptions_;
 	std::vector<std::string> devicesNames_;

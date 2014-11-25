@@ -40,7 +40,7 @@ public:
 	const std::string &name() const;
 	const std::string &description() const;
 	pa_cvolume volume;
-	int volume_percent() const;
+	int volume_percent();
 	bool mute() const;
 	double round(double value) const;
 private:
@@ -50,7 +50,6 @@ private:
 	device_type type_;
 	std::string name_;
 	std::string description_;
-	int volume_percent_;
 	bool mute_;
 };
 

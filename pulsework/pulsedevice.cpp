@@ -24,7 +24,6 @@ PulseDevice::PulseDevice()
   type_(SINK),
   name_(std::string()),
   description_(std::string()),
-  volume_percent_(0),
   mute_(false)
 {
 }
@@ -40,8 +39,6 @@ PulseDevice::PulseDevice(const pa_source_info* i)
 	for (n = 0; n < volume.channels; ++n) {
 		volume.values[n] = i->volume.values[n];
 	}
-	volume_percent_ = percent(volume);
-
 	mute_ = i->mute == 1;
 }
 
@@ -56,7 +53,6 @@ PulseDevice::PulseDevice(const pa_sink_info* i)
 	for (n = 0; n < volume.channels; ++n) {
 		volume.values[n] = i->volume.values[n];
 	}
-	volume_percent_ = percent(volume);
 	mute_ = i->mute == 1;
 }
 
@@ -90,9 +86,9 @@ const std::string &PulseDevice::description() const
 	return description_;
 }
 
-int PulseDevice::volume_percent() const
+int PulseDevice::volume_percent()
 {
-	return volume_percent_;
+	return percent(volume);
 }
 
 bool PulseDevice::mute() const

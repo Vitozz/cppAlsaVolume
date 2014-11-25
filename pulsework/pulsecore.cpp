@@ -90,7 +90,8 @@ PulseCore::PulseCore(const char *clientName)
 	}
 	if (isAvailable_) {
 		updateDevices();
-		currentDevice_ = getDefaultSink();
+		currentDeviceName_ = defaultSink();
+		currentDeviceIndex_ = getCurrentDeviceIndex();
 	}
 }
 
@@ -100,7 +101,6 @@ PulseCore::~PulseCore()
 		sinks_.clear();
 	if (!sources_.empty())
 		sources_.clear();
-	currentDevice_.reset();
 	if (pState == CONNECTED)
 		pa_context_disconnect(context_);
 	pa_mainloop_free(mainLoop_);
@@ -291,39 +291,24 @@ void PulseCore::onError(const std::string &message)
 
 void PulseCore::setCurrentDevice(const std::string &name)
 {
-	currentDevice_ = getDeviceByName(name);
+	updateDevices();
+	currentDeviceName_ = getDeviceByName(name)->name();
+	currentDeviceIndex_ = getCurrentDeviceIndex();
 }
 
 void PulseCore::setVolume(int value)
 {
-	setVolume_(currentDevice_, value);
+	setVolume_(getDeviceByIndex(currentDeviceIndex_), value);
 }
 
 void PulseCore::setMute(bool mute)
 {
-	setMute_(currentDevice_, !mute);
+	setMute_(getDeviceByIndex(currentDeviceIndex_), !mute);
 }
 
 void PulseCore::updateDevices()
 {
-	if (!sinks_.empty()) {
-		sinks_.clear();
-	}
-	if (!sources_.empty()) {
-		sources_.clear();
-	}
-	if (!sinksDescriptions_.empty()) {
-		sinksDescriptions_.clear();
-	}
-	if(!sourcesDescriptions_.empty()) {
-		sourcesDescriptions_.clear();
-	}
-	if(!devicesNames_.empty()) {
-		devicesNames_.clear();
-	}
-	if(!devicesDescs_.empty()) {
-		devicesDescs_.clear();
-	}
+	clearLists();
 	getSinks();
 	getSources();
 	PulseDevicePtrList::iterator it = sinks_.begin();
@@ -344,14 +329,36 @@ void PulseCore::updateDevices()
 	devicesDescs_.insert(devicesDescs_.end(), sourcesDescriptions_.begin(), sourcesDescriptions_.end());
 }
 
-int PulseCore::getVolume() const
+void PulseCore::clearLists()
 {
-	return currentDevice_->volume_percent();
+	if (!sinks_.empty()) {
+		sinks_.clear();
+	}
+	if (!sources_.empty()) {
+		sources_.clear();
+	}
+	if (!sinksDescriptions_.empty()) {
+		sinksDescriptions_.clear();
+	}
+	if(!sourcesDescriptions_.empty()) {
+		sourcesDescriptions_.clear();
+	}
+	if(!devicesNames_.empty()) {
+		devicesNames_.clear();
+	}
+	if(!devicesDescs_.empty()) {
+		devicesDescs_.clear();
+	}
+}
+
+int PulseCore::getVolume()
+{
+	return getDeviceByIndex(currentDeviceIndex_)->volume_percent();
 }
 
 bool PulseCore::getMute()
 {
-	return currentDevice_->mute();
+	return getDeviceByIndex(currentDeviceIndex_)->mute();
 }
 
 const std::vector<std::string> &PulseCore::getCardList() const
@@ -366,6 +373,7 @@ const std::vector<std::string> &PulseCore::getCardNames() const
 
 PulseDevice::Ptr PulseCore::getDeviceByIndex(int index)
 {
+	updateDevices();
 	PulseDevice::Ptr device = getDefaultSink();
 	const int sinksSize = sinksDescriptions_.size();
 	const int sourcesSize = sourcesDescriptions_.size();
@@ -378,7 +386,7 @@ PulseDevice::Ptr PulseCore::getDeviceByIndex(int index)
 
 int PulseCore::getCurrentDeviceIndex()
 {
-	int index = Tools::itemIndex(devicesNames_, currentDevice_->name());
+	const int index = Tools::itemIndex(devicesNames_, currentDeviceName_);
 	return ((index > 0) ? index : 0);
 }
 

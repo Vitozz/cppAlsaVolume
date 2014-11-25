@@ -1,3 +1,9 @@
+2014-11-25
+v0.2.5
+  - Fixed calculations of Alsa volume 
+  - Fixed device update in Pulseaudio
+  - Added timer to monitor system devices activity
+
 2014-11-11
 v0.2.4
   - Added Russian and Ukrainian locales

@@ -160,12 +160,12 @@ void AlsaDevice::setDeviceVolume(double volume)
 		long min, max, realVolume;
 		if (snd_mixer_selem_has_playback_volume(element)) {
 			checkError(snd_mixer_selem_get_playback_volume_range(element, &min, &max));
-			realVolume = long(volume)*((max - min) / 100);
+			realVolume = min + static_cast<long>(volume + 0.5)*(max - min)/100;
 			checkError(snd_mixer_selem_set_playback_volume_all(element, realVolume));
 		}
 		else if (snd_mixer_selem_has_capture_volume(element)) {
 			checkError(snd_mixer_selem_get_capture_volume_range(element, &min, &max));
-			realVolume = long(volume)*((max - min) / 100);
+			realVolume = min + static_cast<long>(volume + 0.5)*(max - min)/100;
 			checkError(snd_mixer_selem_set_capture_volume_all(element, realVolume));
 		}
 		else {
@@ -190,12 +190,12 @@ double AlsaDevice::getVolume()
 			if (snd_mixer_selem_has_playback_channel(elem, chanelid)) {
 				checkError(snd_mixer_selem_get_playback_volume(elem, chanelid, &outvol));
 			}
-			min = (double)minv;
-			max = (double)maxv;
-			volume = (double)outvol;
+			min = static_cast<double>(minv);
+			max = static_cast<double>(maxv);;
+			volume = static_cast<double>(outvol);
 			if ((max - min) != 0) {
 				double delta = 100/(max - min);
-				volume = (volume - min)/delta;
+				volume = min + volume * delta;
 				return volume;
 			}
 		}
@@ -204,12 +204,12 @@ double AlsaDevice::getVolume()
 			if (snd_mixer_selem_has_capture_channel(elem, chanelid)) {
 				checkError(snd_mixer_selem_get_capture_volume(elem, chanelid, &outvol));
 			}
-			min = (double)minv;
-			max = (double)maxv;
-			volume = (double)outvol;
+			min = static_cast<double>(minv);
+			max = static_cast<double>(maxv);;
+			volume = static_cast<double>(outvol);
 			if ((max - min) != 0) {
 				double delta = 100/(max - min);
-				volume = (volume - min)/delta;
+				volume = min + volume * delta;
 				return volume;
 			}
 		}
