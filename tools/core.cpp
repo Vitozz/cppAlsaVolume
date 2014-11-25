@@ -24,6 +24,7 @@
 #include "gtkmm/messagedialog.h"
 #include "glibmm/markup.h"
 #include "glibmm/fileutils.h"
+#include "glibmm/main.h"
 #include "../gui/settingsframe.h"
 #include <iostream>
 #include "libintl.h"
