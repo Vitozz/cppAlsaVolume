@@ -81,6 +81,7 @@ private:
 	settingsStr *settingsStr_;
 	std::string mixerName_;
 	double volumeValue_;
+	double pollVolume_;
 	SettingsFrame *settingsDialog_;
 	bool isPulse_;
 	bool isMuted_;
@@ -88,6 +89,7 @@ private:
 	sigc::connection signal_switches_;
 	sigc::connection signal_sndcard_;
 	sigc::connection signal_mixer_;
+	sigc::connection signal_timer_;
 #ifdef HAVE_PULSE
 	PulseCore::Ptr pulse_;
 	std::string pulseDevice_;

@@ -47,6 +47,7 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
   settingsStr_(new settingsStr()),
   mixerName_(settings_->getMixer()),
   volumeValue_(0.0),
+  pollVolume_(0.0),
   settingsDialog_(0),
   isPulse_(false),
   isMuted_(false)
@@ -80,6 +81,7 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 		volumeValue_ = pulse_->getVolume();
 	}
 #endif
+	pollVolume_ = volumeValue_;
 	settingsStr_->setNotebookOrientation(settings_->getNotebookOrientation());
 	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList());
 	settings_->setVersion(VERSION);
@@ -94,7 +96,7 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 		signal_pulsedevices_ = settingsDialog_->signal_pulsedevices_changed().connect(sigc::mem_fun(*this, &Core::updatePulseDevices));
 #endif
 	}
-	Glib::signal_timeout().connect(sigc::mem_fun(*this,&Core::onTimeout), POLLING_INTERVAL);
+	signal_timer_ = Glib::signal_timeout().connect(sigc::mem_fun(*this,&Core::onTimeout), POLLING_INTERVAL);
 }
 
 Core::~Core()
@@ -239,6 +241,7 @@ void Core::switchChanged(const std::string &name, int id, bool enabled)
 
 void Core::soundMuted(bool mute)
 {
+	signal_timer_.block(true);
 	if (!isPulse_) {
 		isMuted_ = mute;
 		alsaWork_->setMute(mute);
@@ -249,6 +252,7 @@ void Core::soundMuted(bool mute)
 		pulse_->setMute(mute);
 	}
 #endif
+	signal_timer_.block(false);
 }
 
 bool Core::getMuted()
@@ -322,7 +326,15 @@ std::string Core::getActiveMixer() const
 
 double Core::getVolumeValue() const
 {
-	return volumeValue_;
+	if (!isPulse_) {
+		return alsaWork_->getAlsaVolume();
+	}
+#ifdef HAVE_PULSE
+	else if (pulse_) {
+		return pulse_->getVolume();
+	}
+#endif
+	return 0.0;
 }
 
 void Core::onTrayIconScroll(double value)
@@ -334,21 +346,25 @@ void Core::onTrayIconScroll(double value)
 	else if (volumeValue_ <= 0){
 		volumeValue_ = 0;
 	}
-	m_signal_volume_changed(volumeValue_);
+	m_signal_volume_changed(volumeValue_); //send signal to sliderwindow
 }
 
 void Core::onVolumeSlider(double value)
 {
+	signal_timer_.block(true);
 	volumeValue_ = value;
+	pollVolume_ = value;
 	if (!isPulse_) {
 		alsaWork_->setAlsaVolume(value);
+		pollVolume_ = alsaWork_->getAlsaVolume();
 	}
 #ifdef HAVE_PULSE
 	else if (pulse_) {
-		pulse_->setVolume(static_cast<int>(value));
+		pulse_->setVolume(int(value));
 	}
 #endif
 	updateTrayIcon(value);
+	signal_timer_.block(false);
 }
 
 void Core::updateTrayIcon(double value)
@@ -389,9 +405,9 @@ bool Core::onTimeout()
 	if (!isPulse_) {
 		const double volume = alsaWork_->getAlsaVolume();
 		bool ismute = !alsaWork_->getMute();
-		if (volumeValue_ != volume) {
-			volumeValue_ = volume;
-			m_signal_volume_changed(volumeValue_);
+		if (pollVolume_ != volume) {
+			pollVolume_ = volume;
+			m_signal_volume_changed(pollVolume_);
 		}
 		if (ismute != isMuted_) {
 			isMuted_ = ismute;
@@ -402,15 +418,16 @@ bool Core::onTimeout()
 	if (isPulse_ && pulse_) {
 		const int volume = pulse_->getVolume();
 		bool ismute = pulse_->getMute();
-		if (volumeValue_ != volume) {
-			volumeValue_ = volume;
-			m_signal_volume_changed(volumeValue_);
+		if (pollVolume_ != volume) {
+			pollVolume_ = volume;
+			m_signal_volume_changed(pollVolume_);
 		}
 		if (ismute != isMuted_) {
 			isMuted_ = ismute;
 			m_signal_mixer_muted(isMuted_);
 		}
 	}
+
 #endif
 	return true;
 }
