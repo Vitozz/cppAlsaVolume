@@ -58,6 +58,10 @@ private:
 	snd_mixer_elem_t *initMixerElement(snd_mixer_t *handle, const char *mixer);
 	void checkError (int errorIndex);
 	void initMixerList();
+	double getNormVolume(snd_mixer_elem_t *element);
+	double getExp10(double value);
+	bool useLinearDb(long min, long max);
+	void setNormVolume(snd_mixer_elem_t *element, double volume);
 
 private:
 	int id_;

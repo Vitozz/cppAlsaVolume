@@ -387,11 +387,11 @@ void Core::mixerChanged(int mixerId)
 bool Core::onTimeout()
 {
 	if (!isPulse_) {
-		const int volume = static_cast<int>(alsaWork_->getAlsaVolume());
+		const double volume = alsaWork_->getAlsaVolume();
 		bool ismute = !alsaWork_->getMute();
 		if (volumeValue_ != volume) {
 			volumeValue_ = volume;
-			onVolumeSlider(volumeValue_);
+			m_signal_volume_changed(volumeValue_);
 		}
 		if (ismute != isMuted_) {
 			isMuted_ = ismute;
@@ -404,7 +404,7 @@ bool Core::onTimeout()
 		bool ismute = pulse_->getMute();
 		if (volumeValue_ != volume) {
 			volumeValue_ = volume;
-			onVolumeSlider(volumeValue_);
+			m_signal_volume_changed(volumeValue_);
 		}
 		if (ismute != isMuted_) {
 			isMuted_ = ismute;

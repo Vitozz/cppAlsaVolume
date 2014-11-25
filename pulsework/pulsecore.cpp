@@ -24,7 +24,7 @@
 
 //Callbacks
 void state_cb(pa_context* context, void* raw) {
-	PulseCore *state = (PulseCore*) raw;
+	PulseCore *state = static_cast<PulseCore*> (raw);
 	switch(pa_context_get_state(context)) {
 		case PA_CONTEXT_READY:
 			state->pState = CONNECTED;
@@ -44,7 +44,7 @@ void state_cb(pa_context* context, void* raw) {
 void sink_list_cb(pa_context *c, const pa_sink_info *i, int eol, void *raw) {
 	(void)c;
 	if (eol != 0) return;
-	PulseDevicePtrList *sinks = (PulseDevicePtrList*) raw;
+	PulseDevicePtrList *sinks = static_cast<PulseDevicePtrList*>(raw);
 	const PulseDevice::Ptr s(new PulseDevice(i));
 	sinks->push_back(s);
 }
@@ -52,14 +52,14 @@ void sink_list_cb(pa_context *c, const pa_sink_info *i, int eol, void *raw) {
 void source_list_cb(pa_context *c, const pa_source_info *i, int eol, void *raw) {
 	(void)c;
 	if (eol != 0) return;
-	PulseDevicePtrList *sources = (PulseDevicePtrList*) raw;
+	PulseDevicePtrList *sources = static_cast<PulseDevicePtrList*>(raw);
 	const PulseDevice::Ptr s(new PulseDevice(i));
 	sources->push_back(s);
 }
 
 void server_info_cb(pa_context* c, const pa_server_info* i, void* raw) {
 	(void)c;
-	ServerInfo* info = (ServerInfo*) raw;
+	ServerInfo* info = static_cast<ServerInfo*>(raw);
 	info->defaultSinkName = std::string(i->default_sink_name);
 	info->defaultSourceName = std::string(i->default_source_name);
 }

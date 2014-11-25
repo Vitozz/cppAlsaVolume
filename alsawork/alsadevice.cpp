@@ -18,6 +18,7 @@
  *
  */
 #include "alsadevice.h"
+#include "cmath"
 
 const double ZERO = 0.0;
 
@@ -152,25 +153,145 @@ snd_mixer_selem_channel_id_t AlsaDevice::checkMixerChannels(snd_mixer_elem_t *el
 	return SND_MIXER_SCHN_UNKNOWN;
 }
 
+//This part of code from alsa-utils.git/alsamixer/volume_mapping.c
+//Copyright (c) 2010 Clemens Ladisch <clemens@ladisch.de>
+double AlsaDevice::getExp10(double value)
+{
+	return exp(value * log(10));
+}
+
+double AlsaDevice::getNormVolume(snd_mixer_elem_t *element)
+{
+	long min, max, value;
+	double norm, minNorm;
+	int err;
+	snd_mixer_selem_channel_id_t chanelid = checkMixerChannels(element);
+	if (snd_mixer_selem_has_playback_volume(element)) {
+		err = snd_mixer_selem_get_playback_dB_range(element, &min, &max);
+		if (err < 0 || min >= max) {
+			err = snd_mixer_selem_get_playback_volume_range(element, &min, &max);
+			if (err < 0 || min == max) {
+				return 0;
+			}
+			err = snd_mixer_selem_get_playback_volume(element, chanelid, &value);
+			if (err < 0) {
+				return 0;
+			}
+			return (value - min) / (double)(max-min);
+		}
+		err = snd_mixer_selem_get_playback_dB(element, chanelid, &value);
+		if (err < 0) {
+			return 0;
+		}
+		if (useLinearDb(min, max)) {
+			return (value - min)/(double)(max-min);
+		}
+		norm = getExp10((value - max) / 6000.0);
+		if (min != SND_CTL_TLV_DB_GAIN_MUTE) {
+			minNorm = getExp10((min - max) / 6000.0);
+			norm = (norm - minNorm)/(1 - minNorm);
+		}
+		return norm;
+	}
+	else if (snd_mixer_selem_has_capture_volume(element)) {
+		err = snd_mixer_selem_get_capture_dB_range(element, &min, &max);
+		if (err < 0 || min >= max) {
+			err = snd_mixer_selem_get_capture_volume_range(element, &min, &max);
+			if (err < 0 || min == max) {
+				return 0;
+			}
+			err = snd_mixer_selem_get_capture_volume(element, chanelid, &value);
+			if (err < 0) {
+				return 0;
+			}
+			return (value - min) / (double)(max-min);
+		}
+
+		err = snd_mixer_selem_get_capture_dB(element, chanelid, &value);
+		if (err < 0) {
+			return 0;
+		}
+		if (useLinearDb(min, max)) {
+			return (value - min)/(double)(max-min);
+		}
+		norm = getExp10((value - max) / 6000.0);
+		if (min != SND_CTL_TLV_DB_GAIN_MUTE) {
+			minNorm = getExp10((min - max) / 6000.0);
+			norm = (norm - minNorm)/(1 - minNorm);
+		}
+		return norm;
+	}
+	return ZERO;
+}
+
+bool AlsaDevice::useLinearDb(long min, long max)
+{
+	const long maxDB = 24;
+	return (max - min) <= maxDB*100;
+}
+
+void AlsaDevice::setNormVolume(snd_mixer_elem_t *element, double volume)
+{
+	long min, max, value;
+	double min_norm;
+	int err;
+	if (snd_mixer_selem_has_playback_volume(element)) {
+		err = snd_mixer_selem_get_playback_dB_range(element, &min, &max);
+		if (err < 0 || min >= max) {
+			err = snd_mixer_selem_get_playback_volume_range(element, &min, &max);
+			if (err < 0) {
+				return;
+			}
+			value = lrint(volume*(max-min)) + min;
+			checkError(snd_mixer_selem_set_playback_volume_all(element, value));
+			return;
+		}
+		if (useLinearDb(min, max)) {
+			value = lrint(volume*(max-min)) + min;
+			checkError(snd_mixer_selem_set_playback_dB_all(element, value, 1));
+			return;
+		}
+		if (min != SND_CTL_TLV_DB_GAIN_MUTE) {
+			min_norm = getExp10((min-max)/6000.0);
+			volume = volume * (1-min_norm) + min_norm;
+		}
+		value = lrint(6000.0 * log10(volume))+max;
+		checkError(snd_mixer_selem_set_playback_dB_all(element, value, 1));
+		return;
+	}
+	else if (snd_mixer_selem_has_capture_volume(element)) {
+		err = snd_mixer_selem_get_capture_dB_range(element, &min, &max);
+		if (err < 0 || min >= max) {
+			err = snd_mixer_selem_get_capture_volume_range(element, &min, &max);
+			if (err < 0) {
+				return;
+			}
+			value = lrint(volume*(max-min)) + min;
+			checkError(snd_mixer_selem_set_capture_volume_all(element, value));
+			return;
+		}
+		if (useLinearDb(min, max)) {
+			value = lrint(volume*(max-min)) + min;
+			checkError(snd_mixer_selem_set_capture_dB_all(element, value, 1));
+			return;
+		}
+		if (min != SND_CTL_TLV_DB_GAIN_MUTE) {
+			min_norm = getExp10((min-max)/6000.0);
+			volume = volume * (1-min_norm) + min_norm;
+		}
+		value = lrint(6000.0 * log10(volume))+max;
+		checkError(snd_mixer_selem_set_capture_dB_all(element, value, 1));
+	}
+}
+
+//This part of code from alsa-utils.git/alsamixer/volume_mapping.c
+
 void AlsaDevice::setDeviceVolume(double volume)
 {
 	if (!currentMixerName_.empty()) {
 		snd_mixer_t *handle = getMixerHanlde(id_);
 		snd_mixer_elem_t *element = initMixerElement(handle, currentMixerName_.c_str());
-		long min, max, realVolume;
-		if (snd_mixer_selem_has_playback_volume(element)) {
-			checkError(snd_mixer_selem_get_playback_volume_range(element, &min, &max));
-			realVolume = min + static_cast<long>(volume + 0.5)*(max - min)/100;
-			checkError(snd_mixer_selem_set_playback_volume_all(element, realVolume));
-		}
-		else if (snd_mixer_selem_has_capture_volume(element)) {
-			checkError(snd_mixer_selem_get_capture_volume_range(element, &min, &max));
-			realVolume = min + static_cast<long>(volume + 0.5)*(max - min)/100;
-			checkError(snd_mixer_selem_set_capture_volume_all(element, realVolume));
-		}
-		else {
-			std::cerr << "Selected mixer has no playback or capture volume" << std::endl;
-		}
+		setNormVolume(element, volume/100);
 		checkError(snd_mixer_close(handle));
 	}
 }
@@ -180,40 +301,9 @@ double AlsaDevice::getVolume()
 	if (!currentMixerName_.empty()) {
 		snd_mixer_t *handle = getMixerHanlde(id_);
 		snd_mixer_elem_t *elem = initMixerElement(handle, currentMixerName_.c_str());
-		long minv = 0L;
-		long maxv = 0L;
-		long outvol = 0L;
-		double min, max, volume;
-		snd_mixer_selem_channel_id_t chanelid = checkMixerChannels(elem);
-		if (snd_mixer_selem_has_playback_volume(elem) || snd_mixer_selem_has_playback_volume_joined(elem)) {
-			checkError(snd_mixer_selem_get_playback_volume_range(elem, &minv, &maxv));
-			if (snd_mixer_selem_has_playback_channel(elem, chanelid)) {
-				checkError(snd_mixer_selem_get_playback_volume(elem, chanelid, &outvol));
-			}
-			min = static_cast<double>(minv);
-			max = static_cast<double>(maxv);;
-			volume = static_cast<double>(outvol);
-			if ((max - min) != 0) {
-				double delta = 100/(max - min);
-				volume = min + volume * delta;
-				return volume;
-			}
-		}
-		if (snd_mixer_selem_has_capture_volume(elem) || snd_mixer_selem_has_capture_volume_joined(elem)) {
-			checkError(snd_mixer_selem_get_capture_volume_range(elem, &minv, &maxv));
-			if (snd_mixer_selem_has_capture_channel(elem, chanelid)) {
-				checkError(snd_mixer_selem_get_capture_volume(elem, chanelid, &outvol));
-			}
-			min = static_cast<double>(minv);
-			max = static_cast<double>(maxv);;
-			volume = static_cast<double>(outvol);
-			if ((max - min) != 0) {
-				double delta = 100/(max - min);
-				volume = min + volume * delta;
-				return volume;
-			}
-		}
+		double volume = getNormVolume(elem)*100;
 		checkError(snd_mixer_close(handle));
+		return round(volume);
 	}
 	return ZERO;
 }
