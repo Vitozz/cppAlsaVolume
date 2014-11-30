@@ -50,10 +50,10 @@ public:
 	void setCurrentMixer(const std::string &mixer);
 	void setSwitch(const std::string &mixer, int id, bool enabled);
 	void setMute(bool enabled);
+	static std::string formatCardName(int id);
 
 private:
 	snd_mixer_t *getMixerHanlde(int id);
-	std::string formatCardName(int id) const;
 	snd_mixer_selem_channel_id_t checkMixerChannels(snd_mixer_elem_t *element);
 	snd_mixer_elem_t *initMixerElement(snd_mixer_t *handle, const char *mixer);
 	void checkError (int errorIndex);

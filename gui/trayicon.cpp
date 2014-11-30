@@ -52,7 +52,8 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
   muteItem_(Gtk::manage(new Gtk::CheckMenuItem(MUTEITEM))),
   mouseX_(0),
   mouseY_(0),
-  pixbufWidth_(0)
+  pixbufWidth_(0),
+  pixbufHeight_(0)
 {
 	Gtk::SeparatorMenuItem *separator2 = Gtk::manage(new Gtk::SeparatorMenuItem());
 	settingsItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::runSettings));
@@ -84,8 +85,10 @@ void TrayIcon::onHideRestore()
 	if (get_geometry(screen, area, orientation)) {
 		pos.iconX_ = area.get_x();
 		pos.iconY_ = area.get_y();
-		pos.iconHeight_ = area.get_height();
-		pos.iconWidth_ = pixbufWidth_;
+		const int areaHeight = area.get_height();
+		const int areaWidth = area.get_width();
+		pos.iconHeight_ = (areaHeight > 0) ? areaHeight : pixbufHeight_;
+		pos.iconWidth_ = (areaWidth > 0) ? areaWidth : pixbufWidth_;
 		pos.screenHeight_ = screen->get_height();
 		pos.screenWidth_ = screen->get_width();
 		pos.geometryAvailable_ = bool(pos.iconX_ > 0 || pos.iconY_ > 0);
@@ -157,11 +160,13 @@ void TrayIcon::setIcon(double value)
 	if (!iconPath.empty()) {
 		const Glib::RefPtr<Gdk::Pixbuf> pixbuf = Glib::RefPtr<Gdk::Pixbuf>(Gdk::Pixbuf::create_from_file(iconPath));
 		pixbufWidth_ = pixbuf->get_width();
+		pixbufHeight_ = pixbuf->get_height() + 4;
 		try {
 			this->set(pixbuf);
 		}
 		catch (Glib::FileError &err) {
 			std::cerr << "FileError::trayicon.cpp::161:: " << err.what() << std::endl;
+			exit(1);
 		}
 	}
 }

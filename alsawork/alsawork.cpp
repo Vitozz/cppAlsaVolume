@@ -48,7 +48,7 @@ AlsaWork::~AlsaWork()
 //public
 void AlsaWork::setCurrentCard(int cardId)
 {
-	if(cardId < (int)devices_.size()) {
+	if(cardId < int(devices_.size())) {
 		currentAlsaDevice_ = devices_.at(cardId);
 	}
 }
@@ -75,14 +75,22 @@ double AlsaWork::getAlsaVolume() const
 
 const std::string AlsaWork::getCardName(int index)
 {
-	std::string card(formatCardName(index));
+	const std::string card(AlsaDevice::formatCardName(index));
 	snd_ctl_t *ctl;
-	checkError(snd_ctl_open(&ctl, card.c_str(), SND_CTL_NONBLOCK));
+	int err = snd_ctl_open(&ctl, card.c_str(), SND_CTL_NONBLOCK);
+	if (err < 0) {
+		checkError(err);
+		return std::string();
+	}
 	snd_ctl_card_info_t *cardInfo;
 	snd_ctl_card_info_alloca(&cardInfo);
-	checkError(snd_ctl_card_info(ctl, cardInfo));
-	const char *cardName = snd_ctl_card_info_get_name(cardInfo);
-	return std::string(cardName);
+	err = snd_ctl_card_info(ctl, cardInfo);
+	if (err < 0) {
+		checkError(err);
+		return std::string();
+	}
+	const std::string cardName = snd_ctl_card_info_get_name(cardInfo);
+	return cardName;
 }
 
 std::string AlsaWork::getCurrentMixerName() const
@@ -141,14 +149,6 @@ void AlsaWork::checkError (int errorIndex)
 	}
 }
 
-std::string AlsaWork::formatCardName(int id) const
-{
-	size_t size = 64;
-	char *name = (char*)malloc(size);
-	sprintf(name, "hw:%d", id);
-	return std::string(name);
-}
-
 int AlsaWork::getTotalCards()
 {
 	int cards = 0;
@@ -183,10 +183,7 @@ bool AlsaWork::haveVolumeMixers()
 
 bool AlsaWork::cardExists(int id)
 {
-	if (id >= 0 && id < totalCards_) {
-		return true;
-	}
-	return false;
+	return (id >= 0 && id < totalCards_) ? true: false;
 }
 
 bool AlsaWork::mixerExists(const std::string &name)

@@ -115,7 +115,7 @@ snd_mixer_elem_t *AlsaDevice::initMixerElement(snd_mixer_t *handle, const char *
 
 snd_mixer_t *AlsaDevice::getMixerHanlde(int id)
 {
-	std::string card(formatCardName(id));
+	const std::string card(formatCardName(id));
 	snd_ctl_t *ctl;
 	checkError(snd_ctl_open(&ctl, card.c_str(), SND_CTL_NONBLOCK));
 	snd_hctl_t *hctl;
@@ -184,7 +184,7 @@ double AlsaDevice::getNormVolume(snd_mixer_elem_t *element)
 			return 0;
 		}
 		if (useLinearDb(min, max)) {
-			return (value - min)/(double)(max-min);
+			return (value - min) / (double)(max-min);
 		}
 		norm = getExp10((value - max) / 6000.0);
 		if (min != SND_CTL_TLV_DB_GAIN_MUTE) {
@@ -212,7 +212,7 @@ double AlsaDevice::getNormVolume(snd_mixer_elem_t *element)
 			return 0;
 		}
 		if (useLinearDb(min, max)) {
-			return (value - min)/(double)(max-min);
+			return (value - min) / (double)(max-min);
 		}
 		norm = getExp10((value - max) / 6000.0);
 		if (min != SND_CTL_TLV_DB_GAIN_MUTE) {
@@ -371,17 +371,14 @@ bool AlsaDevice::getMute()
 	return true;
 }
 
-std::string AlsaDevice::formatCardName(int id) const
+std::string AlsaDevice::formatCardName(int id)
 {
-	size_t size = 64;
-	char *name = (char*)malloc(size);
-	sprintf(name, "hw:%d", id);
-	return std::string(name);
+	return std::string("hw:") + std::to_string(id);
 }
 
 void AlsaDevice::setCurrentMixer(int id)
 {
-	if(id >= 0 && id < (int)mixers_.size()) {
+	if(id >= 0 && id < int(mixers_.size())) {
 		currentMixerId_ = id;
 		currentMixerName_ = mixers_.at(id);
 	}

@@ -84,6 +84,7 @@ private:
 	int mouseX_;
 	int mouseY_;
 	int pixbufWidth_;
+	int pixbufHeight_;
 
 };
 
