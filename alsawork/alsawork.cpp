@@ -183,7 +183,7 @@ bool AlsaWork::haveVolumeMixers()
 
 bool AlsaWork::cardExists(int id)
 {
-	return (id >= 0 && id < totalCards_) ? true: false;
+	return bool(id >= 0 && id < totalCards_);
 }
 
 bool AlsaWork::mixerExists(const std::string &name)
