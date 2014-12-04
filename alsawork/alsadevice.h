@@ -50,7 +50,7 @@ public:
 	void setCurrentMixer(const std::string &mixer);
 	void setSwitch(const std::string &mixer, int id, bool enabled);
 	void setMute(bool enabled);
-	static std::string formatCardName(int id);
+	static std::string formatCardName(long long int id);
 
 private:
 	snd_mixer_t *getMixerHanlde(int id);

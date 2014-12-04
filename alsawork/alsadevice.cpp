@@ -371,7 +371,7 @@ bool AlsaDevice::getMute()
 	return true;
 }
 
-std::string AlsaDevice::formatCardName(int id)
+std::string AlsaDevice::formatCardName(long long int id)
 {
 	return std::string("hw:") + std::to_string(id);
 }
