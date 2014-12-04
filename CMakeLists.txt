@@ -17,8 +17,8 @@ else( ${USE_GTK3} )
 	add_definitions( -DIS_GTK_2 )
 endif( ${USE_GTK3} )
 pkg_check_modules( ALSA REQUIRED alsa )
-
-set( CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+set( CUSTOM_LDFLAGS "-Wl,-as-needed" )
+set( CMAKE_CXX_FLAGS "-std=c++0x ${CUSTOM_LDFLAGS} ${CMAKE_CXX_FLAGS}")
 
 if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
 	add_definitions( -DIS_DEBUG )
