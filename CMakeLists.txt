@@ -18,7 +18,7 @@ else( ${USE_GTK3} )
 endif( ${USE_GTK3} )
 pkg_check_modules( ALSA REQUIRED alsa )
 set( CUSTOM_LDFLAGS "-Wl,-as-needed" )
-set( CMAKE_CXX_FLAGS "-std=c++0x ${CUSTOM_LDFLAGS} ${CMAKE_CXX_FLAGS}")
+set( CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 
 if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
 	add_definitions( -DIS_DEBUG )
@@ -118,7 +118,7 @@ else( ${USE_GTK3} )
 endif( ${USE_GTK3} )
 	
 add_executable( ${PROJECT} ${alsavolume_SRCS} )
-target_link_libraries( ${PROJECT} ${DEPLIBS} )
+target_link_libraries( ${PROJECT} ${CUSTOM_LDFLAGS} ${DEPLIBS} )
 
 set( DATADIR_PATH ${CMAKE_INSTALL_PREFIX}/share )
 
