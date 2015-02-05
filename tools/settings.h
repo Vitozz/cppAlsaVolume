@@ -33,6 +33,7 @@ public:
 	bool getNotebookOrientation();
 	bool getAutorun();
 	bool usePulse();
+	bool usePolling();
 	std::string pulseDeviceName() const;
 	void saveSoundCard(int soundCard);
 	void saveMixer(const std::string& mixerName);
@@ -41,6 +42,7 @@ public:
 	void setVersion(const Glib::ustring& version);
 	void setUsePulse(bool use);
 	void savePulseDeviceName(const std::string &name);
+	void setUsePolling(bool use);
 
 private:
 	void parseConfig(const Glib::ustring& keyFileName, const Glib::ustring& keyFileData);

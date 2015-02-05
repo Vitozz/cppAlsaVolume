@@ -37,7 +37,7 @@ public:
 	const std::string &name() const;
 	int id() const;
 	const std::vector<std::string> &mixers() const;
-	const MixerSwitches &switches() const;
+	MixerSwitches &switches();
 	const std::string &currentMixer() const;
 	int currentMixerId() const;
 	bool havePlaybackMixers();
@@ -62,6 +62,7 @@ private:
 	double getExp10(double value);
 	bool useLinearDb(long min, long max);
 	void setNormVolume(snd_mixer_elem_t *element, double volume);
+	void updateElements();
 
 private:
 	int id_;

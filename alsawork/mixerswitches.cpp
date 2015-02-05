@@ -79,6 +79,24 @@ void MixerSwitches::clear(SwitchType sType)
 	}
 }
 
+void MixerSwitches::clearAll()
+{
+	if (!playbackSwitchList_.empty()) {
+		playbackSwitchList_.clear();
+	}
+	if (!captureSwitchList_.empty()) {
+		captureSwitchList_.clear();
+	}
+	if (!enumSwitchList_.empty()) {
+		enumSwitchList_.clear();
+	}
+}
+
+bool MixerSwitches::isEmpty()
+{
+	return (playbackSwitchList_.empty() && captureSwitchList_.empty() && enumSwitchList_.empty());
+}
+
 const std::vector<switchcap> &MixerSwitches::captureSwitchList() const
 {
 	return captureSwitchList_;

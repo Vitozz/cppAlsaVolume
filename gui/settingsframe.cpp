@@ -43,8 +43,23 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
   tabPos_(0),
   tabWidget_(0),
   pulseHBox_(0),
-  cards_(0),
-  mixers_(0)
+  alsaHBox_(0),
+  usePulse_(0),
+  usePolling_(0),
+#ifdef HAVE_PULSE
+  pulseBox_(0),
+  pulseDev_(0),
+  pulseCards_(Glib::RefPtr<Gtk::ListStore>()),
+#endif
+  cards_(Glib::RefPtr<Gtk::ListStore>()),
+  mixers_(Glib::RefPtr<Gtk::ListStore>()),
+  pbSwitches_(Glib::RefPtr<Gtk::ListStore>()),
+  capSwitches_(Glib::RefPtr<Gtk::ListStore>()),
+  enumSwitches_(Glib::RefPtr<Gtk::ListStore>()),
+  settings_(new settingsStr()),
+  mixerId_(0),
+  cardId_(0),
+  isPulse_(false)
 {
 	//init all lists
 	Glib::RefPtr<Gtk::Builder> builder = refGlade;
@@ -61,6 +76,7 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	builder->get_widget("pulseBox", pulseHBox_);
 	builder->get_widget("alsaBox", alsaHBox_);
 	builder->get_widget("usePulse", usePulse_);
+	builder->get_widget("usePolling", usePolling_);
 #ifdef HAVE_PULSE
 	builder->get_widget("pulseDevices", pulseBox_);
 #endif
@@ -83,6 +99,9 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	if (mixerBox_) {
 		mixerBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::mixerBoxChanged));
 	}
+	if (usePolling_) {
+		usePolling_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onUsePollingToggled));
+	}
 #ifdef HAVE_PULSE
 	if (usePulse_) {
 		usePulse_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onPulseToggled));
@@ -95,9 +114,6 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 	usePulse_->set_visible(false);
 #endif
 	this->signal_delete_event().connect(sigc::mem_fun(*this, &SettingsFrame::onDeleteEvent));
-	settings_ = new settingsStr();
-	mixerId_ = 0;
-	cardId_ = 0;
 	pulseHBox_->set_visible(false);
 }
 
@@ -132,6 +148,9 @@ void SettingsFrame::initParms(settingsStr &str)
 	}
 	if (isAutoRun_) {
 		isAutoRun_->set_active(settings_->isAutorun());
+	}
+	if (usePolling_) {
+		usePolling_->set_active(settings_->usePolling());
 	}
 #ifdef HAVE_PULSE
 	if (usePulse_) {
@@ -456,6 +475,12 @@ void SettingsFrame::onPulseToggled()
 	m_signal_pulse_toggled(isPulse_);
 }
 #endif
+
+void SettingsFrame::onUsePollingToggled()
+{
+	bool usePoll = usePolling_->get_active();
+	settings_->setUsePolling(usePoll);
+}
 
 void SettingsFrame::disablePulseCheckButton()
 {

@@ -90,6 +90,7 @@ const std::string AlsaWork::getCardName(int index)
 		return std::string();
 	}
 	const std::string cardName = snd_ctl_card_info_get_name(cardInfo);
+	checkError(snd_ctl_close(ctl));
 	return cardName;
 }
 

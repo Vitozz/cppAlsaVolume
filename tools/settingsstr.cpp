@@ -26,6 +26,7 @@ settingsStr::settingsStr()
   notebookOrientation_(false),
   isAutorun_(false),
   usePulse_(false),
+  usePolling_(true),
   cardList_(std::vector<std::string>()),
   mixerList_(std::vector<std::string>()),
   switchList_(new MixerSwitches()),
@@ -42,6 +43,7 @@ settingsStr::settingsStr(settingsStr &str)
   notebookOrientation_(str.notebookOrientation()),
   isAutorun_(str.isAutorun()),
   usePulse_(str.usePulse()),
+  usePolling_(str.usePolling()),
   cardList_(str.cardList()),
   mixerList_(str.mixerList()),
   switchList_(new MixerSwitches(str.switchList())),
@@ -75,6 +77,11 @@ bool settingsStr::notebookOrientation()
 bool settingsStr::isAutorun()
 {
 	return isAutorun_;
+}
+
+bool settingsStr::usePolling()
+{
+	return usePolling_;
 }
 
 const std::vector<std::string> &settingsStr::cardList() const
@@ -215,4 +222,9 @@ void settingsStr::setPulseDevices(const std::vector<std::string> &devices)
 void settingsStr::setUsePulse(bool use)
 {
 	usePulse_ = use;
+}
+
+void settingsStr::setUsePolling(bool use)
+{
+	usePolling_ = use;
 }

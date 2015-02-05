@@ -83,6 +83,7 @@ protected:
 	void onCaptureCellToggled(const Glib::ustring &path);
 	void onEnumCellToggled(const Glib::ustring &path);
 	void onAutorunToggled();
+	void onUsePollingToggled();
 #ifdef HAVE_PULSE
 	void onPulseToggled();
 	void onPulseDeviceChanged();
@@ -120,6 +121,7 @@ private:
 	Gtk::Box *pulseHBox_;
 	Gtk::Box *alsaHBox_;
 	Gtk::CheckButton *usePulse_;
+	Gtk::CheckButton *usePolling_;
 #ifdef HAVE_PULSE
 	Gtk::ComboBox *pulseBox_;
 	int pulseDev_;

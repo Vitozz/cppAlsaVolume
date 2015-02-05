@@ -21,6 +21,8 @@
 #include "sliderwindow.h"
 #include <iostream>
 
+#define SLIDER_HEIGHT 120
+
 SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade)
 : Gtk::Window(cobject),
   volumeSlider_(0)
@@ -50,11 +52,21 @@ void SliderWindow::setWindowPosition(const iconPosition &pos)
 		const int wHeight = volumeSlider_->get_allocated_height();
 #else
 		const int wWidth = volumeSlider_->get_width();
-		const int wHeight = volumeSlider_->get_height();
+		const int wHeight = SLIDER_HEIGHT;
+#endif
+#ifdef IS_DEBUG
+		std::cout << "Screen height = " << pos.screenHeight_ << std::endl;
+		std::cout << "At top = " << pos.trayAtTop_ << std::endl;
+		std::cout << "wHeight = " << wHeight << std::endl;
+		std::cout << "iconHeight = " << pos.iconHeight_ << std::endl;
 #endif
 		const int wY = pos.trayAtTop_ ? pos.iconHeight_ + 4 : pos.screenHeight_ - wHeight - pos.iconHeight_ - 4;
 		int wX;
 		if (pos.geometryAvailable_) {
+#ifdef IS_DEBUG
+			std::cout << "Geometry available" << std::endl;
+			std::cout << "wY = " << wY << std::endl;
+#endif
 			wX = (wWidth > 1) ? pos.iconX_ - (wWidth/2 - pos.iconWidth_/2) : pos.iconX_ - pos.iconWidth_/2;
 		}
 		else{

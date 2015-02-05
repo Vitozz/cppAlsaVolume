@@ -33,9 +33,11 @@ public:
 	void setPlaybackSwitchList(const std::vector<switchcap> &list);
 	void setEnumSwitchList(const std::vector<switchcap> &list);
 	void clear(SwitchType sType);
+	void clearAll();
 	const std::vector<switchcap> &captureSwitchList() const;
 	const std::vector<switchcap> &playbackSwitchList() const;
 	const std::vector<switchcap> &enumSwitchList() const;
+	bool isEmpty();
 
 private:
 	std::vector<switchcap> captureSwitchList_;

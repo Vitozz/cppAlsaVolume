@@ -34,10 +34,10 @@
 #define TITLE _("About AlsaVolume")
 #define PROGNAME _("Alsa Volume Changer")
 #define COMMENTS _("Tray Alsa Volume Changer written using gtkmm")
-#define COPYRIGHT _("2012-2014 (c) Vitaly Tonkacheyev (thetvg@gmail.com)")
+#define COPYRIGHT _("2012-2015 (c) Vitaly Tonkacheyev (thetvg@gmail.com)")
 #define WEBSITE "http://sites.google.com/site/thesomeprojects/"
 #define WEBSITELABEL _("Program Website")
-#define VERSION "0.2.5"
+#define VERSION "0.2.6"
 
 #define POLLING_INTERVAL 2000
 
@@ -85,6 +85,7 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 	settingsStr_->setNotebookOrientation(settings_->getNotebookOrientation());
 	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList());
 	settings_->setVersion(VERSION);
+	settingsStr_->setUsePolling(settings_->usePolling());
 	refGlade->get_widget_derived("settingsDialog", settingsDialog_);
 	//connect signals
 	if (settingsDialog_) {
@@ -200,6 +201,7 @@ void Core::saveSettings()
 	settings_->saveNotebookOrientation(settingsStr_->notebookOrientation());
 	settings_->setUsePulse(isPulse_);
 	settings_->setAutorun(settingsStr_->isAutorun());
+	settings_->setUsePolling(settingsStr_->usePolling());
 #ifdef HAVE_PULSE
 	if (pulse_) {
 		settings_->savePulseDeviceName(pulseDevice_);
@@ -213,6 +215,7 @@ void Core::onSettingsDialogOk(settingsStr &str)
 	settingsStr_->setMixerId(str.mixerId());
 	settingsStr_->setNotebookOrientation(str.notebookOrientation());
 	settingsStr_->setIsAutorun(str.isAutorun());
+	settingsStr_->setUsePolling(str.usePolling());
 	updateControls(settingsStr_->cardId());
 #ifdef HAVE_PULSE
 	if (isPulse_ && pulse_) {
@@ -402,29 +405,31 @@ void Core::mixerChanged(int mixerId)
 
 bool Core::onTimeout()
 {
-	if (!isPulse_) {
-		const double volume = alsaWork_->getAlsaVolume();
-		bool ismute = !alsaWork_->getMute();
-		if (pollVolume_ != volume) {
-			pollVolume_ = volume;
-			m_signal_volume_changed(pollVolume_);
+	if (settingsStr_->usePolling()) {
+		if (!isPulse_) {
+			const double volume = alsaWork_->getAlsaVolume();
+			bool ismute = !alsaWork_->getMute();
+			if (pollVolume_ != volume) {
+				pollVolume_ = volume;
+				m_signal_volume_changed(pollVolume_);
+			}
+			if (ismute != isMuted_) {
+				isMuted_ = ismute;
+				m_signal_mixer_muted(isMuted_);
+			}
 		}
-		if (ismute != isMuted_) {
-			isMuted_ = ismute;
-			m_signal_mixer_muted(isMuted_);
-		}
-	}
 #ifdef HAVE_PULSE
-	if (isPulse_ && pulse_) {
-		const int volume = pulse_->getVolume();
-		bool ismute = pulse_->getMute();
-		if (pollVolume_ != volume) {
-			pollVolume_ = volume;
-			m_signal_volume_changed(pollVolume_);
-		}
-		if (ismute != isMuted_) {
-			isMuted_ = ismute;
-			m_signal_mixer_muted(isMuted_);
+		if (isPulse_ && pulse_) {
+			const int volume = pulse_->getVolume();
+			bool ismute = pulse_->getMute();
+			if (pollVolume_ != volume) {
+				pollVolume_ = volume;
+				m_signal_volume_changed(pollVolume_);
+			}
+			if (ismute != isMuted_) {
+				isMuted_ = ismute;
+				m_signal_mixer_muted(isMuted_);
+			}
 		}
 	}
 

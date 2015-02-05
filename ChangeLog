@@ -1,3 +1,9 @@
+2015-02-06
+v0.2.6
+  - Fixes in AlsaDevice module
+  - Fixed Switches update
+  - Added option to disable monitoring timer
+
 2014-11-25
 v0.2.5
   - Fixed calculations of Alsa volume 

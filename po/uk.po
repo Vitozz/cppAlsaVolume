@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: alsavolume Version 0.2.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-15 01:06+0200\n"
-"PO-Revision-Date: 2014-11-15 01:09+0300\n"
+"POT-Creation-Date: 2015-02-06 00:22+0200\n"
+"PO-Revision-Date: 2015-02-06 00:24+0300\n"
 "Last-Translator: Vitaly Tonkacheyev <thetvg@gmail.com>\n"
 "Language-Team: KukuRuzo-team <thetvg@gmail.com>\n"
 "Language: uk\n"
@@ -44,21 +44,26 @@ msgstr "Використовувати PulseAudio"
 
 #: ../gladefiles/SettingsFrame.glade.h:6
 #: ../gladefiles/SettingsFrame_2.glade.h:6
-msgid "Autorun program on logon"
-msgstr "Запускати програму при старті системи"
+msgid "Enable monitoring of sound volume"
+msgstr "Увімкнути моніторинг гучності звуку"
 
 #: ../gladefiles/SettingsFrame.glade.h:7
 #: ../gladefiles/SettingsFrame_2.glade.h:7
-msgid "Place tabs horizontally"
-msgstr "Вкладинки горизонтально"
+msgid "Autorun program on logon"
+msgstr "Запускати програму при старті системи"
 
 #: ../gladefiles/SettingsFrame.glade.h:8
 #: ../gladefiles/SettingsFrame_2.glade.h:8
-msgid "Options"
-msgstr "Опції"
+msgid "Place tabs horizontally"
+msgstr "Вкладинки горизонтально"
 
 #: ../gladefiles/SettingsFrame.glade.h:9
 #: ../gladefiles/SettingsFrame_2.glade.h:9
+msgid "Options"
+msgstr "Опції"
+
+#: ../gladefiles/SettingsFrame.glade.h:10
+#: ../gladefiles/SettingsFrame_2.glade.h:10
 msgid "Switchers"
 msgstr "Перемикачі"
 
@@ -94,30 +99,30 @@ msgstr "Гучність: "
 msgid "Mixer: "
 msgstr "Мікшер: "
 
-#: ../tools/core.cpp:33
+#: ../tools/core.cpp:34
 msgid "About AlsaVolume"
 msgstr "Про AlsaVolume"
 
-#: ../tools/core.cpp:34
+#: ../tools/core.cpp:35
 msgid "Alsa Volume Changer"
 msgstr "Регулятор гучності Alsa"
 
-#: ../tools/core.cpp:35
+#: ../tools/core.cpp:36
 msgid "Tray Alsa Volume Changer written using gtkmm"
 msgstr "Регулятор гучності Alsa в треї на gtkmm"
 
-#: ../tools/core.cpp:36
+#: ../tools/core.cpp:37
 msgid "2012-2014 (c) Vitaly Tonkacheyev (thetvg@gmail.com)"
 msgstr "2012-2014 (c) Віталій Тонкачеєв (thetvg@gmail.com)"
 
-#: ../tools/core.cpp:38
+#: ../tools/core.cpp:39
 msgid "Program Website"
 msgstr "Web-сторінка програми"
 
-#: ../tools/core.cpp:139
+#: ../tools/core.cpp:146
 msgid "Can't start PulseAudio! Using Alsa by default"
 msgstr "Неможливо запустити PulseAudio! Буде використано Alsa за замовчуванням"
 
-#: ../tools/core.cpp:354
+#: ../tools/core.cpp:381
 msgid "Sound card not contains any volume control mixers"
 msgstr "Звукова карта не містить будь-яких мікшерів регулювання гучності"

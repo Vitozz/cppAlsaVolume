@@ -37,6 +37,7 @@ public:
 	bool notebookOrientation();
 	bool isAutorun();
 	bool usePulse();
+	bool usePolling();
 	const std::string &pulseDeviceName() const;
 	const std::string &pulseDeviceDesc() const;
 	const std::vector<std::string> &cardList() const;
@@ -57,6 +58,7 @@ public:
 	void setPulseDeviceDesc(const std::string &description);
 	void setPulseDevices(const std::vector<std::string> &devices);
 	void setUsePulse(bool use);
+	void setUsePolling(bool use);
 
 private:
 	unsigned int cardId_;
@@ -64,6 +66,7 @@ private:
 	bool notebookOrientation_;
 	bool isAutorun_;
 	bool usePulse_;
+	bool usePolling_;
 	std::vector<std::string> cardList_;
 	std::vector<std::string> mixerList_;
 	MixerSwitches *switchList_;

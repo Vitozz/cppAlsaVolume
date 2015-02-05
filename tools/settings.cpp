@@ -31,6 +31,7 @@
 #define ORIENT "orient"
 #define ISPULSE "ispulse"
 #define PULSEDEV "pulsedev"
+#define USEPOLL "usepolling"
 
 Settings::Settings()
 : configFile_(new Glib::KeyFile()),
@@ -132,6 +133,12 @@ void Settings::setUsePulse(bool use)
 	parseConfig(iniFileName_, configFile_->to_data());
 }
 
+void Settings::setUsePolling(bool use)
+{
+	configFile_->set_boolean(Glib::ustring(MAIN), Glib::ustring(USEPOLL), use);
+	parseConfig(iniFileName_, configFile_->to_data());
+}
+
 void Settings::savePulseDeviceName(const std::string &name)
 {
 	configFile_->set_string(Glib::ustring(MAIN), Glib::ustring(PULSEDEV), Glib::ustring(name));
@@ -208,4 +215,16 @@ bool Settings::usePulse()
 		std::cerr << "settings.cpp::211::KeyFileError " << ex.what() << std::endl;
 	}
 	return isPulse;
+}
+
+bool Settings::usePolling()
+{
+	bool isPolling = true;
+	try {
+		isPolling = bool(configFile_->get_boolean(Glib::ustring(MAIN),Glib::ustring(USEPOLL)));
+	}
+	catch (const Glib::KeyFileError& ex) {
+		std::cerr << "settings.cpp::211::KeyFileError " << ex.what() << std::endl;
+	}
+	return isPolling;
 }

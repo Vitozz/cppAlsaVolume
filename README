@@ -11,6 +11,3 @@ What features available:
 	- mute sound on middleclick and by checkbox selection
 	- enable or disable sound card switches in settings dialog
 	- use PulseAudio volume control (optionally)
-
-TODO:
-add alsa and pulseaudio monitors
