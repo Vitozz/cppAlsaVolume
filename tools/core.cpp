@@ -431,9 +431,9 @@ bool Core::onTimeout()
 				m_signal_mixer_muted(isMuted_);
 			}
 		}
-	}
 
 #endif
+	}
 	return true;
 }
 
