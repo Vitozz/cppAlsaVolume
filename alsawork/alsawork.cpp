@@ -109,7 +109,7 @@ const std::vector<std::string> &AlsaWork::getVolumeMixers() const
 	return currentAlsaDevice_->mixers();
 }
 
-const MixerSwitches &AlsaWork::getSwitchList() const
+MixerSwitches::Ptr AlsaWork::getSwitchList() const
 {
 	return currentAlsaDevice_->switches();
 }

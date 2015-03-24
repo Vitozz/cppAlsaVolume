@@ -29,7 +29,7 @@ settingsStr::settingsStr()
   usePolling_(true),
   cardList_(std::vector<std::string>()),
   mixerList_(std::vector<std::string>()),
-  switchList_(new MixerSwitches()),
+  switchList_(MixerSwitches::Ptr()),
   pulseDevices_(std::vector<std::string>()),
   pulseDeviceId_(0),
   pulseDeviceName_(std::string()),
@@ -46,7 +46,7 @@ settingsStr::settingsStr(settingsStr &str)
   usePolling_(str.usePolling()),
   cardList_(str.cardList()),
   mixerList_(str.mixerList()),
-  switchList_(new MixerSwitches(str.switchList())),
+  switchList_(str.switchList()),
   pulseDevices_(str.pulseDevices()),
   pulseDeviceId_(str.pulseDeviceId()),
   pulseDeviceName_(str.pulseDeviceName()),
@@ -56,7 +56,6 @@ settingsStr::settingsStr(settingsStr &str)
 
 settingsStr::~settingsStr()
 {
-	delete switchList_;
 }
 
 unsigned int settingsStr::cardId() const
@@ -151,10 +150,9 @@ void settingsStr::pushBack(ListType listType, const std::string &item)
 	}
 }
 
-void settingsStr::addMixerSwitch(const MixerSwitches &switchItem)
+void settingsStr::addMixerSwitch(const MixerSwitches::Ptr &switchItem)
 {
-	switchList_ = 0;
-	switchList_ = new MixerSwitches(switchItem);
+	switchList_ = switchItem;
 }
 
 void settingsStr::setList(ListType listType,const  std::vector<std::string> &list)
@@ -170,9 +168,9 @@ void settingsStr::setList(ListType listType,const  std::vector<std::string> &lis
 
 }
 
-const MixerSwitches &settingsStr::switchList() const
+MixerSwitches::Ptr settingsStr::switchList() const
 {
-	return *switchList_;
+	return switchList_;
 }
 
 void settingsStr::clear(ListType listType)
@@ -192,9 +190,11 @@ void settingsStr::clear(ListType listType)
 
 void settingsStr::clearSwitches()
 {
-	switchList_->clear(PLAYBACK);
-	switchList_->clear(CAPTURE);
-	switchList_->clear(ENUM);
+	if (switchList_) {
+		switchList_->clear(PLAYBACK);
+		switchList_->clear(CAPTURE);
+		switchList_->clear(ENUM);
+	}
 }
 
 void settingsStr::setPulseDeviceId(int id)

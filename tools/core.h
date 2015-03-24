@@ -49,7 +49,7 @@ public:
 	double getVolumeValue() const;
 	void onTrayIconScroll(double value);
 	void onVolumeSlider(double value);
-	void onSettingsDialogOk(settingsStr &str);
+	void onSettingsDialogOk(const settingsStr::Ptr &str);
 	void onSettingsDialogUsePulse(bool isPulse);
 
 	typedef sigc::signal<void, double> type_double_signal;
@@ -76,9 +76,9 @@ private:
 	bool onTimeout();
 
 private:
-	Settings *settings_;
-	AlsaWork *alsaWork_;
-	settingsStr *settingsStr_;
+	Settings::Ptr settings_;
+	AlsaWork::Ptr alsaWork_;
+	settingsStr::Ptr settingsStr_;
 	std::string mixerName_;
 	double volumeValue_;
 	double pollVolume_;

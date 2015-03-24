@@ -24,6 +24,7 @@
 #include "../alsawork/mixerswitches.h"
 #include <string>
 #include <vector>
+#include <memory>
 
 class settingsStr
 {
@@ -31,6 +32,7 @@ public:
 	settingsStr();
 	settingsStr(settingsStr &str);
 	~settingsStr();
+	typedef std::shared_ptr<settingsStr> Ptr;
 	unsigned int cardId() const;
 	unsigned int mixerId() const;
 	int pulseDeviceId() const;
@@ -43,13 +45,13 @@ public:
 	const std::vector<std::string> &cardList() const;
 	const std::vector<std::string> &mixerList() const;
 	const std::vector<std::string> &pulseDevices() const;
-	const MixerSwitches &switchList() const;
+	MixerSwitches::Ptr switchList() const;
 	void setCardId(unsigned int id);
 	void setMixerId(unsigned int id);
 	void setNotebookOrientation(bool orient);
 	void setIsAutorun(bool autorun);
 	void pushBack(ListType listType, const std::string &item);
-	void addMixerSwitch(const MixerSwitches &switchItem);
+	void addMixerSwitch(const MixerSwitches::Ptr &switchItem);
 	void setList(ListType listType, const std::vector<std::string> &list);
 	void clear(ListType listType);
 	void clearSwitches();
@@ -69,7 +71,7 @@ private:
 	bool usePolling_;
 	std::vector<std::string> cardList_;
 	std::vector<std::string> mixerList_;
-	MixerSwitches *switchList_;
+	MixerSwitches::Ptr switchList_;
 	std::vector<std::string> pulseDevices_;
 	int pulseDeviceId_;
 	std::string pulseDeviceName_;

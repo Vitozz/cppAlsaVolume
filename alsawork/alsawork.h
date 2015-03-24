@@ -37,6 +37,7 @@ public:
 	AlsaWork();
 	AlsaWork(AlsaWork const &);
 	~AlsaWork();
+	typedef std::shared_ptr<AlsaWork> Ptr;
 	void setCurrentCard(int cardId);
 	void setCurrentMixer(const std::string &mixer);
 	void setCurrentMixer(int id);
@@ -46,7 +47,7 @@ public:
 	std::string getCurrentMixerName() const;
 	const std::vector<std::string> &getCardsList() const;
 	const std::vector<std::string> &getVolumeMixers() const;
-	const MixerSwitches &getSwitchList() const;
+	MixerSwitches::Ptr getSwitchList() const;
 	void setSwitch(const std::string& mixer, int id, bool enabled);
 	void setMute(bool enabled);
 	bool getMute();

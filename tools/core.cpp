@@ -37,14 +37,14 @@
 #define COPYRIGHT _("2012-2015 (c) Vitaly Tonkacheyev (thetvg@gmail.com)")
 #define WEBSITE "http://sites.google.com/site/thesomeprojects/"
 #define WEBSITELABEL _("Program Website")
-#define VERSION "0.2.6"
+#define VERSION "0.2.7"
 
 #define POLLING_INTERVAL 2000
 
 Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
-: settings_(new Settings()),
-  alsaWork_(new AlsaWork()),
-  settingsStr_(new settingsStr()),
+: settings_(Settings::Ptr(new Settings())),
+  alsaWork_(AlsaWork::Ptr(new AlsaWork())),
+  settingsStr_(settingsStr::Ptr(new settingsStr())),
   mixerName_(settings_->getMixer()),
   volumeValue_(0.0),
   pollVolume_(0.0),
@@ -83,7 +83,6 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 #endif
 	pollVolume_ = volumeValue_;
 	settingsStr_->setNotebookOrientation(settings_->getNotebookOrientation());
-	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList());
 	settings_->setVersion(VERSION);
 	settingsStr_->setUsePolling(settings_->usePolling());
 	refGlade->get_widget_derived("settingsDialog", settingsDialog_);
@@ -102,9 +101,6 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 
 Core::~Core()
 {
-	delete alsaWork_;
-	delete settings_;
-	delete settingsStr_;
 	if (settingsDialog_)
 		delete settingsDialog_;
 }
@@ -183,7 +179,7 @@ void Core::runSettings()
 		}
 #endif
 		blockAllSignals(true);
-		settingsDialog_->initParms(*settingsStr_);
+		settingsDialog_->initParms(settingsStr_);
 		blockAllSignals(false);
 		settingsDialog_->updateMixers(settingsStr_->mixerList());
 		settingsDialog_->updateSwitches(settingsStr_->switchList());
@@ -209,13 +205,13 @@ void Core::saveSettings()
 #endif
 }
 
-void Core::onSettingsDialogOk(settingsStr &str)
+void Core::onSettingsDialogOk(const settingsStr::Ptr &str)
 {
-	settingsStr_->setCardId(str.cardId());
-	settingsStr_->setMixerId(str.mixerId());
-	settingsStr_->setNotebookOrientation(str.notebookOrientation());
-	settingsStr_->setIsAutorun(str.isAutorun());
-	settingsStr_->setUsePolling(str.usePolling());
+	settingsStr_->setCardId(str->cardId());
+	settingsStr_->setMixerId(str->mixerId());
+	settingsStr_->setNotebookOrientation(str->notebookOrientation());
+	settingsStr_->setIsAutorun(str->isAutorun());
+	settingsStr_->setUsePolling(str->usePolling());
 	updateControls(settingsStr_->cardId());
 #ifdef HAVE_PULSE
 	if (isPulse_ && pulse_) {

@@ -56,7 +56,7 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
   pbSwitches_(Glib::RefPtr<Gtk::ListStore>()),
   capSwitches_(Glib::RefPtr<Gtk::ListStore>()),
   enumSwitches_(Glib::RefPtr<Gtk::ListStore>()),
-  settings_(new settingsStr()),
+  settings_(settingsStr::Ptr()),
   mixerId_(0),
   cardId_(0),
   isPulse_(false)
@@ -134,15 +134,11 @@ SettingsFrame::~SettingsFrame()
 	delete isAutoRun_;
 	delete tabPos_;
 	delete tabWidget_;
-	delete settings_;
 }
 
-void SettingsFrame::initParms(settingsStr &str)
+void SettingsFrame::initParms(const settingsStr::Ptr &str)
 {
-	if (settings_) {
-		settings_ = 0;
-	}
-	settings_ = new settingsStr(str);
+	settings_ = str;
 	if (tabPos_) {
 		tabPos_->set_active(settings_->notebookOrientation());
 	}
@@ -204,9 +200,9 @@ bool SettingsFrame::onDeleteEvent(GdkEventAny *event)
 	return true;
 }
 
-settingsStr &SettingsFrame::getSettings() const
+settingsStr::Ptr SettingsFrame::getSettings() const
 {
-	return *settings_;
+	return settings_;
 }
 
 void SettingsFrame::setupTreeModels()
@@ -220,7 +216,7 @@ void SettingsFrame::setupTreeModels()
 
 void SettingsFrame::setupSoundCards()
 {
-	if (sndCardBox_){
+	if (sndCardBox_ && settings_){
 		const std::vector<std::string> cards = settings_->cardList();
 		sndCardBox_->clear();
 		cards_ = Gtk::ListStore::create(m_Columns);
@@ -244,7 +240,7 @@ void SettingsFrame::setupSoundCards()
 #ifdef HAVE_PULSE
 void SettingsFrame::setupPulseDevices()
 {
-	if(pulseBox_) {
+	if(pulseBox_ && settings_) {
 		pulseBox_->clear();
 		pulseCards_ = Gtk::ListStore::create(m_Columns);
 		pulseBox_->set_model(pulseCards_);
@@ -268,7 +264,7 @@ void SettingsFrame::setupPulseDevices()
 
 void SettingsFrame::setupMixers()
 {
-	if (mixerBox_) {
+	if (mixerBox_ && settings_) {
 		mixerBox_->clear();
 		mixers_ = Gtk::ListStore::create(m_Columns);
 		mixerBox_->set_model(mixers_);
@@ -293,6 +289,9 @@ void SettingsFrame::setupMixers()
 
 void SettingsFrame::updateSwitchTree()
 {
+	if (!settings_)
+		return;
+
 	if (playbackSwitchTree_) {
 		playbackSwitchTree_->remove_all_columns();
 		Gtk::CellRendererToggle *pcell = Gtk::manage(new Gtk::CellRendererToggle);
@@ -308,7 +307,7 @@ void SettingsFrame::updateSwitchTree()
 		if (colsCount) {
 			pColumn->add_attribute(pcell->property_active(), m_TColumns.m_col_toggle);
 		}
-		const std::vector<switchcap> pbsl(settings_->switchList().playbackSwitchList());
+		const std::vector<switchcap> pbsl(settings_->switchList()->playbackSwitchList());
 		std::vector<switchcap>::const_iterator it = pbsl.begin();
 		while (it != pbsl.end()) {
 			row = *(pbSwitches_->append());
@@ -335,7 +334,7 @@ void SettingsFrame::updateSwitchTree()
 		if (colsCount) {
 			pColumn->add_attribute(rcell->property_active(), m_TColumns.m_col_toggle);
 		}
-		const std::vector<switchcap> ctsl(settings_->switchList().captureSwitchList());
+		const std::vector<switchcap> ctsl(settings_->switchList()->captureSwitchList());
 		std::vector<switchcap>::const_iterator it = ctsl.begin();
 		while (it != ctsl.end()) {
 			row = *(capSwitches_->append());
@@ -361,7 +360,7 @@ void SettingsFrame::updateSwitchTree()
 		if (colsCount) {
 			pColumn->add_attribute(ecell->property_active(), m_TColumns.m_col_toggle);
 		}
-		const std::vector<switchcap> ensl(settings_->switchList().enumSwitchList());
+		const std::vector<switchcap> ensl(settings_->switchList()->enumSwitchList());
 		std::vector<switchcap>::const_iterator it = ensl.begin();
 		while (it != ensl.end()) {
 			row = *(enumSwitches_->append());
@@ -396,9 +395,9 @@ void SettingsFrame::updateMixers(const std::vector<std::string> &mixers)
 	setupMixers();
 }
 
-void SettingsFrame::updateSwitches(const MixerSwitches &slist)
+void SettingsFrame::updateSwitches(const MixerSwitches::Ptr &slist)
 {
-	settings_->clearSwitches();
+	//settings_->clearSwitches();
 	settings_->addMixerSwitch(slist);
 	updateSwitchTree();
 }

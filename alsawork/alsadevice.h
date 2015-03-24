@@ -37,7 +37,7 @@ public:
 	const std::string &name() const;
 	int id() const;
 	const std::vector<std::string> &mixers() const;
-	MixerSwitches &switches();
+	MixerSwitches::Ptr switches();
 	const std::string &currentMixer() const;
 	int currentMixerId() const;
 	bool havePlaybackMixers();
@@ -70,7 +70,7 @@ private:
 	std::vector<std::string> volumeMixers_;
 	std::vector<std::string> captureMixers_;
 	std::vector<std::string> mixers_;
-	MixerSwitches *switches_;
+	MixerSwitches::Ptr switches_;
 	int currentMixerId_;
 	std::string currentMixerName_;
 

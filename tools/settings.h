@@ -21,6 +21,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 #include "glibmm/keyfile.h"
+#include <memory>
 
 class Settings
 {
@@ -28,6 +29,7 @@ public:
 	Settings();
 	Settings(Settings const &);
 	~Settings();
+	typedef std::shared_ptr<Settings> Ptr;
 	int getSoundCard() const;
 	Glib::ustring getMixer() const;
 	bool getNotebookOrientation();

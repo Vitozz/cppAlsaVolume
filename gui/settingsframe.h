@@ -42,12 +42,12 @@ public:
 		OK_RESPONSE = 1,
 		CANCEL_RESPONSE = 0
 	};
-	void initParms(settingsStr &str);
-	void updateControls(settingsStr &str);
+	void initParms(const settingsStr::Ptr &str);
+	void updateControls(const settingsStr::Ptr &str);
 	void updateMixers(const std::vector<std::string> &mixers);
-	void updateSwitches(const MixerSwitches &slist);
+	void updateSwitches(const MixerSwitches::Ptr &slist);
 	void disablePulseCheckButton();
-	settingsStr &getSettings() const;
+	settingsStr::Ptr getSettings() const;
 	//
 	typedef sigc::signal<void, std::string, int ,bool> type_toggled_signal;
 	type_toggled_signal signal_switches_toggled();
@@ -132,7 +132,7 @@ private:
 	Glib::RefPtr<Gtk::ListStore> pbSwitches_;
 	Glib::RefPtr<Gtk::ListStore> capSwitches_;
 	Glib::RefPtr<Gtk::ListStore> enumSwitches_;
-	settingsStr *settings_;
+	settingsStr::Ptr settings_;
 	int mixerId_;
 	int cardId_;
 	bool isPulse_;

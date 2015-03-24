@@ -28,7 +28,7 @@ AlsaDevice::AlsaDevice(int id, const std::string &card)
   volumeMixers_(std::vector<std::string>()),
   captureMixers_(std::vector<std::string>()),
   mixers_(std::vector<std::string>()),
-  switches_(new MixerSwitches()),
+  switches_(MixerSwitches::Ptr(new MixerSwitches())),
   currentMixerId_(0),
   currentMixerName_(std::string())
 {
@@ -37,7 +37,6 @@ AlsaDevice::AlsaDevice(int id, const std::string &card)
 
 AlsaDevice::~AlsaDevice()
 {
-	delete switches_;
 }
 
 void AlsaDevice::updateElements()
@@ -48,7 +47,7 @@ void AlsaDevice::updateElements()
 	if (!captureMixers_.empty()) {
 		captureMixers_.clear();
 	}
-	if (!switches_->isEmpty()) {
+	if (switches_ && !switches_->isEmpty()) {
 		switches_->clearAll();
 	}
 	snd_mixer_t *handle = getMixerHanlde(id_);
@@ -453,10 +452,10 @@ bool AlsaDevice::haveMixers()
 	return !mixers_.empty();
 }
 
-MixerSwitches &AlsaDevice::switches()
+MixerSwitches::Ptr AlsaDevice::switches()
 {
 	updateElements();
-	return *switches_;
+	return switches_;
 }
 
 int AlsaDevice::currentMixerId() const

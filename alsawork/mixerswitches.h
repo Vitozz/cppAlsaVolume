@@ -22,12 +22,14 @@
 #define MIXERSWITCHES_H
 
 #include "../tools/tools.h"
+#include <memory>
 
 class MixerSwitches
 {
 public:
 	MixerSwitches();
 	MixerSwitches(const MixerSwitches &ms);
+	typedef std::shared_ptr<MixerSwitches> Ptr;
 	void pushBack(SwitchType sType, switchcap &item);
 	void setCaptureSwitchList(const std::vector<switchcap> &list);
 	void setPlaybackSwitchList(const std::vector<switchcap> &list);
