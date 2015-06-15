@@ -131,25 +131,17 @@ void TrayIcon::onMute()
 
 Glib::ustring TrayIcon::getIconName(double value) const
 {
-	Glib::ustring iconPath;
-	if (value <= 0) {
-		iconPath = Glib::ustring(ICON_PREFIX + "0.png");
+	int number = 100;
+	Glib::ustring iconPath = Glib::ustring::compose("%1%2.png",ICON_PREFIX, Glib::ustring::format(number));
+	value = (value <= 0) ? 0 : (value > 100) ? 100 : value;
+	number = (value < 20) ? 20 : int(value/20)*20;
+	if (value <= 0 || muted) {
+		number = 0;
 	}
-	if (value >0 && (value < 40)) {
-		iconPath = Glib::ustring(ICON_PREFIX + "20.png");
-	}
-	if (value >=40 && (value < 60)) {
-		iconPath = Glib::ustring(ICON_PREFIX + "40.png");
-	}
-	if (value >=60 && (value < 80)) {
-		iconPath = Glib::ustring(ICON_PREFIX + "60.png");
-	}
-	if (value >=80 && (value < 100)) {
-		iconPath = Glib::ustring(ICON_PREFIX + "80.png");
-	}
-	if (value >= 100) {
-		iconPath = Glib::ustring(ICON_PREFIX + "100.png");
-	}
+	iconPath = Glib::ustring::compose("%1%2.png",ICON_PREFIX, Glib::ustring::format(number));
+#ifdef IS_DEBUG
+	std::cout << iconPath << std::endl;
+#endif
 	return iconPath;
 }
 
