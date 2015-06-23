@@ -37,9 +37,9 @@
 
 int main (int argc, char *argv[])
 {
-	gchar *str = bindtextdomain(PACKAGE, Tools::getDirPath("locale").c_str());
-	str = bind_textdomain_codeset(PACKAGE, CODEC);
-	str = textdomain(PACKAGE);
+	bindtextdomain(PACKAGE, Tools::getDirPath("locale").c_str());
+	bind_textdomain_codeset(PACKAGE, CODEC);
+	textdomain(PACKAGE);
 #ifndef IS_GTK_2
 	Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "org.gtkmm.alsavolume");
 	Glib::ustring slider_ui_ = Tools::getResPath("gladefiles/SliderFrame.glade");

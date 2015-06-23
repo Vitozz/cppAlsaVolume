@@ -39,7 +39,7 @@ typedef std::vector<PulseDevice::Ptr> PulseDevicePtrList;
 class PulseCore
 {
 public:
-	PulseCore(const char *clientName);
+	explicit PulseCore(const char *clientName);
 	~PulseCore();
 	PulseCore(PulseCore const &);
 	typedef std::shared_ptr<PulseCore> Ptr;

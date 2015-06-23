@@ -32,8 +32,8 @@ class PulseDevice
 {
 public:
 	PulseDevice();
-	PulseDevice(const pa_source_info* i_);
-	PulseDevice(const pa_sink_info* i);
+	explicit PulseDevice(const pa_source_info* i_);
+	explicit PulseDevice(const pa_sink_info* i);
 	typedef std::shared_ptr<PulseDevice> Ptr;
 	uint32_t index() const;
 	device_type type() const;

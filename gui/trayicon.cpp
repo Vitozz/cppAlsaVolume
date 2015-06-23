@@ -135,7 +135,7 @@ Glib::ustring TrayIcon::getIconName(double value) const
 	Glib::ustring iconPath = Glib::ustring::compose("%1%2.png",ICON_PREFIX, Glib::ustring::format(number));
 	value = (value <= 0) ? 0 : (value > 100) ? 100 : value;
 	number = (value < 20) ? 20 : int(value/20)*20;
-	if (value <= 0 || muted) {
+	if (value <= 0 || muted_) {
 		number = 0;
 	}
 	iconPath = Glib::ustring::compose("%1%2.png",ICON_PREFIX, Glib::ustring::format(number));

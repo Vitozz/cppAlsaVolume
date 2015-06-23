@@ -33,7 +33,7 @@
 class Core
 {
 public:
-	Core(const Glib::RefPtr<Gtk::Builder>& refGlade);
+	explicit Core(const Glib::RefPtr<Gtk::Builder>& refGlade);
 	Core(Core const &);
 	~Core();
 	void runAboutDialog();
