@@ -19,8 +19,11 @@
 #include "pulsedevice.h"
 #include <cmath>
 
+#define ALSA_CARDID_PROPERTY "alsa.card"
+
 PulseDevice::PulseDevice()
 : index_(0),
+  card_(0),
   type_(SINK),
   name_(std::string()),
   description_(std::string()),
@@ -30,6 +33,7 @@ PulseDevice::PulseDevice()
 
 PulseDevice::PulseDevice(const pa_source_info* i)
 : index_(i->index),
+  card_(std::stoi(pa_proplist_gets(i->proplist, ALSA_CARDID_PROPERTY))),
   type_(SOURCE),
   name_(std::string(i->name)),
   description_(std::string(i->description))
@@ -44,6 +48,7 @@ PulseDevice::PulseDevice(const pa_source_info* i)
 
 PulseDevice::PulseDevice(const pa_sink_info* i)
 : index_(i->index),
+  card_(std::stoi(pa_proplist_gets(i->proplist, ALSA_CARDID_PROPERTY))),
   type_(SINK),
   name_(std::string(i->name)),
   description_(std::string(i->description))
@@ -69,6 +74,11 @@ double PulseDevice::round(double value) const
 uint32_t PulseDevice::index() const
 {
 	return index_;
+}
+
+uint32_t PulseDevice::card() const
+{
+	return card_;
 }
 
 device_type PulseDevice::type() const

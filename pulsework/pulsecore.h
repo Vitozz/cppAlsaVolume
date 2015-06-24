@@ -51,6 +51,7 @@ public:
 	const std::string getDeviceNameByIndex(int index);
 	int getCurrentDeviceIndex();
 	int getVolume();
+	int getCardIndex();
 	bool getMute();
 	bool deviceNameExists(const std::string &name);
 	bool deviceDescriptionExists(const std::string &description);

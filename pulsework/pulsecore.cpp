@@ -390,6 +390,11 @@ int PulseCore::getCurrentDeviceIndex()
 	return ((index > 0) ? index : 0);
 }
 
+int PulseCore::getCardIndex()
+{
+	return getDeviceByIndex(currentDeviceIndex_)->card();
+}
+
 bool PulseCore::deviceNameExists(const std::string &name)
 {
 	return Tools::itemExists(devicesNames_, name);

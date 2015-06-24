@@ -291,6 +291,7 @@ void Core::updateControls(int cardId)
 void Core::updatePulseDevices(int deviceId)
 {
 	if (pulse_) {
+		const std::string olddev = settingsStr_->pulseDeviceName();
 		pulse_->refreshDevices();
 		settingsStr_->setPulseDevices(pulse_->getCardList());
 		const std::string currDev = pulse_->getDeviceNameByIndex(deviceId);
@@ -300,6 +301,9 @@ void Core::updatePulseDevices(int deviceId)
 		settingsStr_->setPulseDeviceName(pulseDevice_);
 		settingsStr_->setPulseDeviceDesc(pulseDeviceDesc_);
 		settingsStr_->setPulseDeviceId(pulse_->getCurrentDeviceIndex());
+		if ( olddev != currDev ) {
+			updateControls(pulse_->getCardIndex());
+		}
 	}
 }
 #endif

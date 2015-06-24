@@ -36,6 +36,7 @@ public:
 	explicit PulseDevice(const pa_sink_info* i);
 	typedef std::shared_ptr<PulseDevice> Ptr;
 	uint32_t index() const;
+	uint32_t card() const;
 	device_type type() const;
 	const std::string &name() const;
 	const std::string &description() const;
@@ -47,6 +48,7 @@ private:
 	int percent(pa_cvolume& volume) const;
 private:
 	uint32_t index_;
+	uint32_t card_;
 	device_type type_;
 	std::string name_;
 	std::string description_;
