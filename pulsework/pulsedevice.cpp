@@ -21,6 +21,12 @@
 
 #define ALSA_CARDID_PROPERTY "alsa.card"
 
+static uint32_t getCardId(pa_proplist *pl)
+{
+	const char* cardId = pa_proplist_gets(pl, ALSA_CARDID_PROPERTY);
+	return (cardId != NULL) ? std::stoi(std::string(cardId)) : 0;
+}
+
 PulseDevice::PulseDevice()
 : index_(0),
   card_(0),
@@ -33,7 +39,7 @@ PulseDevice::PulseDevice()
 
 PulseDevice::PulseDevice(const pa_source_info* i)
 : index_(i->index),
-  card_(std::stoi(pa_proplist_gets(i->proplist, ALSA_CARDID_PROPERTY))),
+  card_(getCardId(i->proplist)),
   type_(SOURCE),
   name_(std::string(i->name)),
   description_(std::string(i->description))
@@ -48,7 +54,7 @@ PulseDevice::PulseDevice(const pa_source_info* i)
 
 PulseDevice::PulseDevice(const pa_sink_info* i)
 : index_(i->index),
-  card_(std::stoi(pa_proplist_gets(i->proplist, ALSA_CARDID_PROPERTY))),
+  card_(getCardId(i->proplist)),
   type_(SINK),
   name_(std::string(i->name)),
   description_(std::string(i->description))
