@@ -1,3 +1,10 @@
+2015-06-25
+v0.2.8
+  - Fixes in icon animation. Reduced images sizes
+  - Added update card switches on pulseaudio device change
+  - Fixed alsa mixer reset when monitoring is enabled
+  - Fixed alsa mixer changing
+
 2015-03-24
 v0.2.7
   - Code optimizations
