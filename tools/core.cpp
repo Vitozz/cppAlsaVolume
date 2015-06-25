@@ -37,7 +37,7 @@
 #define COPYRIGHT _("2012-2015 (c) Vitaly Tonkacheyev (thetvg@gmail.com)")
 #define WEBSITE "http://sites.google.com/site/thesomeprojects/"
 #define WEBSITELABEL _("Program Website")
-#define VERSION "0.2.7"
+#define VERSION "0.2.8"
 
 #define POLLING_INTERVAL 2000
 
@@ -390,6 +390,9 @@ void Core::updateTrayIcon(double value)
 void Core::mixerChanged(int mixerId)
 {
 	alsaWork_->setCurrentMixer(mixerId);
+	if (mixerName_ != alsaWork_->getCurrentMixerName() ) {
+		mixerName_ = alsaWork_->getCurrentMixerName();
+	}
 	if (!isPulse_) {
 		volumeValue_ = alsaWork_->getAlsaVolume();
 	}
@@ -407,6 +410,9 @@ bool Core::onTimeout()
 {
 	if (settingsStr_->usePolling()) {
 		if (!isPulse_) {
+			if (mixerName_ != alsaWork_->getCurrentMixerName()) {
+				return true;
+			}
 			const double volume = alsaWork_->getAlsaVolume();
 			bool ismute = !alsaWork_->getMute();
 			if (pollVolume_ != volume) {
@@ -420,6 +426,10 @@ bool Core::onTimeout()
 		}
 #ifdef HAVE_PULSE
 		if (isPulse_ && pulse_) {
+			const int index = pulse_->getCurrentDeviceIndex();
+			if (pulseDevice_ != pulse_->getDeviceNameByIndex(index)) {
+				return true;
+			}
 			const int volume = pulse_->getVolume();
 			bool ismute = pulse_->getMute();
 			if (pollVolume_ != volume) {
