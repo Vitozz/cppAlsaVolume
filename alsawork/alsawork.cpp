@@ -35,6 +35,7 @@ AlsaWork::AlsaWork()
 		++id;
 	}
 	setCurrentCard(0);
+	setCurrentMixer(0);
 }
 
 AlsaWork::~AlsaWork()
@@ -92,6 +93,15 @@ const std::string AlsaWork::getCardName(int index)
 	const std::string cardName = snd_ctl_card_info_get_name(cardInfo);
 	checkError(snd_ctl_close(ctl));
 	return cardName;
+}
+
+const std::string AlsaWork::getMixerName(int index)
+{
+	std::string mixerName;
+	if (index >= 0 && index < currentAlsaDevice_->mixers().size()) {
+		mixerName = currentAlsaDevice_->mixers().at(index);
+	}
+	return mixerName;
 }
 
 std::string AlsaWork::getCurrentMixerName() const

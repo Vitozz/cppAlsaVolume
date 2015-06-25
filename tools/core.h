@@ -69,7 +69,6 @@ private:
 	void initPulseAudio();
 #endif
 	void updateSettings(int cardId);
-	void mixerChanged(int mixerId);
 	void updateTrayIcon(double value);
 	void blockAllSignals(bool isblock);
 	void errorDialog(const std::string &errorMessage);
@@ -88,7 +87,6 @@ private:
 	std::vector<std::string> alsaCards_;
 	sigc::connection signal_switches_;
 	sigc::connection signal_sndcard_;
-	sigc::connection signal_mixer_;
 	sigc::connection signal_timer_;
 #ifdef HAVE_PULSE
 	PulseCore::Ptr pulse_;

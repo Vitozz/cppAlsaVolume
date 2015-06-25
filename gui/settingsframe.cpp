@@ -407,7 +407,6 @@ void SettingsFrame::mixerBoxChanged()
 	const int row = mixerBox_->get_active_row_number();
 	if (mixerId_ != row && row >=0) {
 		mixerId_ = row;
-		m_signal_mixer_changed(row);
 	}
 }
 
@@ -494,11 +493,6 @@ SettingsFrame::type_toggled_signal SettingsFrame::signal_switches_toggled()
 SettingsFrame::type_int_signal SettingsFrame::signal_sndcard_changed()
 {
 	return m_signal_sndcard_changed;
-}
-
-SettingsFrame::type_int_signal SettingsFrame::signal_mixer_changed()
-{
-	return m_signal_mixer_changed;
 }
 
 #ifdef HAVE_PULSE

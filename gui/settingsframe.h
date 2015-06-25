@@ -54,7 +54,6 @@ public:
 	typedef sigc::signal<void, bool> type_bool_signal;
 	typedef sigc::signal<void, int> type_int_signal;
 	type_int_signal signal_sndcard_changed();
-	type_int_signal signal_mixer_changed();
 	type_int_signal signal_pulsedevices_changed();
 	type_bool_signal signal_pulsdev_toggled();
 protected:
@@ -95,7 +94,6 @@ protected:
 	type_int_signal m_signal_pulsedev_changed;
 #endif
 	type_int_signal m_signal_sndcard_changed;
-	type_int_signal m_signal_mixer_changed;
 
 private:
 	void setupTreeModels();

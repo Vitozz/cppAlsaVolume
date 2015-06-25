@@ -412,6 +412,10 @@ void AlsaDevice::setCurrentMixer(const std::string &mixer)
 	if(Tools::itemExists(mixers_, mixer)){
 		currentMixerId_ = Tools::itemIndex(mixers_, mixer);
 		currentMixerName_ = mixer;
+#ifdef IS_DEBUG
+		std::cout << "MID " << currentMixerId_ << std::endl;
+		std::cout << "MN " << currentMixerName_ << std::endl;
+#endif
 	}
 }
 

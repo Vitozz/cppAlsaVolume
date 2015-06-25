@@ -61,25 +61,15 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 	settingsStr_->setUsePulse(isPulse_);
 	alsaCards_ = alsaWork_->getCardsList();
 	settingsStr_->setList(CARDS, alsaCards_);
+	settingsStr_->setMixerId(settings_->getMixerId());
 	int cardId = settings_->getSoundCard();
 	cardId = (alsaWork_->cardExists(settings_->getSoundCard())) ? cardId : alsaWork_->getFirstCardWithMixers();
+	if (mixerName_.empty()) {
+		mixerName_ = alsaWork_->getMixerName(settingsStr_->mixerId());
+	}
 	updateControls(cardId);
-	if (!mixerName_.empty()) {
-		alsaWork_->setCurrentMixer(mixerName_);
-		settingsStr_->setMixerId(alsaWork_->getCurrentMixerId());
-	}
-	else {
-		alsaWork_->setCurrentMixer(0);
-		settingsStr_->setMixerId(0);
-		mixerName_ = settingsStr_->mixerList().at(settingsStr_->mixerId());
-	}
-	if (!isPulse_) {
-		volumeValue_ = alsaWork_->getAlsaVolume();
-	}
-#ifdef HAVE_PULSE
-	else if (pulse_) {
-		volumeValue_ = pulse_->getVolume();
-	}
+#ifdef IS_DEBUG
+	std::cout << "Id in settings - " << settingsStr_->mixerId() << std::endl;
 #endif
 	pollVolume_ = volumeValue_;
 	settingsStr_->setNotebookOrientation(settings_->getNotebookOrientation());
@@ -90,7 +80,6 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
 	if (settingsDialog_) {
 		signal_switches_ = settingsDialog_->signal_switches_toggled().connect(sigc::mem_fun(*this, &Core::switchChanged));
 		signal_sndcard_ = settingsDialog_->signal_sndcard_changed().connect(sigc::mem_fun(*this, &Core::updateControls));
-		signal_mixer_ = settingsDialog_->signal_mixer_changed().connect(sigc::mem_fun(*this, &Core::mixerChanged));
 #ifdef HAVE_PULSE
 		signal_pulsdev_ = settingsDialog_->signal_pulsdev_toggled().connect(sigc::mem_fun(*this, &Core::onSettingsDialogUsePulse));
 		signal_pulsedevices_ = settingsDialog_->signal_pulsedevices_changed().connect(sigc::mem_fun(*this, &Core::updatePulseDevices));
@@ -160,7 +149,6 @@ void Core::blockAllSignals(bool isblock)
 {
 	signal_switches_.block(isblock);
 	signal_sndcard_.block(isblock);
-	signal_mixer_.block(isblock);
 #ifdef HAVE_PULSE
 	signal_pulsdev_.block(isblock);
 	signal_pulsedevices_.block(isblock);
@@ -180,9 +168,9 @@ void Core::runSettings()
 #endif
 		blockAllSignals(true);
 		settingsDialog_->initParms(settingsStr_);
-		blockAllSignals(false);
 		settingsDialog_->updateMixers(settingsStr_->mixerList());
 		settingsDialog_->updateSwitches(settingsStr_->switchList());
+		blockAllSignals(false);
 		int response = settingsDialog_->run();
 		if ( response == settingsDialog_->OK_RESPONSE ) {
 			onSettingsDialogOk(settingsDialog_->getSettings());
@@ -198,6 +186,7 @@ void Core::saveSettings()
 	settings_->setUsePulse(isPulse_);
 	settings_->setAutorun(settingsStr_->isAutorun());
 	settings_->setUsePolling(settingsStr_->usePolling());
+	settings_->saveMixerId(settingsStr_->mixerId());
 #ifdef HAVE_PULSE
 	if (pulse_) {
 		settings_->savePulseDeviceName(pulseDevice_);
@@ -275,15 +264,30 @@ void Core::updateControls(int cardId)
 	settingsStr_->clearSwitches();
 	const int soundCardId = (alsaWork_->cardExists(cardId)) ? cardId : alsaWork_->getFirstCardWithMixers();
 	alsaWork_->setCurrentCard(soundCardId);
-	if (!mixerName_.empty()) {
-		alsaWork_->setCurrentMixer(mixerName_);
-	}
 	settingsStr_->setCardId(soundCardId);
 	settingsStr_->setList(MIXERS, alsaWork_->getVolumeMixers());
 	settingsStr_->addMixerSwitch(alsaWork_->getSwitchList());
+	const std::string newName = alsaWork_->getMixerName(settingsStr_->mixerId());
+	if (mixerName_ != newName) {
+		mixerName_ = newName;
+		alsaWork_->setCurrentMixer(mixerName_);
+	}
+	if (!isPulse_) {
+		volumeValue_ = alsaWork_->getAlsaVolume();
+	}
+#ifdef HAVE_PULSE
+	else if (pulse_) {
+		volumeValue_ = pulse_->getVolume();
+	}
+#endif
+	m_signal_volume_changed(volumeValue_);
+	updateTrayIcon(volumeValue_);
+	m_signal_mixer_muted(getMuted());
 	if(settingsDialog_) {
+		blockAllSignals(true);
 		settingsDialog_->updateMixers(settingsStr_->mixerList());
 		settingsDialog_->updateSwitches(settingsStr_->switchList());
+		blockAllSignals(false);
 	}
 }
 
@@ -387,29 +391,14 @@ void Core::updateTrayIcon(double value)
 	}
 }
 
-void Core::mixerChanged(int mixerId)
-{
-	alsaWork_->setCurrentMixer(mixerId);
-	if (mixerName_ != alsaWork_->getCurrentMixerName() ) {
-		mixerName_ = alsaWork_->getCurrentMixerName();
-	}
-	if (!isPulse_) {
-		volumeValue_ = alsaWork_->getAlsaVolume();
-	}
-#ifdef HAVE_PULSE
-	else if (pulse_) {
-		volumeValue_ = pulse_->getVolume();
-	}
-#endif
-	m_signal_volume_changed(volumeValue_);
-	updateTrayIcon(volumeValue_);
-	m_signal_mixer_muted(getMuted());
-}
-
 bool Core::onTimeout()
 {
 	if (settingsStr_->usePolling()) {
 		if (!isPulse_) {
+#ifdef IS_DEBUG
+			std::cout << "mixerName= " << mixerName_ << std::endl;
+			std::cout << "CurrentMixerName= " << alsaWork_->getCurrentMixerName() << std::endl;
+#endif
 			if (mixerName_ != alsaWork_->getCurrentMixerName()) {
 				return true;
 			}

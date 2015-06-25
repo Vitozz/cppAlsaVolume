@@ -44,6 +44,7 @@ public:
 	void setAlsaVolume(double volume);
 	double getAlsaVolume() const;
 	const std::string getCardName(int index);
+	const std::string getMixerName(int index);
 	std::string getCurrentMixerName() const;
 	const std::vector<std::string> &getCardsList() const;
 	const std::vector<std::string> &getVolumeMixers() const;

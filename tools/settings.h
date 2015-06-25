@@ -31,6 +31,7 @@ public:
 	~Settings();
 	typedef std::shared_ptr<Settings> Ptr;
 	int getSoundCard() const;
+	int getMixerId() const;
 	Glib::ustring getMixer() const;
 	bool getNotebookOrientation();
 	bool getAutorun();
@@ -39,6 +40,7 @@ public:
 	std::string pulseDeviceName() const;
 	void saveSoundCard(int soundCard);
 	void saveMixer(const std::string& mixerName);
+	void saveMixerId(int mixerId);
 	void saveNotebookOrientation(bool orient);
 	void setAutorun(bool isAutorun);
 	void setVersion(const Glib::ustring& version);
