@@ -1,6 +1,6 @@
 /*
  * alsawork.cpp
- * Copyright (C) 2012 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2015 Vitaly Tonkacheyev
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -27,13 +27,10 @@ AlsaWork::AlsaWork()
 {
 	getCards();
 	int id = 0;
-	std::vector<std::string>::iterator it = cardList_.begin();
-	while (it != cardList_.end()) {
-		const std::string name = *it;
+	std::for_each(cardList_.begin(), cardList_.end(), [&](const std::string &name){
 		devices_.push_back(AlsaDevice::Ptr(new AlsaDevice(id, name)));
-		++it;
 		++id;
-	}
+	});
 	setCurrentCard(0);
 	setCurrentMixer(0);
 }
@@ -147,7 +144,7 @@ bool AlsaWork::checkCardId(int cardId)
 		}
 	}
 	catch (std::out_of_range &ex) {
-		std::cerr << "alsawork.cpp::124:: Item out of Range " << ex.what() << std::endl;
+		std::cerr << "alsawork.cpp::145:: Item out of Range " << ex.what() << std::endl;
 	}
 	return false;
 }
@@ -209,17 +206,10 @@ bool AlsaWork::mixerExists(int id)
 
 int AlsaWork::getFirstCardWithMixers()
 {
-	AlsaDevicePtrList::iterator it = devices_.begin();
-	int inc = 0;
-	while (it != devices_.end()) {
-		AlsaDevice::Ptr dev = *it;
-		if(dev->haveMixers()) {
-			return inc;
-		}
-		++it;
-		++inc;
-	}
-	return 0;
+	AlsaDevicePtrList::iterator it = std::find_if(devices_.begin(),
+						      devices_.end(),
+						      [](const AlsaDevice::Ptr &dev){return dev->haveMixers();});
+	return (it != devices_.end()) ? it - devices_.begin() : 0;
 }
 
 int AlsaWork::getCurrentMixerId() const

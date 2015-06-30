@@ -1,6 +1,6 @@
 /*
  * tools.cpp
- * Copyright (C) 2012 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2015 Vitaly Tonkacheyev
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -99,10 +99,9 @@ void Tools::createDirectory(const std::string &dirName)
 {
 	if (!checkDirExists(dirName)) {
 		std::cerr << "Directory " << dirName << " not found. Attempting to create it.." << std::endl;
-		gint err = 0;
-		err = g_mkdir_with_parents(dirName.c_str(), MK_RIGHTS);
+		gint err  = g_mkdir_with_parents(dirName.c_str(), MK_RIGHTS);
 		if (err < 0) {
-			std::cerr << g_file_error_from_errno(err) << std::endl;
+			std::cerr << "tools.cpp::102::createDirectory:: " << g_file_error_from_errno(err) << std::endl;
 		}
 	}
 }
@@ -115,7 +114,7 @@ void Tools::saveFile(const std::string &fileName, const std::string &fileData)
 		ofile.close();
 	}
 	catch ( const std::exception & ex ) {
-		std::cerr << "settings.cpp::57::Parsing failed:: " << ex.what() << std::endl;
+		std::cerr << "tools.cpp::112::saveFile:: " << ex.what() << std::endl;
 	}
 }
 
@@ -128,11 +127,8 @@ std::string Tools::pathToFileName(const std::string &path)
 void Tools::printList(const std::vector<std::string> &list)
 {
 	std::cout << "Printing vector contents" << std::endl;
-	const std::vector<std::string> vector(list);
-	std::vector<std::string>::const_iterator it = vector.begin();
-	while (it != vector.end()) {
-		std::cout << std::string(*it) << std::endl;
-		++it;
-	}
+	std::for_each(list.begin(),
+		      list.end(),
+		      []( const std::string &item){ std::cout << item << std::endl; });
 }
 #endif

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Clément Démoulins <clement@archivel.fr>
- * Copyright (C) 2014 Vitaly Tonkacheyev <thetvg@gmail.com>
+ * Copyright (C) 2014-2015 Vitaly Tonkacheyev <thetvg@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -133,23 +133,17 @@ PulseDevice::Ptr PulseCore::getSink(u_int32_t index)
 		return sinks_.at(index);
 	}
 	else {
-		onError("ERROR in pulsecore.cpp:136. This pulseaudio sink does not exits. Default sink will be used");
+		onError("ERROR in pulsecore.cpp:132. This pulseaudio sink does not exits. Default sink will be used");
 	}
 	return getDefaultSink();
 }
 
 PulseDevice::Ptr PulseCore::getSink(const std::string &name)
 {
-	PulseDevicePtrList::iterator it = sinks_.begin();
-	while(it != sinks_.end()) {
-		PulseDevice::Ptr device = *it;
-		if (device->name() == name) {
-			return device;
-		}
-		++it;
-	}
-	onError("ERROR in pulsecore.cpp:151. This pulseaudio sink does not exits. Default sink will be used");
-	return getDefaultSink();
+	PulseDevicePtrList::iterator it = std::find_if(sinks_.begin(),
+						       sinks_.end(),
+						       [&](const PulseDevice::Ptr &device){return (device->name() == name);});
+	return (it != sinks_.end()) ? *it : getDefaultSink();
 }
 
 PulseDevice::Ptr PulseCore::getSource(u_int32_t index)
@@ -165,16 +159,10 @@ PulseDevice::Ptr PulseCore::getSource(u_int32_t index)
 
 PulseDevice::Ptr PulseCore::getSource(const std::string &name)
 {
-	PulseDevicePtrList::iterator it = sources_.begin();
-	while(it != sources_.end()) {
-		PulseDevice::Ptr device = *it;
-		if (device->name() == name) {
-			return device;
-		}
-		++it;
-	}
-	onError("ERROR in pulsecore.cpp:176.This pulseaudio source does not exits. Default source will be used");
-	return getDefaultSource();
+	PulseDevicePtrList::iterator it = std::find_if(sources_.begin(),
+						       sources_.end(),
+						       [&](const PulseDevice::Ptr &device){return (device->name() == name);});
+	return (it != sinks_.end()) ? *it : getDefaultSource();
 }
 
 PulseDevice::Ptr PulseCore::getDefaultSink()
@@ -216,31 +204,22 @@ const std::vector<std::string> &PulseCore::getSourcesDescriptions() const
 const std::string PulseCore::getDeviceDescription(const std::string &name)
 {
 	std::string desc = getDeviceByName(name)->description();
-	if (desc.empty()) {
-		desc = getDefaultSink()->description();
-	}
-	return desc;
+	return desc.empty() ? getDefaultSink()->description() : desc;
 }
 
 PulseDevice::Ptr PulseCore::getDeviceByName(const std::string &name)
 {
 	PulseDevice::Ptr result;
-	PulseDevicePtrList::iterator it = sinks_.begin();
-	while (it != sinks_.end()) {
-		PulseDevice::Ptr device = *it;
+	std::for_each(sinks_.begin(), sinks_.end(), [&](const PulseDevice::Ptr &device){
 		if(device->name() == name) {
 			result = device;
 		}
-		++it;
-	}
-	it = sources_.begin();
-	while (it != sources_.end()) {
-		PulseDevice::Ptr device = *it;
-		if (device->name() == name) {
+	});
+	std::for_each(sources_.begin(), sources_.end(), [&](const PulseDevice::Ptr &device){
+		if(device->name() == name) {
 			result = device;
 		}
-		++it;
-	}
+	});
 	return result;
 }
 
@@ -284,11 +263,6 @@ void PulseCore::setMute_(const PulseDevice::Ptr &device, bool mute)
 	pa_operation_unref(op);
 }
 
-void PulseCore::onError(const std::string &message)
-{
-	std::cerr << "Error: " << message << std::endl;
-}
-
 void PulseCore::setCurrentDevice(const std::string &name)
 {
 	updateDevices();
@@ -311,20 +285,14 @@ void PulseCore::updateDevices()
 	clearLists();
 	getSinks();
 	getSources();
-	PulseDevicePtrList::iterator it = sinks_.begin();
-	while(it != sinks_.end()) {
-		PulseDevice::Ptr device = *it;
+	std::for_each(sinks_.begin(), sinks_.end(), [&](const PulseDevice::Ptr &device){
 		devicesNames_.push_back(device->name());
 		sinksDescriptions_.push_back(device->description());
-		++it;
-	}
-	PulseDevicePtrList::iterator it1 = sources_.begin();
-	while(it1 != sources_.end()) {
-		PulseDevice::Ptr device = *it1;
+	});
+	std::for_each(sources_.begin(), sources_.end(), [&](const PulseDevice::Ptr &device){
 		devicesNames_.push_back(device->name());
 		sourcesDescriptions_.push_back(device->description());
-		++it1;
-	}
+	});
 	devicesDescs_.insert(devicesDescs_.end(), sinksDescriptions_.begin(), sinksDescriptions_.end());
 	devicesDescs_.insert(devicesDescs_.end(), sourcesDescriptions_.begin(), sourcesDescriptions_.end());
 }

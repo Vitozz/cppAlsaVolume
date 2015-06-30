@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Clément Démoulins <clement@archivel.fr>
- * Copyright (C) 2014 Vitaly Tonkacheyev <thetvg@gmail.com>
+ * Copyright (C) 2014-2015 Vitaly Tonkacheyev <thetvg@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ private:
 	void setVolume_(const PulseDevice::Ptr &device, int value);
 	void setMute_(const PulseDevice::Ptr &device, bool mute);
 	void iterate(pa_operation* op);
-	void onError(const std::string &message);
+	inline void onError(const std::string &message){ std::cerr << "Error: " << message << std::endl; }
 	void updateDevices();
 	void clearLists();
 private:

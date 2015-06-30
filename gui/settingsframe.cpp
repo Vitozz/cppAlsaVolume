@@ -1,6 +1,6 @@
 /*
  * settingsframe.cpp
- * Copyright (C) 2012 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2015 Vitaly Tonkacheyev
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -222,17 +222,15 @@ void SettingsFrame::setupSoundCards()
 		cards_ = Gtk::ListStore::create(m_Columns);
 		sndCardBox_->set_model(cards_);
 		Gtk::TreeModel::Row row;
-		std::vector<std::string>::const_iterator it = cards.begin();
 		uint i = 0;
-		while (it != cards.end()) {
+		std::for_each(cards.begin(), cards.end(), [&](const Glib::ustring &name){
 			row = *(cards_->append());
-			row[m_Columns.m_col_name] = Glib::ustring(*it);
+			row[m_Columns.m_col_name] = name;
 			if (i == (uint)cardId_) {
 				sndCardBox_->set_active(row);
 			}
-			++it;
 			++i;
-		}
+		});
 		sndCardBox_->pack_start(m_Columns.m_col_name);
 	}
 }
@@ -246,17 +244,15 @@ void SettingsFrame::setupPulseDevices()
 		pulseBox_->set_model(pulseCards_);
 		Gtk::TreeModel::Row row;
 		const std::vector<std::string> cards(settings_->pulseDevices());
-		std::vector<std::string>::const_iterator it = cards.begin();
 		uint i = 0;
-		while (it != cards.end()) {
+		std::for_each(cards.begin(), cards.end(), [&](const Glib::ustring &name){
 			row = *(pulseCards_->append());
-			row[m_Columns.m_col_name] = Glib::ustring(*it);
+			row[m_Columns.m_col_name] = name;
 			if (i == (uint)pulseDev_) {
 				pulseBox_->set_active(row);
 			}
-			++it;
 			++i;
-		}
+		});
 		pulseBox_->pack_start(m_Columns.m_col_name);
 	}
 }
@@ -271,17 +267,15 @@ void SettingsFrame::setupMixers()
 		if (settings_->mixerList().size() > 0) {
 			Gtk::TreeModel::Row row;
 			const std::vector<std::string> mixers = settings_->mixerList();
-			std::vector<std::string>::const_iterator it = mixers.begin();
 			uint i = 0;
-			while (it != mixers.end()) {
+			std::for_each(mixers.begin(), mixers.end(), [&](const Glib::ustring &name){
 				row = *(mixers_->append());
-				row[m_Columns.m_col_name] = Glib::ustring(*it);
+				row[m_Columns.m_col_name] = name;
 				if (i == (uint)mixerId_) {
 					mixerBox_->set_active(row);
 				}
-				++it;
-				i++;
-			}
+				++i;
+			});
 			mixerBox_->pack_start(m_Columns.m_col_name);
 		}
 	}
@@ -308,13 +302,11 @@ void SettingsFrame::updateSwitchTree()
 			pColumn->add_attribute(pcell->property_active(), m_TColumns.m_col_toggle);
 		}
 		const std::vector<switchcap> pbsl(settings_->switchList()->playbackSwitchList());
-		std::vector<switchcap>::const_iterator it = pbsl.begin();
-		while (it != pbsl.end()) {
+		std::for_each(pbsl.begin(), pbsl.end(), [&](const switchcap &scap){
 			row = *(pbSwitches_->append());
-			row[m_TColumns.m_col_toggle] = (*it).second;
-			row[m_TColumns.m_col_name] = (*it).first;
-			++it;
-		}
+			row[m_TColumns.m_col_toggle] = scap.second;
+			row[m_TColumns.m_col_name] = scap.first;
+		});
 		playbackSwitchTree_->append_column(PB_SWITCH_NAME, m_TColumns.m_col_name);
 		playbackSwitchTree_->show_all_children();
 	}
@@ -335,13 +327,11 @@ void SettingsFrame::updateSwitchTree()
 			pColumn->add_attribute(rcell->property_active(), m_TColumns.m_col_toggle);
 		}
 		const std::vector<switchcap> ctsl(settings_->switchList()->captureSwitchList());
-		std::vector<switchcap>::const_iterator it = ctsl.begin();
-		while (it != ctsl.end()) {
+		std::for_each(ctsl.begin(), ctsl.end(), [&](const switchcap &scap){
 			row = *(capSwitches_->append());
-			row[m_TColumns.m_col_toggle] = (*it).second;
-			row[m_TColumns.m_col_name] = (*it).first;
-			++it;
-		}
+			row[m_TColumns.m_col_toggle] = scap.second;
+			row[m_TColumns.m_col_name] = scap.first;
+		});
 		captureSwitchTree_->append_column(CP_SWITCH_NAME, m_TColumns.m_col_name);
 		captureSwitchTree_->show_all_children();
 	}
@@ -361,13 +351,11 @@ void SettingsFrame::updateSwitchTree()
 			pColumn->add_attribute(ecell->property_active(), m_TColumns.m_col_toggle);
 		}
 		const std::vector<switchcap> ensl(settings_->switchList()->enumSwitchList());
-		std::vector<switchcap>::const_iterator it = ensl.begin();
-		while (it != ensl.end()) {
+		std::for_each(ensl.begin(), ensl.end(), [&](const switchcap &scap){
 			row = *(enumSwitches_->append());
-			row[m_TColumns.m_col_toggle] = (*it).second;
-			row[m_TColumns.m_col_name] = (*it).first;
-			++it;
-		}
+			row[m_TColumns.m_col_toggle] = scap.second;
+			row[m_TColumns.m_col_name] = scap.first;
+		});
 		otherSwitchTree_->append_column(EN_SWITCH_NAME, m_TColumns.m_col_name);
 		otherSwitchTree_->show_all_children();
 	}
@@ -427,14 +415,12 @@ void SettingsFrame::onPlaybackCellToggled(const Glib::ustring& path)
 
 void SettingsFrame::onCaptureCellToggled(const Glib::ustring& path)
 {
-	Gtk::TreeModel::iterator iter = capSwitches_->children().begin();
 	Gtk::TreeModel::Row row;
-	while (iter != capSwitches_->children().end()) {
-		row = *iter;
+	std::for_each(capSwitches_->children().begin(), capSwitches_->children().end(), [&](Gtk::TreeModel::Row r){
+		row = r;
 		row[m_TColumns.m_col_toggle] = false;
-		++iter;
-	}
-	iter = capSwitches_->get_iter(path);
+	});
+	Gtk::TreeModel::iterator iter = capSwitches_->get_iter(path);
 	row = *iter;
 	if (!bool(row.get_value(m_TColumns.m_col_toggle))) {
 		row[m_TColumns.m_col_toggle] = true;

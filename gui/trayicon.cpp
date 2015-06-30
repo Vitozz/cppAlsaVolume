@@ -1,6 +1,6 @@
 /*
  * trayicon.cpp
- * Copyright (C) 2012 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2015 Vitaly Tonkacheyev
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -157,7 +157,7 @@ void TrayIcon::setIcon(double value)
 			this->set(pixbuf);
 		}
 		catch (Glib::FileError &err) {
-			std::cerr << "FileError::trayicon.cpp::161:: " << err.what() << std::endl;
+			std::cerr << "FileError::trayicon.cpp::157:: " << err.what() << std::endl;
 			exit(1);
 		}
 	}

@@ -1,6 +1,6 @@
 /*
  * tools.h
- * Copyright (C) 2012 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2015 Vitaly Tonkacheyev
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 enum SwitchType {
 	PLAYBACK = 0,
@@ -66,31 +67,16 @@ namespace Tools {
 	template <class T>
 	int itemIndex(const std::vector<T> &vect, const T &item) {
 		int index = 0;
-		int i = 0;
-		typename std::vector<T>::const_iterator it = vect.begin();
-		while (it != vect.end()) {
-			const T answ(*it);
-			if (answ == item) {
-				index = i;
-				break;
-			}
-			++it;
-			++i;
+		typename std::vector<T>::const_iterator it = std::find(vect.begin(), vect.end(), item);
+		if (it != vect.end()) {
+			index = it - vect.begin();
 		}
 		return index;
 	}
 	template <class T>
 	bool itemExists(const std::vector<T> &vect, const T &item) {
-		typename std::vector<T>::const_iterator it = vect.begin();
-		while (it != vect.end()) {
-			const T answ(*it);
-			if (answ == item) {
-				return true;
-			}
-			++it;
-
-		}
-		return false;
+		typename std::vector<T>::const_iterator it = std::find(vect.begin(), vect.end(), item);
+		return (it != vect.end());
 	}
 }
 #endif // FILEWORK_H

@@ -1,6 +1,6 @@
 /*
  * core.cpp
- * Copyright (C) 2013 Vitaly Tonkacheyev
+ * Copyright (C) 2013-2015 Vitaly Tonkacheyev
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
