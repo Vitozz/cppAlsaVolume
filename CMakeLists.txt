@@ -9,6 +9,7 @@ set( USE_PULSE OFF CACHE BOOL "Set pulseaudio usage" )
 set( USE_GTK3 ON CACHE BOOL "Build with gtkmm-3.0 support" )
 
 find_package( PkgConfig REQUIRED )
+find_package( Intl REQUIRED )
 
 if( ${USE_GTK3} )
 	pkg_check_modules( GTKMM REQUIRED gtkmm-3.0 )

@@ -142,7 +142,7 @@ PulseDevice::Ptr PulseCore::getSink(const std::string &name)
 {
 	PulseDevicePtrList::iterator it = std::find_if(sinks_.begin(),
 						       sinks_.end(),
-						       [&](const PulseDevice::Ptr &device){return (device->name() == name);});
+						       [=](const PulseDevice::Ptr &device){return (device->name() == name);});
 	return (it != sinks_.end()) ? *it : getDefaultSink();
 }
 
@@ -161,7 +161,7 @@ PulseDevice::Ptr PulseCore::getSource(const std::string &name)
 {
 	PulseDevicePtrList::iterator it = std::find_if(sources_.begin(),
 						       sources_.end(),
-						       [&](const PulseDevice::Ptr &device){return (device->name() == name);});
+						       [=](const PulseDevice::Ptr &device){return (device->name() == name);});
 	return (it != sinks_.end()) ? *it : getDefaultSource();
 }
 
