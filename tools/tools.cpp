@@ -67,32 +67,28 @@ std::string Tools::getResPath(const char *resName)
 {
 	const std::string resName_(resName);
 	const std::vector<std::string> list = getProjectPathes();
-	std::vector<std::string>::const_iterator it = list.begin();
 	std::string fileName;
-	while (it != list.end()) {
-		fileName = (*it) + resName_;
-		if (checkFileExists(fileName)) {
-			return fileName;
-		}
-		++it;
-	}
-	return fileName;
+	std::vector<std::string>::const_iterator it = std::find_if(list.begin(),
+								   list.end(),
+								   [&](const std::string &path){
+		fileName = path + resName_;
+		return checkFileExists(fileName);
+	});
+	return (it != list.end()) ? fileName : std::string();
 }
 
 std::string Tools::getDirPath(const char *dirName)
 {
 	const std::string dirName_(dirName);
 	const std::vector<std::string> list = getProjectPathes();
-	std::vector<std::string>::const_iterator it = list.begin();
 	std::string directoryName;
-	while (it != list.end()) {
-		directoryName = (*it) + dirName_;
-		if (checkDirExists(directoryName)) {
-			return directoryName;
-		}
-		++it;
-	}
-	return directoryName;
+	std::vector<std::string>::const_iterator it = std::find_if(list.begin(),
+								   list.end(),
+								   [&](const std::string &path){
+		directoryName = path + dirName_;
+		return checkDirExists(directoryName);
+	});
+	return (it != list.end()) ? directoryName : std::string();
 }
 
 void Tools::createDirectory(const std::string &dirName)
