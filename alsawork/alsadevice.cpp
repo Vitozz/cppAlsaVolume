@@ -320,9 +320,8 @@ double AlsaDevice::getVolume()
 			result = getNormVolume(elem)*100;
 		}
 		checkError(snd_mixer_close(handle));
-		return round(result);
 	}
-	return result;
+	return round(result);
 }
 
 void AlsaDevice::setSwitch(const std::string &mixer, int id, bool enabled)
@@ -369,6 +368,7 @@ void AlsaDevice::setMute(bool enabled)
 
 bool AlsaDevice::getMute()
 {
+	bool isMute = true;
 	if (!currentMixerName_.empty()) {
 		snd_mixer_t *handle = getMixerHanlde(id_);
 		snd_mixer_elem_t* elem = initMixerElement(handle, currentMixerName_.c_str());
@@ -378,7 +378,7 @@ bool AlsaDevice::getMute()
 			    || snd_mixer_selem_has_playback_switch_joined(elem)) {
 				int value = 0;
 				checkError(snd_mixer_selem_get_playback_switch(elem, channel, &value));
-				return bool(value);
+				isMute = bool(value);
 			}
 			if (snd_mixer_selem_has_capture_switch(elem)
 			    || snd_mixer_selem_has_common_switch(elem)
@@ -386,12 +386,12 @@ bool AlsaDevice::getMute()
 			    || snd_mixer_selem_has_capture_switch_exclusive(elem)) {
 				int value = 0;
 				checkError(snd_mixer_selem_get_capture_switch(elem, channel, &value));
-				return bool(value);
+				isMute = bool(value);
 			}
 		}
 		checkError(snd_mixer_close(handle));
 	}
-	return true;
+	return isMute;
 }
 
 std::string AlsaDevice::formatCardName(long long int id)

@@ -37,7 +37,7 @@
 #define COPYRIGHT _("2012-2015 (c) Vitaly Tonkacheyev (thetvg@gmail.com)")
 #define WEBSITE "http://sites.google.com/site/thesomeprojects/"
 #define WEBSITELABEL _("Program Website")
-#define VERSION "0.2.8"
+#define VERSION "0.2.9"
 
 #define POLLING_INTERVAL 2000
 

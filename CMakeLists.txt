@@ -7,6 +7,7 @@ endif( NOT UNIX )
 
 set( USE_PULSE OFF CACHE BOOL "Set pulseaudio usage" )
 set( USE_GTK3 ON CACHE BOOL "Build with gtkmm-3.0 support" )
+set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 
 find_package( PkgConfig REQUIRED )
 find_package( Intl REQUIRED )

@@ -1,3 +1,9 @@
+2015-08-15
+v0.2.9
+  - Fixed memory leaks in alsadevice module
+  - Added lost Intl dependency to cmake script
+  - Codestyle fixes
+
 2015-06-25
 v0.2.8
   - Fixes in icon animation. Reduced images sizes
