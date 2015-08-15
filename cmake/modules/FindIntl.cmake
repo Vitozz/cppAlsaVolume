@@ -53,7 +53,7 @@ find_library(Intl_LIBRARY "intl"
   DOC "libintl libraries (if not in the C library)")
 mark_as_advanced(Intl_LIBRARY)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Intl
                                   FOUND_VAR Intl_FOUND
                                   REQUIRED_VARS Intl_INCLUDE_DIR
