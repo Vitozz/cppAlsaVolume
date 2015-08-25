@@ -96,7 +96,7 @@ Core::~Core()
 
 void Core::runAboutDialog()
 {
-	Gtk::AboutDialog *dialog = new Gtk::AboutDialog();
+	std::shared_ptr<Gtk::AboutDialog> dialog(new Gtk::AboutDialog());
 	dialog->set_title(TITLE);
 	dialog->set_program_name(PROGNAME);
 	dialog->set_comments(COMMENTS);
@@ -111,7 +111,6 @@ void Core::runAboutDialog()
 	dialog->set_icon(icon);
 	dialog->set_logo(logo);
 	dialog->run();
-	delete dialog;
 }
 
 #ifdef HAVE_PULSE
@@ -140,9 +139,8 @@ void Core::initPulseAudio()
 
 void Core::errorDialog(const std::string &errorMessage)
 {
-	Gtk::MessageDialog *warn_ = new Gtk::MessageDialog(Glib::ustring(errorMessage));
+	std::shared_ptr<Gtk::MessageDialog> warn_(new Gtk::MessageDialog(Glib::ustring(errorMessage)));
 	warn_->run();
-	delete warn_;
 }
 
 void Core::blockAllSignals(bool isblock)

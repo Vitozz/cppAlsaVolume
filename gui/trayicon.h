@@ -28,11 +28,13 @@
 #include "gtkmm/checkmenuitem.h"
 #include "gtkmm/aboutdialog.h"
 #include "../tools/tools.h"
+#include <memory>
 
 class TrayIcon : public Gtk::StatusIcon
 {
 public:
 	TrayIcon(double volume, const std::string &cardName, const std::string &mixerName, bool muted);
+	typedef std::shared_ptr<TrayIcon> Ptr;
 	void on_signal_volume_changed(double volume, const std::string &cardName, const std::string &mixerName);
 	void setMuted(bool isit);
 	//signals

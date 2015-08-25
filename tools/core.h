@@ -26,6 +26,7 @@
 #include "../gui/settingsframe.h"
 #include "settingsstr.h"
 #include <vector>
+#include <memory>
 #ifdef HAVE_PULSE
 #include "../pulsework/pulsecore.h"
 #endif
@@ -36,6 +37,7 @@ public:
 	explicit Core(const Glib::RefPtr<Gtk::Builder>& refGlade);
 	Core(Core const &);
 	~Core();
+	typedef std::shared_ptr<Core> Ptr;
 	void runAboutDialog();
 	std::string getSoundCardName() const;
 	std::string getActiveMixer() const;

@@ -29,6 +29,7 @@
 #endif
 #include "gtkmm/builder.h"
 #include "glibmm.h"
+#include "memory.h"
 #include "libintl.h"
 #define _(String) gettext(String)
 #define N_(String) gettext_noop (String)
@@ -74,16 +75,16 @@ int main (int argc, char *argv[])
 		std::cerr << "FileError::main.cpp::62 " << ex.what() << std::endl;
 		return 1;
 	}
-	Core *core = new Core(refBuilder);
+	Core::Ptr core(new Core(refBuilder));
 #ifndef IS_GTK_2
 	app->hold();
 #endif
 	SliderWindow *sliderWindow = 0;
 	refBuilder->get_widget_derived("volumeFrame", sliderWindow);
-	TrayIcon *trayIcon = new TrayIcon(core->getVolumeValue(),
-					  core->getSoundCardName(),
-					  core->getActiveMixer(),
-					  core->getMuted());
+	TrayIcon::Ptr trayIcon(new TrayIcon(core->getVolumeValue(),
+					    core->getSoundCardName(),
+					    core->getActiveMixer(),
+					    core->getMuted()));
 	if (trayIcon && sliderWindow) {
 		sliderWindow->setVolumeValue(core->getVolumeValue());
 		core->signal_value_changed().connect(sigc::mem_fun(*trayIcon, &TrayIcon::on_signal_volume_changed));
@@ -104,7 +105,5 @@ int main (int argc, char *argv[])
 #endif
 	}
 	delete sliderWindow;
-	delete trayIcon;
-	delete core;
 	return 0;
 }

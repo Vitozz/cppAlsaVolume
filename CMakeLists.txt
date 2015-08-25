@@ -18,7 +18,7 @@ else( ${USE_GTK3} )
 	pkg_check_modules( GTKMM REQUIRED gtkmm-2.4 )
 	add_definitions( -DIS_GTK_2 )
 endif( ${USE_GTK3} )
-pkg_check_modules( ALSA REQUIRED alsa )
+find_package( ALSA REQUIRED )
 set( CUSTOM_LDFLAGS "-Wl,-as-needed" )
 set( CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 
@@ -28,12 +28,9 @@ endif( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
 
 add_definitions(
 	${GTKMM_CFLAGS_OTHER}
-	${ALSA_CFLAGS_OTHER}
-
 )
 link_directories(
 	${GTKMM_LIBRARY_DIRS}
-	${ALSA_LIBRARY_DIRS}
 )
 
 include_directories(
@@ -73,9 +70,8 @@ set( alsavolume_SRCS
 )
 
 if( USE_PULSE )
-	pkg_check_modules( PULSE REQUIRED libpulse )
-	link_directories( ${PULSE_LIBRARY_DIRS} )
-	include_directories( ${PULSE_INCLUDE_DIRS} )
+	find_package( PulseAudio REQUIRED )
+	include_directories( ${PULSE_INCLUDE_DIR} )
 	set( alsavolume_HDRS
 		${alsavolume_HDRS}
 		pulsework/pulsecore.h
@@ -87,12 +83,11 @@ if( USE_PULSE )
 		pulsework/pulsedevice.cpp
 	)
 	add_definitions(
-		${PULSE_CFLAGS_OTHER}
 		-DHAVE_PULSE
 	)
 	set( DEPLIBS
 		${DEPLIBS}
-		${PULSE_LIBRARIES}
+		${PULSEAUDIO_LIBRARY}
 	)
 endif( USE_PULSE )
 
