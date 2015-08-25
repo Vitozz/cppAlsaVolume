@@ -8,15 +8,28 @@ endif( NOT UNIX )
 set( USE_PULSE OFF CACHE BOOL "Set pulseaudio usage" )
 set( USE_GTK3 ON CACHE BOOL "Build with gtkmm-3.0 support" )
 set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
+option( USE_APPINDICATOR "Use appindicator support" OFF )
 
 find_package( PkgConfig REQUIRED )
 find_package( Intl REQUIRED )
 
 if( ${USE_GTK3} )
 	pkg_check_modules( GTKMM REQUIRED gtkmm-3.0 )
+	if( ${USE_APPINDICATOR} )
+		pkg_check_modules( APPINDICATOR REQUIRED appindicator3-0.1 )
+		add_definitions( -DUSE_APPINDICATOR )
+		link_directories( ${APPINDICATOR_LIBRARY_DIRS} )
+		include_directories( ${APPINDICATOR_INCLUDE_DIRS} )
+	endif( ${USE_APPINDICATOR} )
 else( ${USE_GTK3} )
 	pkg_check_modules( GTKMM REQUIRED gtkmm-2.4 )
 	add_definitions( -DIS_GTK_2 )
+	if( ${USE_APPINDICATOR} )
+		pkg_check_modules( APPINDICATOR REQUIRED appindicator-0.1 )
+		add_definitions( -DUSE_APPINDICATOR )
+		link_directories( ${APPINDICATOR_LIBRARY_DIRS} )
+		include_directories( ${APPINDICATOR_INCLUDE_DIRS} )
+	endif( ${USE_APPINDICATOR} )
 endif( ${USE_GTK3} )
 find_package( ALSA REQUIRED )
 set( CUSTOM_LDFLAGS "-Wl,-as-needed" )
@@ -41,6 +54,13 @@ set( DEPLIBS
 	${GTKMM_LIBRARIES}
 	${ALSA_LIBRARIES}
 )
+
+if( ${USE_APPINDICATOR} )
+	set( DEPLIBS
+		${DEPLIBS}
+		${APPINDICATOR_LIBRARIES}
+	)
+endif( ${USE_APPINDICATOR} )
 
 set( alsavolume_HDRS
 	alsawork/alsawork.h

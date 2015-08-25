@@ -28,14 +28,21 @@
 #ifdef IS_GTK_2
 #define GDK_BUTTON_MIDDLE 2
 #define GDK_BUTTON_PRIMARY 1
+#else
+#ifdef USE_APPINDICATOR
+#include "gdkmm/devicemanager.h"
+#endif
 #endif
 #define _(String) gettext(String)
 #define N_(String) gettext_noop (String)
 #define MUTEITEM _("Mute")
+#define SETTSITEM _("Settings")
+#define ABOUTITEM _("About")
+#define QUITITEM _("Quit")
 #define CARDL _("Card: ")
 #define VOLUMEL _("Volume: ")
 #define MIXERL _("Mixer: ")
-
+#define RESTOREITEM _("Restore")
 
 const int OFFSET = 2;
 const std::string ICON_PREFIX = "tb_icon";
@@ -46,17 +53,50 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
   mixerName_(mixerName),
   muted_(muted),
   menu_(Gtk::manage(new Gtk::Menu())),
-  settingsItem_(Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::PREFERENCES))),
-  aboutItem_(Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::ABOUT))),
-  quitItem_(Gtk::manage(new Gtk::ImageMenuItem(Gtk::Stock::QUIT))),
+  restoreItem_(Gtk::manage(new Gtk::MenuItem(RESTOREITEM))),
+  settingsItem_(Gtk::manage(new Gtk::MenuItem(SETTSITEM))),
+  aboutItem_(Gtk::manage(new Gtk::MenuItem(ABOUTITEM))),
+  quitItem_(Gtk::manage(new Gtk::MenuItem(QUITITEM))),
   muteItem_(Gtk::manage(new Gtk::CheckMenuItem(MUTEITEM))),
   mouseX_(0),
   mouseY_(0),
   pixbufWidth_(0),
-  pixbufHeight_(0)
+  pixbufHeight_(0),
+  isLegacyIcon_(true),
+#ifdef USE_APPINDICATOR
+  newIcon_(0),
+#endif
+  legacyIcon_(0)
 {
+	const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(100);
+	const Glib::ustring iconPath = Tools::getResPath(searchPath.c_str());
+#ifdef USE_APPINDICATOR
+	newIcon_ = std::shared_ptr<AppIndicator>(app_indicator_new("AlsaVolume",
+								   iconPath.c_str(),
+								   APP_INDICATOR_CATEGORY_APPLICATION_STATUS));
+	if (newIcon_) {
+		isLegacyIcon_ = false;
+	}
+	app_indicator_set_status(newIcon_.get(), APP_INDICATOR_STATUS_ACTIVE);
+	app_indicator_set_menu(newIcon_.get(), menu_->gobj());
+	app_indicator_set_secondary_activate_target(newIcon_.get(), GTK_WIDGET(muteItem_->gobj()));
+	g_signal_connect(newIcon_.get(), "scroll-event", (GCallback)TrayIcon::onScrollEventAI, this);
+#endif
+	if(isLegacyIcon_) {
+		legacyIcon_ = Gtk::StatusIcon::create(iconPath);
+		//Staus icon signals
+		legacyIcon_->signal_popup_menu().connect(sigc::mem_fun(*this, &TrayIcon::onPopup));
+		legacyIcon_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onHideRestore));
+		legacyIcon_->signal_scroll_event().connect(sigc::mem_fun(*this, &TrayIcon::onScrollEvent));
+		legacyIcon_->signal_button_press_event().connect(sigc::mem_fun(*this, &TrayIcon::onButtonClick));
+		//
+	}
 	Gtk::SeparatorMenuItem *separator2 = Gtk::manage(new Gtk::SeparatorMenuItem());
 	settingsItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::runSettings));
+	if (!isLegacyIcon_) {
+		restoreItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onHideRestore));
+		menu_->append(*Gtk::manage(restoreItem_));
+	}
 	menu_->append(*Gtk::manage(settingsItem_));
 	muteItem_->signal_toggled().connect(sigc::mem_fun(*this, &TrayIcon::onMute));
 	menu_->append(*Gtk::manage(muteItem_));
@@ -66,39 +106,80 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 	quitItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onQuit));
 	menu_->append(*Gtk::manage(quitItem_));
 	menu_->show_all_children();
-	//Staus icon signals
-	signal_popup_menu().connect(sigc::mem_fun(*this, &TrayIcon::onPopup));
-	signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onHideRestore));
-	signal_scroll_event().connect(sigc::mem_fun(*this, &TrayIcon::onScrollEvent));
-	signal_button_press_event().connect(sigc::mem_fun(*this, &TrayIcon::onButtonClick));
-	//
 	on_signal_volume_changed(volumeValue_, cardName, mixerName);
 	muteItem_->set_active(muted_);
 }
-
+#ifdef USE_APPINDICATOR
+void TrayIcon::onScrollEventAI(AppIndicator *ai, gint steps, gint direction, TrayIcon *userdata)
+{
+	(void) ai;
+	(void) steps;
+	double value = 0.0;
+	if (direction == GDK_SCROLL_UP) {
+		value+=OFFSET;
+	}
+	else if(direction == GDK_SCROLL_DOWN) {
+		value-=OFFSET;
+	}
+	userdata->m_signal_value_changed(value);
+}
+#endif
 void TrayIcon::onHideRestore()
 {
 	Glib::RefPtr<Gdk::Screen> screen;
 	Gdk::Rectangle area;
 	Gtk::Orientation orientation;
 	iconPosition pos;
-	if (get_geometry(screen, area, orientation)) {
-		pos.iconX_ = area.get_x();
-		pos.iconY_ = area.get_y();
-		const int areaHeight = area.get_height();
-		const int areaWidth = area.get_width();
-		pos.iconHeight_ = (areaHeight > 0) ? areaHeight : pixbufHeight_;
-		pos.iconWidth_ = (areaWidth > 0) ? areaWidth : pixbufWidth_;
+	if (isLegacyIcon_) {
+		if (legacyIcon_->get_geometry(screen, area, orientation)) {
+			pos.iconX_ = area.get_x();
+			pos.iconY_ = area.get_y();
+			const int areaHeight = area.get_height();
+			const int areaWidth = area.get_width();
+			pos.iconHeight_ = (areaHeight > 0) ? areaHeight : pixbufHeight_;
+			pos.iconWidth_ = (areaWidth > 0) ? areaWidth : pixbufWidth_;
+			pos.screenHeight_ = screen->get_height();
+			pos.screenWidth_ = screen->get_width();
+			pos.geometryAvailable_ = bool(pos.iconX_ > 0 || pos.iconY_ > 0);
+			if (!pos.geometryAvailable_) {
+				pos.iconX_ = mouseX_;
+				pos.iconY_ = mouseY_;
+			}
+			pos.trayAtTop_ = bool(pos.iconY_ < pos.screenHeight_/2);
+			m_signal_on_restore(pos);
+		}
+	}
+#ifdef USE_APPINDICATOR
+	else {
+		screen = restoreItem_->get_screen();
+//Dirty hack to obtain mouse position
+#ifdef IS_GTK_2
+		Glib::RefPtr<Gdk::Display> display = restoreItem_->get_display();
+		Gdk::ModifierType type;
+		display->get_pointer(pos.iconX_, pos.iconY_,type);
+#else
+		Glib::RefPtr<Gdk::Display> display = restoreItem_->get_display();
+		Glib::RefPtr<Gdk::DeviceManager> manager = display->get_device_manager();
+		std::vector<Glib::RefPtr<Gdk::Device> >list = manager->list_devices(Gdk::DEVICE_TYPE_MASTER);
+		std::for_each(list.begin(),
+			      list.end(),
+			      [&](Glib::RefPtr<Gdk::Device> item){
+									item->get_position(pos.iconX_, pos.iconY_);
+								 });
+#ifdef IS_DEBUG
+		std::cout << "X=" << pos.iconX_ << " Y=" << pos.iconY_ << std::endl;
+#endif
+#endif
+//
 		pos.screenHeight_ = screen->get_height();
 		pos.screenWidth_ = screen->get_width();
-		pos.geometryAvailable_ = bool(pos.iconX_ > 0 || pos.iconY_ > 0);
-		if (!pos.geometryAvailable_) {
-			pos.iconX_ = mouseX_;
-			pos.iconY_ = mouseY_;
-		}
 		pos.trayAtTop_ = bool(pos.iconY_ < pos.screenHeight_/2);
+		pos.iconHeight_ = pixbufHeight_;
+		pos.iconWidth_ = pixbufWidth_;
+		pos.geometryAvailable_ = false;
 		m_signal_on_restore(pos);
 	}
+#endif
 }
 
 void TrayIcon::onQuit()
@@ -154,7 +235,14 @@ void TrayIcon::setIcon(double value)
 		pixbufWidth_ = pixbuf->get_width();
 		pixbufHeight_ = pixbuf->get_height() + 4;
 		try {
-			this->set(pixbuf);
+			if(isLegacyIcon_) {
+				legacyIcon_->set(pixbuf);
+			}
+#ifdef USE_APPINDICATOR
+			else {
+				app_indicator_set_icon_full(newIcon_.get(), iconPath.c_str(), "VolumeIcon");
+			}
+#endif
 		}
 		catch (Glib::FileError &err) {
 			std::cerr << "FileError::trayicon.cpp::157:: " << err.what() << std::endl;
@@ -166,7 +254,14 @@ void TrayIcon::setIcon(double value)
 void TrayIcon::setTooltip(const Glib::ustring &message)
 {
 	if (!message.empty())
-		set_tooltip_text(message);
+		if (isLegacyIcon_) {
+			legacyIcon_->set_tooltip_text(message);
+		}
+#ifdef USE_APPINDICATOR
+		else {
+			app_indicator_set_title(newIcon_.get(), message.c_str());
+		}
+#endif
 }
 
 void TrayIcon::setMuted(bool isit)
@@ -180,7 +275,7 @@ void TrayIcon::setMuted(bool isit)
 }
 void TrayIcon::onPopup(guint button, guint32 activate_time)
 {
-	popup_menu_at_position(*menu_, button, activate_time);
+	legacyIcon_->popup_menu_at_position(*menu_, button, activate_time);
 }
 
 bool TrayIcon::onScrollEvent(GdkEventScroll* event)
@@ -203,6 +298,7 @@ bool TrayIcon::onButtonClick(GdkEventButton* event)
 		onMute();
 	}
 	if (event->button == GDK_BUTTON_PRIMARY) {
+		std::cout << "Pressed" << std::endl;
 		setMousePos(event->x_root, event->y_root);
 	}
 	return false;

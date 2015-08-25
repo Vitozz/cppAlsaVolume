@@ -7,18 +7,18 @@ msgid ""
 msgstr ""
 "Project-Id-Version: alsavolume Version 0.2.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-06 00:22+0200\n"
-"PO-Revision-Date: 2015-02-06 00:23+0300\n"
+"POT-Creation-Date: 2015-08-26 00:04+0300\n"
+"PO-Revision-Date: 2015-08-26 00:05+0300\n"
 "Last-Translator: Vitaly Tonkacheyev <thetvg@gmail.com>\n"
 "Language-Team: KukuRuzo-team <thetvg@gmail.com>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.5.5\n"
+"X-Generator: Poedit 1.8.3\n"
 
 #: ../gladefiles/SettingsFrame.glade.h:1
-#: ../gladefiles/SettingsFrame_2.glade.h:1
+#: ../gladefiles/SettingsFrame_2.glade.h:1 ../gui/trayicon.cpp:39
 msgid "Settings"
 msgstr "Настройки"
 
@@ -83,21 +83,33 @@ msgstr "Переключатели записи"
 msgid "Enumerated Control"
 msgstr "Другие переключатели "
 
-#: ../gui/trayicon.cpp:34
+#: ../gui/trayicon.cpp:38
 msgid "Mute"
 msgstr "Заглушить"
 
-#: ../gui/trayicon.cpp:35
+#: ../gui/trayicon.cpp:40
+msgid "About"
+msgstr "О AlsaVolume"
+
+#: ../gui/trayicon.cpp:41
+msgid "Quit"
+msgstr "Выход"
+
+#: ../gui/trayicon.cpp:42
 msgid "Card: "
 msgstr "Карта: "
 
-#: ../gui/trayicon.cpp:36
+#: ../gui/trayicon.cpp:43
 msgid "Volume: "
 msgstr "Громкость: "
 
-#: ../gui/trayicon.cpp:37
+#: ../gui/trayicon.cpp:44
 msgid "Mixer: "
 msgstr "Микшер: "
+
+#: ../gui/trayicon.cpp:45
+msgid "Restore"
+msgstr "Показать"
 
 #: ../tools/core.cpp:34
 msgid "About AlsaVolume"
@@ -112,17 +124,17 @@ msgid "Tray Alsa Volume Changer written using gtkmm"
 msgstr "Регулятор громкости Alsa в трее на gtkmm"
 
 #: ../tools/core.cpp:37
-msgid "2012-2014 (c) Vitaly Tonkacheyev (thetvg@gmail.com)"
-msgstr "2012-2014 (c) Виталий Тонкачеев (thetvg@gmail.com)"
+msgid "2012-2015 (c) Vitaly Tonkacheyev (thetvg@gmail.com)"
+msgstr "2012-2015 (c) Виталий Тонкачеев (thetvg@gmail.com)"
 
 #: ../tools/core.cpp:39
 msgid "Program Website"
 msgstr "Web-сайт программы"
 
-#: ../tools/core.cpp:146
+#: ../tools/core.cpp:130
 msgid "Can't start PulseAudio! Using Alsa by default"
 msgstr "Не вышло запустить PulseAudio! Используем Alsa по-умолчанию"
 
-#: ../tools/core.cpp:381
+#: ../tools/core.cpp:383
 msgid "Sound card not contains any volume control mixers"
 msgstr "Звуковая карта не содержит каких-либо микшеров регулировки громкости"

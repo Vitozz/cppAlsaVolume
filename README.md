@@ -1,4 +1,4 @@
-This is a simple application to control one of the Alsa's mixers volume in tray.
+This is a simple application to control one of the Alsa's mixer volume in tray.
 
 Application uses GTK+ interface via gtkmm library
 
@@ -8,8 +8,9 @@ Build Deps:
 	- gtkmm-2.4 (only for gtkmm-2.4 support) 
 	- glib (libglibmm-2.4-dev package in Ubuntu)
 	- alsa/asoundlib (libasound2-dev package in Ubuntu)
-	- libpulse (only for pulseaudio support)
+	- libpulse (only for pulseaudio support / optional)
 	- cmake >= 2.8.0
+	- libappindicator (libappindicator3 for GTK3 / optional)
 
 Howto build application:
 
@@ -33,6 +34,13 @@ to build with gtkmm-2.4 support:
 
 >make
 
+to build with libappindicator support:
+
+>cmake -DUSE_APPINDICATOR=ON ..
+
+>make
+
+
 What features available:
 
 	- sound card selection
@@ -42,3 +50,7 @@ What features available:
 	- mute sound on middleclick and by checkbox selection
 	- enable or disable sound card switches in settings dialog
 	- use PulseAaudio volume controll (optionally)
+
+Warning!!!
+With AppIndicator in KDE5 the scroll-event is not working. Use Restore menu item to
+control volume with slider.

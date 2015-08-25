@@ -30,7 +30,11 @@
 #include "../tools/tools.h"
 #include <memory>
 
-class TrayIcon : public Gtk::StatusIcon
+#ifdef USE_APPINDICATOR
+#include "libappindicator/app-indicator.h"
+#endif
+
+class TrayIcon
 {
 public:
 	TrayIcon(double volume, const std::string &cardName, const std::string &mixerName, bool muted);
@@ -74,6 +78,9 @@ private:
 	void setTooltip(const Glib::ustring &message);
 	Glib::ustring getIconName(double value) const;
 	void setMousePos(const int X, const int Y);
+#ifdef USE_APPINDICATOR
+	static void onScrollEventAI(AppIndicator *ai, gint steps, gint direction, TrayIcon *userdata);
+#endif
 
 private:
 	double volumeValue_;
@@ -81,13 +88,17 @@ private:
 	std::string mixerName_;
 	bool muted_;
 	Gtk::Menu *menu_;
-	Gtk::ImageMenuItem *settingsItem_, *aboutItem_, *quitItem_;
+	Gtk::MenuItem *restoreItem_, *settingsItem_, *aboutItem_, *quitItem_;
 	Gtk::CheckMenuItem* muteItem_;
 	int mouseX_;
 	int mouseY_;
 	int pixbufWidth_;
 	int pixbufHeight_;
-
+	bool isLegacyIcon_;
+#ifdef USE_APPINDICATOR
+	std::shared_ptr<AppIndicator> newIcon_;
+#endif
+	Glib::RefPtr<Gtk::StatusIcon> legacyIcon_;
 };
 
 #endif // TRAYICON_H

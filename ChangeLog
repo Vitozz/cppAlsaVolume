@@ -1,3 +1,8 @@
+2015-08-26
+v0.3.0
+  - Added initial libappindicator support (optionally)
+  - Some fixes in work with gui
+
 2015-08-15
 v0.2.9
   - Fixed memory leaks in alsadevice module
