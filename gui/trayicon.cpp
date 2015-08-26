@@ -298,7 +298,9 @@ bool TrayIcon::onButtonClick(GdkEventButton* event)
 		onMute();
 	}
 	if (event->button == GDK_BUTTON_PRIMARY) {
+#ifdef IS_DEBUG
 		std::cout << "Pressed" << std::endl;
+#endif
 		setMousePos(event->x_root, event->y_root);
 	}
 	return false;
