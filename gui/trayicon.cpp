@@ -95,9 +95,11 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 		status_notifier_set_title(newIcon_.get(), "AlsaVolume");
 		StatusNotifierState state = status_notifier_get_state(newIcon_.get());
 		std::cout << "New Icon state " << state << std::endl;
-		if ( state == STATUS_NOTIFIER_STATE_REGISTERED || state == STATUS_NOTIFIER_STATE_REGISTERING ) {
+		if ( state != STATUS_NOTIFIER_STATE_NOT_REGISTERED || state != STATUS_NOTIFIER_STATE_FAILED ) {
 			isLegacyIcon_ = false;
+#ifdef IS_DEBUG
 			std::cout << "New Icon" << std::endl;
+#endif
 			g_signal_connect(newIcon_.get(), "activate", (GCallback)TrayIcon::onActivate, this);
 			g_signal_connect(newIcon_.get(), "context-menu", (GCallback)TrayIcon::onContextMenu, this);
 			g_signal_connect(newIcon_.get(), "secondary-activate", (GCallback)TrayIcon::onSecondaryActivate, this);
@@ -181,7 +183,7 @@ void TrayIcon::onHideRestore()
 #ifdef IS_GTK_2
 		Glib::RefPtr<Gdk::Display> display = restoreItem_->get_display();
 		Gdk::ModifierType type;
-		display->get_pointer(pos.iconX_, pos.iconY_,type);
+		display->get_pointer(pos.iconX_, pos.iconY_, type);
 #else
 		Glib::RefPtr<Gdk::Display> display = restoreItem_->get_display();
 		Glib::RefPtr<Gdk::DeviceManager> manager = display->get_device_manager();
