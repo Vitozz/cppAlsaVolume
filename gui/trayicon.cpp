@@ -66,14 +66,17 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 #ifdef USE_APPINDICATOR
   newIcon_(0),
 #endif
+#ifdef USE_KDE
+  newIcon_(0),
+#endif
   legacyIcon_(0)
 {
 	const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(100);
 	const Glib::ustring iconPath = Tools::getResPath(searchPath.c_str());
 #ifdef USE_APPINDICATOR
-	newIcon_ = std::shared_ptr<AppIndicator>(app_indicator_new("AlsaVolume",
-								   iconPath.c_str(),
-								   APP_INDICATOR_CATEGORY_APPLICATION_STATUS));
+	newIcon_ = AppIndicatorPtr(app_indicator_new("AlsaVolume",
+						     iconPath.c_str(),
+						     APP_INDICATOR_CATEGORY_APPLICATION_STATUS));
 	if (newIcon_) {
 		isLegacyIcon_ = false;
 	}
@@ -81,6 +84,26 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 	app_indicator_set_menu(newIcon_.get(), menu_->gobj());
 	app_indicator_set_secondary_activate_target(newIcon_.get(), GTK_WIDGET(muteItem_->gobj()));
 	g_signal_connect(newIcon_.get(), "scroll-event", (GCallback)TrayIcon::onScrollEventAI, this);
+#endif
+#ifdef USE_KDE
+	newIcon_ = StatusNotifierPtr(status_notifier_new_from_icon_name("AlsaVolume",
+									STATUS_NOTIFIER_CATEGORY_APPLICATION_STATUS,
+									iconPath.c_str()));
+	if ( newIcon_ ) {
+		status_notifier_register(newIcon_.get());
+		status_notifier_set_status(newIcon_.get(), STATUS_NOTIFIER_STATUS_ACTIVE);
+		status_notifier_set_title(newIcon_.get(), "AlsaVolume");
+		StatusNotifierState state = status_notifier_get_state(newIcon_.get());
+		std::cout << "New Icon state " << state << std::endl;
+		if ( state == STATUS_NOTIFIER_STATE_REGISTERED || state == STATUS_NOTIFIER_STATE_REGISTERING ) {
+			isLegacyIcon_ = false;
+			std::cout << "New Icon" << std::endl;
+			g_signal_connect(newIcon_.get(), "activate", (GCallback)TrayIcon::onActivate, this);
+			g_signal_connect(newIcon_.get(), "context-menu", (GCallback)TrayIcon::onContextMenu, this);
+			g_signal_connect(newIcon_.get(), "secondary-activate", (GCallback)TrayIcon::onSecondaryActivate, this);
+			g_signal_connect(newIcon_.get(), "scroll", (GCallback)TrayIcon::onScroll, this);
+		}
+	}
 #endif
 	if(isLegacyIcon_) {
 		legacyIcon_ = Gtk::StatusIcon::create(iconPath);
@@ -93,10 +116,12 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 	}
 	Gtk::SeparatorMenuItem *separator2 = Gtk::manage(new Gtk::SeparatorMenuItem());
 	settingsItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::runSettings));
+#ifdef USE_APPINDICATOR
 	if (!isLegacyIcon_) {
 		restoreItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onHideRestore));
 		menu_->append(*Gtk::manage(restoreItem_));
 	}
+#endif
 	menu_->append(*Gtk::manage(settingsItem_));
 	muteItem_->signal_toggled().connect(sigc::mem_fun(*this, &TrayIcon::onMute));
 	menu_->append(*Gtk::manage(muteItem_));
@@ -182,6 +207,57 @@ void TrayIcon::onHideRestore()
 #endif
 }
 
+#ifdef USE_KDE
+void TrayIcon::onActivate(StatusNotifier *sn, gint x, gint y, TrayIcon *userdata)
+{
+	(void)sn;
+	Glib::RefPtr<Gdk::Screen> screen = userdata->aboutItem_->get_screen();
+	iconPosition pos;
+	pos.iconX_ = x + userdata->pixbufWidth_/2;
+	pos.iconY_ = y;
+	pos.screenHeight_ = screen->get_height();
+	pos.screenWidth_ = screen->get_width();
+	pos.trayAtTop_ = bool(pos.iconY_ < pos.screenHeight_/2);
+	pos.iconHeight_ = userdata->pixbufHeight_;
+	pos.iconWidth_ = userdata->pixbufWidth_;
+	pos.geometryAvailable_ = false;
+	userdata->m_signal_on_restore(pos);
+}
+
+void TrayIcon::onContextMenu(StatusNotifier *sn, gint x, gint y, TrayIcon *userdata)
+{
+	(void)sn;
+	(void)x;
+	(void)y;
+	userdata->menu_->popup(0, gtk_get_current_event_time());
+}
+
+void TrayIcon::onSecondaryActivate(StatusNotifier *sn, gint x, gint y, TrayIcon *userdata)
+{
+	(void)sn;
+	(void)x;
+	(void)y;
+	userdata->muteItem_->set_active(!userdata->muteItem_->get_active());
+}
+
+void TrayIcon::onScroll(StatusNotifier *sn, gint delta, StatusNotifierScrollOrientation orient, TrayIcon *userdata)
+{
+	(void)sn;
+	(void)orient;
+	double value = 0.0;
+	if (delta >0) {
+		value+=OFFSET;
+	}
+	else {
+		value-=OFFSET;
+	}
+#ifdef IS_DEBUG
+	std::cout << "Value " << value << std::endl;
+#endif
+	userdata->m_signal_value_changed(value);
+}
+#endif
+
 void TrayIcon::onQuit()
 {
 	m_signal_save_settings();
@@ -243,6 +319,11 @@ void TrayIcon::setIcon(double value)
 				app_indicator_set_icon_full(newIcon_.get(), iconPath.c_str(), "VolumeIcon");
 			}
 #endif
+#ifdef USE_KDE
+			else {
+				status_notifier_set_from_icon_name(newIcon_.get(), STATUS_NOTIFIER_ICON, iconPath.c_str());
+			}
+#endif
 		}
 		catch (Glib::FileError &err) {
 			std::cerr << "FileError::trayicon.cpp::157:: " << err.what() << std::endl;
@@ -260,6 +341,13 @@ void TrayIcon::setTooltip(const Glib::ustring &message)
 #ifdef USE_APPINDICATOR
 		else {
 			app_indicator_set_title(newIcon_.get(), message.c_str());
+		}
+#endif
+#ifdef USE_KDE
+		else {
+			const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(volumeValue_);
+			const Glib::ustring iconPath = Tools::getResPath(searchPath.c_str());
+			status_notifier_set_tooltip(newIcon_.get(), iconPath.c_str(), "AlsaVolume" ,message.c_str());
 		}
 #endif
 }

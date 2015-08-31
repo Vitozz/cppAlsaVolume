@@ -32,6 +32,12 @@
 
 #ifdef USE_APPINDICATOR
 #include "libappindicator/app-indicator.h"
+typedef std::shared_ptr<AppIndicator> AppIndicarorPtr;
+#endif
+
+#ifdef USE_KDE
+#include "../third-party/statusnotifier/statusnotifier.h"
+typedef std::shared_ptr<StatusNotifier> StatusNotifierPtr;
 #endif
 
 class TrayIcon
@@ -81,6 +87,12 @@ private:
 #ifdef USE_APPINDICATOR
 	static void onScrollEventAI(AppIndicator *ai, gint steps, gint direction, TrayIcon *userdata);
 #endif
+#ifdef USE_KDE
+	static void onActivate(StatusNotifier * sn, gint x, gint y, TrayIcon *userdata);
+	static void onSecondaryActivate(StatusNotifier * sn, gint x, gint y, TrayIcon *userdata);
+	static void onScroll(StatusNotifier * sn, gint delta, StatusNotifierScrollOrientation orient, TrayIcon *userdata);
+	static void onContextMenu(StatusNotifier * sn, gint x, gint y, TrayIcon *userdata);
+#endif
 
 private:
 	double volumeValue_;
@@ -96,7 +108,10 @@ private:
 	int pixbufHeight_;
 	bool isLegacyIcon_;
 #ifdef USE_APPINDICATOR
-	std::shared_ptr<AppIndicator> newIcon_;
+	AppIndicatorPtr newIcon_;
+#endif
+#ifdef USE_KDE
+	StatusNotifierPtr newIcon_;
 #endif
 	Glib::RefPtr<Gtk::StatusIcon> legacyIcon_;
 };

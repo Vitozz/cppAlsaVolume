@@ -9,6 +9,7 @@ set( USE_PULSE OFF CACHE BOOL "Set pulseaudio usage" )
 set( USE_GTK3 ON CACHE BOOL "Build with gtkmm-3.0 support" )
 set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 option( USE_APPINDICATOR "Use appindicator support" OFF )
+option( USE_KDE "Enable KStatusNotifierItem support" OFF )
 
 find_package( PkgConfig REQUIRED )
 find_package( Intl REQUIRED )
@@ -31,6 +32,9 @@ else( ${USE_GTK3} )
 		include_directories( ${APPINDICATOR_INCLUDE_DIRS} )
 	endif( ${USE_APPINDICATOR} )
 endif( ${USE_GTK3} )
+if( ${USE_KDE} )
+	set( USE_APPINDICATOR OFF )
+endif( ${USE_KDE} )
 find_package( ALSA REQUIRED )
 set( CUSTOM_LDFLAGS "-Wl,-as-needed" )
 set( CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
@@ -89,6 +93,19 @@ set( alsavolume_SRCS
 	tools/core.cpp
 )
 
+set( statusnotifier_SRCS
+	third-party/statusnotifier/closures.c
+	third-party/statusnotifier/enums.c
+	third-party/statusnotifier/statusnotifier.c
+)
+
+set( statusnotifier_HDRS
+	third-party/statusnotifier/interfaces.h
+	third-party/statusnotifier/statusnotifier.h
+	third-party/statusnotifier/closures.h
+	third-party/statusnotifier/enums.h
+)
+
 if( USE_PULSE )
 	find_package( PulseAudio REQUIRED )
 	include_directories( ${PULSE_INCLUDE_DIR} )
@@ -110,6 +127,14 @@ if( USE_PULSE )
 		${PULSEAUDIO_LIBRARY}
 	)
 endif( USE_PULSE )
+
+if( ${USE_KDE} )
+	set( alsavolume_SRCS
+		${alsavolume_SRCS}
+		${statusnotifier_SRCS}
+	)
+	add_definitions( -DUSE_KDE )
+endif( ${USE_KDE} )
 
 set( DESKTOP_FILES ${PROJECT}.desktop )
 set( ICON_FILES

@@ -40,6 +40,12 @@ to build with libappindicator support:
 
 >make
 
+to build with KStatusNotifier support:
+
+>cmake -DUSE_KDE=ON ..
+
+>make
+
 
 What features available:
 

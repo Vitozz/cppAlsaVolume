@@ -1,3 +1,7 @@
+2015-08-31
+v0.3.1
+  - Added KStatusNotifierItem support (optionally / uses third-party lib)
+
 2015-08-26
 v0.3.0
   - Added initial libappindicator support (optionally)
