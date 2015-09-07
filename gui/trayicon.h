@@ -32,7 +32,7 @@
 
 #ifdef USE_APPINDICATOR
 #include "libappindicator/app-indicator.h"
-typedef std::shared_ptr<AppIndicator> AppIndicarorPtr;
+typedef std::shared_ptr<AppIndicator> AppIndicatorPtr;
 #endif
 
 #ifdef USE_KDE
