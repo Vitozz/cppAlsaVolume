@@ -95,7 +95,7 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 		status_notifier_set_title(newIcon_.get(), "AlsaVolume");
 		StatusNotifierState state = status_notifier_get_state(newIcon_.get());
 		std::cout << "New Icon state " << state << std::endl;
-		if ( state != STATUS_NOTIFIER_STATE_NOT_REGISTERED || state != STATUS_NOTIFIER_STATE_FAILED ) {
+		if ( state != STATUS_NOTIFIER_STATE_NOT_REGISTERED && state != STATUS_NOTIFIER_STATE_FAILED ) {
 			isLegacyIcon_ = false;
 #ifdef IS_DEBUG
 			std::cout << "New Icon" << std::endl;
