@@ -92,6 +92,7 @@ private:
 	static void onSecondaryActivate(StatusNotifier * sn, gint x, gint y, TrayIcon *userdata);
 	static void onScroll(StatusNotifier * sn, gint delta, StatusNotifierScrollOrientation orient, TrayIcon *userdata);
 	static void onContextMenu(StatusNotifier * sn, gint x, gint y, TrayIcon *userdata);
+	bool checkDBusInterfaceExists(const Glib::ustring &serviceName);
 #endif
 
 private:
