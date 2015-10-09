@@ -22,7 +22,6 @@
 #include "../tools/tools.h"
 #include "gtkmm/separatormenuitem.h"
 #include "gtkmm/stock.h"
-#include "giomm/dbusproxy.h"
 #include "glibmm.h"
 #include "libintl.h"
 #include <iostream>
@@ -33,6 +32,9 @@
 #ifdef USE_APPINDICATOR
 #include "gdkmm/devicemanager.h"
 #endif
+#endif
+#ifdef USE_KDE
+#include "giomm/dbusproxy.h"
 #endif
 #define _(String) gettext(String)
 #define N_(String) gettext_noop (String)
@@ -45,13 +47,7 @@
 #define MIXERL _("Mixer: ")
 #define RESTOREITEM _("Restore")
 
-const int OFFSET = 2;
-const std::string ICON_PREFIX = "tb_icon";
-
-#ifdef USE_KDE
-static const std::string DBUS_SERVICE = "org.freedesktop.DBus";
-static const Glib::ustring KSNI_IFACE = "org.kde.StatusNotifierWatcher";
-#endif
+static const int OFFSET = 2;
 
 TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string &mixerName, bool muted)
 : volumeValue_(volume),
@@ -92,7 +88,7 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 	g_signal_connect(newIcon_.get(), "scroll-event", (GCallback)TrayIcon::onScrollEventAI, this);
 #endif
 #ifdef USE_KDE
-	if (checkDBusInterfaceExists(KSNI_IFACE)) {
+	if (checkDBusInterfaceExists("org.kde.StatusNotifierWatcher")) {
 		newIcon_ = StatusNotifierPtr(status_notifier_new_from_icon_name("AlsaVolume",
 										STATUS_NOTIFIER_CATEGORY_APPLICATION_STATUS,
 										iconPath.c_str()));
@@ -101,11 +97,13 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 			status_notifier_set_status(newIcon_.get(), STATUS_NOTIFIER_STATUS_ACTIVE);
 			status_notifier_set_title(newIcon_.get(), "AlsaVolume");
 			StatusNotifierState state = status_notifier_get_state(newIcon_.get());
-			std::cout << "New Icon state " << state << std::endl;
+#ifdef IS_DEBUG
+			std::cout << "StatusNotifier state " << state << std::endl;
+#endif
 			if ( state != STATUS_NOTIFIER_STATE_NOT_REGISTERED && state != STATUS_NOTIFIER_STATE_FAILED ) {
 				isLegacyIcon_ = false;
 #ifdef IS_DEBUG
-				std::cout << "New Icon" << std::endl;
+				std::cout << "New Icon created" << std::endl;
 #endif
 				g_signal_connect(newIcon_.get(), "activate", (GCallback)TrayIcon::onActivate, this);
 				g_signal_connect(newIcon_.get(), "context-menu", (GCallback)TrayIcon::onContextMenu, this);
@@ -269,14 +267,22 @@ void TrayIcon::onScroll(StatusNotifier *sn, gint delta, StatusNotifierScrollOrie
 
 bool TrayIcon::checkDBusInterfaceExists(const Glib::ustring &serviceName)
 {
+	bool isExists_;
+	const std::string DBUS_SERVICE = "org.freedesktop.DBus";
 	Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SESSION,
 										    DBUS_SERVICE,
 										    "/",
 										    DBUS_SERVICE);
 	Glib::VariantContainerBase result = proxy->call_sync("ListNames");
-	Glib::Variant<std::vector<Glib::ustring> > gvar = Glib::VariantBase::cast_dynamic<Glib::Variant<std::vector<Glib::ustring> > >(result.get_child(0));
+	Glib::Variant<std::vector<Glib::ustring> > gvar = Glib::VariantBase::cast_dynamic<
+											  Glib::Variant<std::vector<Glib::ustring> >
+											  >(result.get_child(0));
 	std::vector<Glib::ustring> interfaces = gvar.get();
-	return Tools::itemExists(interfaces, serviceName);
+	isExists_ = Tools::itemExists(interfaces, serviceName);
+#ifdef IS_DEBUG
+	std::cout << "Interface exists " << isExists_ << std::endl;
+#endif
+	return isExists_;
 }
 
 #endif
@@ -311,6 +317,7 @@ void TrayIcon::onMute()
 
 Glib::ustring TrayIcon::getIconName(double value) const
 {
+	const std::string ICON_PREFIX = "tb_icon";
 	int number = 100;
 	Glib::ustring iconPath = Glib::ustring::compose("%1%2.png",ICON_PREFIX, Glib::ustring::format(number));
 	value = (value <= 0) ? 0 : (value > 100) ? 100 : value;
