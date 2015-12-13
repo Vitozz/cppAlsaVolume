@@ -2,10 +2,10 @@
  * trayicon.cpp
  * Copyright (C) 2012-2015 Vitaly Tonkacheyev
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,8 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -93,13 +92,15 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 										STATUS_NOTIFIER_CATEGORY_APPLICATION_STATUS,
 										iconPath.c_str()));
 		if ( newIcon_ ) {
-			status_notifier_register(newIcon_.get());
 			status_notifier_set_status(newIcon_.get(), STATUS_NOTIFIER_STATUS_ACTIVE);
 			status_notifier_set_title(newIcon_.get(), "AlsaVolume");
+			status_notifier_register(newIcon_.get());
+			status_notifier_set_window_id(newIcon_.get(),0);
 			StatusNotifierState state = status_notifier_get_state(newIcon_.get());
 #ifdef IS_DEBUG
 			std::cout << "StatusNotifier state " << state << std::endl;
 #endif
+			g_signal_connect(newIcon_.get(), "registration-failed", (GCallback)TrayIcon::onRegisterError, this);
 			if ( state != STATUS_NOTIFIER_STATE_NOT_REGISTERED && state != STATUS_NOTIFIER_STATE_FAILED ) {
 				isLegacyIcon_ = false;
 #ifdef IS_DEBUG
@@ -283,6 +284,23 @@ bool TrayIcon::checkDBusInterfaceExists(const Glib::ustring &serviceName)
 	std::cout << "Interface exists " << isExists_ << std::endl;
 #endif
 	return isExists_;
+}
+
+void TrayIcon::onRegisterError(StatusNotifier *sn, GError *error, TrayIcon *userdata)
+{
+	(void)sn;
+	std::cerr << error->code << " "<< error->message << std::endl;
+	if(userdata->isLegacyIcon_) {
+		const Glib::ustring searchPath = Glib::ustring("icons/") + userdata->getIconName(100);
+		const Glib::ustring iconPath = Tools::getResPath(searchPath.c_str());
+		userdata->legacyIcon_ = Gtk::StatusIcon::create(iconPath);
+		//Staus icon signals
+		userdata->legacyIcon_->signal_popup_menu().connect(sigc::mem_fun(*userdata, &TrayIcon::onPopup));
+		userdata->legacyIcon_->signal_activate().connect(sigc::mem_fun(*userdata, &TrayIcon::onHideRestore));
+		userdata->legacyIcon_->signal_scroll_event().connect(sigc::mem_fun(*userdata, &TrayIcon::onScrollEvent));
+		userdata->legacyIcon_->signal_button_press_event().connect(sigc::mem_fun(*userdata, &TrayIcon::onButtonClick));
+		//
+	}
 }
 
 #endif
