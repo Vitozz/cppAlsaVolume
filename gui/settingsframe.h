@@ -66,9 +66,10 @@ protected:
 	class ModelTreeView : public Gtk::TreeModel::ColumnRecord
 	{
 	public:
-		inline ModelTreeView() { add(m_col_toggle); add(m_col_name); }
-		Gtk::TreeModelColumn<bool> m_col_toggle;
+		inline ModelTreeView() { add(m_col_toggle); add(m_col_name); add(m_col_sname); }
+		Gtk::TreeModelColumn<int> m_col_toggle;
 		Gtk::TreeModelColumn<Glib::ustring> m_col_name;
+		Gtk::TreeModelColumn<Glib::ustring> m_col_sname;
 	};
 	ModelTreeView m_TColumns;
 	void onTabPos();

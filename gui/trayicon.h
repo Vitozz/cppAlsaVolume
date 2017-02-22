@@ -29,12 +29,10 @@
 #include "../tools/tools.h"
 #include <memory>
 
-#ifdef USE_APPINDICATOR
+#if defined(USE_APPINDICATOR)
 #include "libappindicator/app-indicator.h"
-typedef std::shared_ptr<AppIndicator> AppIndicatorPtr;
-#endif
-
-#ifdef USE_KDE
+typedef std::shared_ptr<AppIndicator> StatusNotifierPtr;
+#elif defined(USE_KDE)
 #include "../third-party/statusnotifier/statusnotifier.h"
 typedef std::shared_ptr<StatusNotifier> StatusNotifierPtr;
 #endif
@@ -83,10 +81,9 @@ private:
 	void setTooltip(const Glib::ustring &message);
 	Glib::ustring getIconName(double value) const;
 	void setMousePos(const int X, const int Y);
-#ifdef USE_APPINDICATOR
+#if defined(USE_APPINDICATOR)
 	static void onScrollEventAI(AppIndicator *ai, gint steps, gint direction, TrayIcon *userdata);
-#endif
-#ifdef USE_KDE
+#elif defined(USE_KDE)
 	static void onActivate(StatusNotifier * sn, gint x, gint y, TrayIcon *userdata);
 	static void onSecondaryActivate(StatusNotifier * sn, gint x, gint y, TrayIcon *userdata);
 	static void onScroll(StatusNotifier * sn, gint delta, StatusNotifierScrollOrientation orient, TrayIcon *userdata);
@@ -108,10 +105,7 @@ private:
 	int pixbufWidth_;
 	int pixbufHeight_;
 	bool isLegacyIcon_;
-#ifdef USE_APPINDICATOR
-	AppIndicatorPtr newIcon_;
-#endif
-#ifdef USE_KDE
+#if defined(USE_APPINDICATOR) || defined(USE_KDE)
 	StatusNotifierPtr newIcon_;
 #endif
 	Glib::RefPtr<Gtk::StatusIcon> legacyIcon_;

@@ -33,10 +33,10 @@
 #define TITLE _("About AlsaVolume")
 #define PROGNAME _("Alsa Volume Changer")
 #define COMMENTS _("Tray Alsa Volume Changer written using gtkmm")
-#define COPYRIGHT _("2012-2015 (c) Vitaly Tonkacheyev (thetvg@gmail.com)")
+#define COPYRIGHT _("2012-2017 (c) Vitaly Tonkacheyev (thetvg@gmail.com)")
 #define WEBSITE "http://sites.google.com/site/thesomeprojects/"
 #define WEBSITELABEL _("Program Website")
-#define VERSION "0.3.1"
+#define VERSION "0.3.2"
 
 #define POLLING_INTERVAL 2000
 

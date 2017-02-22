@@ -45,6 +45,8 @@ public:
 	const std::string getCardName(int index);
 	const std::string getMixerName(int index);
 	std::string getCurrentMixerName() const;
+	std::string getEnumCapName(const std::string &mixer, uint index) const;
+	uint getEnumCaps(const std::string &mixer) const;
 	const std::vector<std::string> &getCardsList() const;
 	const std::vector<std::string> &getVolumeMixers() const;
 	MixerSwitches::Ptr getSwitchList() const;

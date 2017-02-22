@@ -59,7 +59,6 @@ void AlsaDevice::updateElements()
 	     element;
 	     element = snd_mixer_elem_next(element)) {
 		if (!snd_mixer_elem_empty(element)) {
-			switchcap sCap;
 			snd_mixer_selem_get_id(element, smid);
 			deviceName = snd_mixer_selem_id_get_name(smid);
 			snd_mixer_selem_channel_id_t channel = checkMixerChannels(element);
@@ -79,20 +78,39 @@ void AlsaDevice::updateElements()
 			    || snd_mixer_selem_has_capture_switch_exclusive(element)){
 				int value = 0;
 				checkError(snd_mixer_selem_get_capture_switch(element, channel, &value));
-				sCap = std::make_pair(deviceName, bool(value));
+				switchcap sCap;
+				sCap.name = deviceName;
+				sCap.index = value;
 				switches_->pushBack(CAPTURE, sCap);
 			}
 			if (snd_mixer_selem_has_playback_switch(element)
 			    || snd_mixer_selem_has_playback_switch_joined(element)){
 				int value = 0;
 				checkError(snd_mixer_selem_get_playback_switch(element, channel, &value));
-				sCap = std::make_pair(deviceName, bool(value));
+				switchcap sCap;
+				sCap.name = deviceName;
+				sCap.index = value;
 				switches_->pushBack(PLAYBACK, sCap);
 			}
 			if (snd_mixer_selem_is_enumerated(element)) {
 				uint value = 0;
 				checkError(snd_mixer_selem_get_enum_item(element, channel, &value));
-				sCap = std::make_pair(deviceName, bool(value));
+				switchcap sCap;
+				sCap.name = deviceName;
+				sCap.index = value;
+				uint items = snd_mixer_selem_get_enum_items(element);
+				if(items > 1) {
+					uint item = 0;
+					std::vector<std::string> extEnums;
+					while (item < items) {
+						char iname[256];
+						checkError(snd_mixer_selem_get_enum_item_name(element, item, sizeof(iname), iname));
+						extEnums.push_back(std::string(iname));
+						item++;
+					}
+					sCap.items = extEnums;
+					Tools::printList(extEnums);
+				}
 				switches_->pushBack(ENUM, sCap);
 			}
 		}
@@ -324,21 +342,21 @@ double AlsaDevice::getVolume()
 	return round(result);
 }
 
-void AlsaDevice::setSwitch(const std::string &mixer, int id, bool enabled)
+void AlsaDevice::setSwitch(const std::string &mixer, int id, uint value)
 {
 	snd_mixer_t *handle = getMixerHanlde(id_);
 	snd_mixer_elem_t* elem = initMixerElement(handle, mixer.c_str());
 	if (!snd_mixer_elem_empty(elem)) {
 		switch (id) {
 		case PLAYBACK:
-			checkError(snd_mixer_selem_set_playback_switch_all(elem, int(enabled)));
+			checkError(snd_mixer_selem_set_playback_switch_all(elem, value));
 			break;
 		case CAPTURE:
-			checkError(snd_mixer_selem_set_capture_switch_all(elem, int(enabled)));
+			checkError(snd_mixer_selem_set_capture_switch_all(elem, value));
 			break;
 		case ENUM:
 			snd_mixer_selem_channel_id_t channel = checkMixerChannels(elem);
-			checkError(snd_mixer_selem_set_enum_item(elem, channel, uint(enabled)));
+			checkError(snd_mixer_selem_set_enum_item(elem, channel, value));
 			break;
 		}
 	}
@@ -398,6 +416,30 @@ bool AlsaDevice::getMute()
 std::string AlsaDevice::formatCardName(long long int id)
 {
 	return std::string("hw:") + std::to_string(id);
+}
+
+const std::string AlsaDevice::switchcapItemName(const std::string &mixer, uint index)
+{
+	const std::vector<switchcap> items = switches_->enumSwitchList();
+	std::for_each(items.begin(), items.end(), [&]( const switchcap &item ){
+		if (mixer == item.name) {
+			if (index < item.items.size()) {
+				return item.items.at(index);
+			}
+		};
+	});
+	return std::string();
+}
+
+uint AlsaDevice::enumSwitchCapsCount(const std::string &mixer)
+{
+	const std::vector<switchcap> items = switches_->enumSwitchList();
+	std::for_each(items.begin(), items.end(), [&]( const switchcap &item ){
+		if (mixer == item.name) {
+			return item.items.size();
+		};
+	});
+	return 0;
 }
 
 void AlsaDevice::setCurrentMixer(int id)

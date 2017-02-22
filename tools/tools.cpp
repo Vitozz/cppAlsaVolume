@@ -56,6 +56,7 @@ std::vector<std::string> Tools::getProjectPathes()
 	std::vector<std::string> list;
 	list.push_back(getHomePath() + std::string("/.local") + PATH_SUFFIX);
 	list.push_back(cwd + "/");
+	list.push_back(cwd + "/" + PATH_SUFFIX);
 	list.push_back(cwd.substr(0, cwd.find_last_of("/")) + PATH_SUFFIX);
 	list.push_back(std::string("/usr") + PATH_SUFFIX);
 	list.push_back(std::string("/usr/local") + PATH_SUFFIX);
@@ -118,7 +119,7 @@ std::string Tools::pathToFileName(const std::string &path)
 	return g_path_get_basename(path.c_str());
 }
 
-#ifdef IS_DEBUG
+//#ifdef IS_DEBUG
 void Tools::printList(const std::vector<std::string> &list)
 {
 	std::cout << "Printing vector contents" << std::endl;
@@ -126,4 +127,4 @@ void Tools::printList(const std::vector<std::string> &list)
 		      list.end(),
 		      []( const std::string &item){ std::cout << item << std::endl; });
 }
-#endif
+//#endif

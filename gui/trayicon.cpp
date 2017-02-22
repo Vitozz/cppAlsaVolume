@@ -27,12 +27,10 @@
 #ifdef IS_GTK_2
 #define GDK_BUTTON_MIDDLE 2
 #define GDK_BUTTON_PRIMARY 1
-#else
-#ifdef USE_APPINDICATOR
+#endif
+#if defined(USE_APPINDICATOR)
 #include "gdkmm/devicemanager.h"
-#endif
-#endif
-#ifdef USE_KDE
+#elif defined(USE_KDE)
 #include "giomm/dbusproxy.h"
 #endif
 #define _(String) gettext(String)
@@ -64,18 +62,15 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
   pixbufWidth_(0),
   pixbufHeight_(0),
   isLegacyIcon_(true),
-#ifdef USE_APPINDICATOR
-  newIcon_(0),
-#endif
-#ifdef USE_KDE
+#if defined(USE_APPINDICATOR) || defined(USE_KDE)
   newIcon_(0),
 #endif
   legacyIcon_(0)
 {
 	const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(100);
 	const Glib::ustring iconPath = Tools::getResPath(searchPath.c_str());
-#ifdef USE_APPINDICATOR
-	newIcon_ = AppIndicatorPtr(app_indicator_new("AlsaVolume",
+#if defined(USE_APPINDICATOR)
+	newIcon_ = StatusNotifierPtr(app_indicator_new("AlsaVolume",
 						     iconPath.c_str(),
 						     APP_INDICATOR_CATEGORY_APPLICATION_STATUS));
 	if (newIcon_) {
@@ -85,8 +80,7 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 	app_indicator_set_menu(newIcon_.get(), menu_->gobj());
 	app_indicator_set_secondary_activate_target(newIcon_.get(), GTK_WIDGET(muteItem_->gobj()));
 	g_signal_connect(newIcon_.get(), "scroll-event", (GCallback)TrayIcon::onScrollEventAI, this);
-#endif
-#ifdef USE_KDE
+#elif defined(USE_KDE)
 	if (checkDBusInterfaceExists("org.kde.StatusNotifierWatcher")) {
 		newIcon_ = StatusNotifierPtr(status_notifier_new_from_icon_name("AlsaVolume",
 										STATUS_NOTIFIER_CATEGORY_APPLICATION_STATUS,
@@ -362,12 +356,11 @@ void TrayIcon::setIcon(double value)
 			if(isLegacyIcon_) {
 				legacyIcon_->set(pixbuf);
 			}
-#ifdef USE_APPINDICATOR
+#if defined (USE_APPINDICATOR)
 			else {
 				app_indicator_set_icon_full(newIcon_.get(), iconPath.c_str(), "VolumeIcon");
 			}
-#endif
-#ifdef USE_KDE
+#elif defined(USE_KDE)
 			else {
 				status_notifier_set_from_icon_name(newIcon_.get(), STATUS_NOTIFIER_ICON, iconPath.c_str());
 			}
@@ -386,12 +379,11 @@ void TrayIcon::setTooltip(const Glib::ustring &message)
 		if (isLegacyIcon_) {
 			legacyIcon_->set_tooltip_text(message);
 		}
-#ifdef USE_APPINDICATOR
+#if defined(USE_APPINDICATOR)
 		else {
 			app_indicator_set_title(newIcon_.get(), message.c_str());
 		}
-#endif
-#ifdef USE_KDE
+#elif defined(USE_KDE)
 		else {
 			const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(volumeValue_);
 			const Glib::ustring iconPath = Tools::getResPath(searchPath.c_str());

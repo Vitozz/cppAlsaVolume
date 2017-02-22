@@ -48,8 +48,10 @@ public:
 	void setDeviceVolume(double volume);
 	void setCurrentMixer(int id);
 	void setCurrentMixer(const std::string &mixer);
-	void setSwitch(const std::string &mixer, int id, bool enabled);
+	void setSwitch(const std::string &mixer, int id, uint value);
 	void setMute(bool enabled);
+	const std::string switchcapItemName(const std::string &mixer, uint index);
+	uint enumSwitchCapsCount(const std::string &mixer);
 	static std::string formatCardName(long long int id);
 
 private:

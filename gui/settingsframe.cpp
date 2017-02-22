@@ -27,6 +27,7 @@
 #define PB_SWITCH_NAME _("Playback Switch")
 #define CP_SWITCH_NAME _("Capture Switch")
 #define EN_SWITCH_NAME _("Enumerated Control")
+#define EN_SWITCH_SNAME _("Name")
 
 SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 			     const Glib::RefPtr<Gtk::Builder>& refGlade)
@@ -303,8 +304,8 @@ void SettingsFrame::updateSwitchTree()
 		const std::vector<switchcap> pbsl(settings_->switchList()->playbackSwitchList());
 		std::for_each(pbsl.begin(), pbsl.end(), [&](const switchcap &scap){
 			row = *(pbSwitches_->append());
-			row[m_TColumns.m_col_toggle] = scap.second;
-			row[m_TColumns.m_col_name] = scap.first;
+			row[m_TColumns.m_col_toggle] = scap.index;
+			row[m_TColumns.m_col_name] = scap.name;
 		});
 		playbackSwitchTree_->append_column(PB_SWITCH_NAME, m_TColumns.m_col_name);
 		playbackSwitchTree_->show_all_children();
@@ -328,8 +329,8 @@ void SettingsFrame::updateSwitchTree()
 		const std::vector<switchcap> ctsl(settings_->switchList()->captureSwitchList());
 		std::for_each(ctsl.begin(), ctsl.end(), [&](const switchcap &scap){
 			row = *(capSwitches_->append());
-			row[m_TColumns.m_col_toggle] = scap.second;
-			row[m_TColumns.m_col_name] = scap.first;
+			row[m_TColumns.m_col_toggle] = scap.index;
+			row[m_TColumns.m_col_name] = scap.name;
 		});
 		captureSwitchTree_->append_column(CP_SWITCH_NAME, m_TColumns.m_col_name);
 		captureSwitchTree_->show_all_children();
@@ -352,10 +353,14 @@ void SettingsFrame::updateSwitchTree()
 		const std::vector<switchcap> ensl(settings_->switchList()->enumSwitchList());
 		std::for_each(ensl.begin(), ensl.end(), [&](const switchcap &scap){
 			row = *(enumSwitches_->append());
-			row[m_TColumns.m_col_toggle] = scap.second;
-			row[m_TColumns.m_col_name] = scap.first;
+			row[m_TColumns.m_col_toggle] = scap.index;
+			row[m_TColumns.m_col_name] = scap.name;
+			if (scap.items.size() > 0) {
+				row[m_TColumns.m_col_sname] = scap.items.at(scap.index);
+			}
 		});
 		otherSwitchTree_->append_column(EN_SWITCH_NAME, m_TColumns.m_col_name);
+		otherSwitchTree_->append_column(EN_SWITCH_SNAME, m_TColumns.m_col_sname);
 		otherSwitchTree_->show_all_children();
 	}
 }
@@ -433,12 +438,24 @@ void SettingsFrame::onEnumCellToggled(const Glib::ustring& path)
 {
 	Gtk::TreeModel::iterator it = enumSwitches_->get_iter(path);
 	Gtk::TreeModel::Row row = *it;
-	if (bool(row.get_value(m_TColumns.m_col_toggle))) {
+	/*if (bool(row.get_value(m_TColumns.m_col_toggle))) {
 		row[m_TColumns.m_col_toggle] = false;
 	}
 	else {
 		row[m_TColumns.m_col_toggle] = true;
-	}
+	}*/
+	uint curInd = row.get_value(m_TColumns.m_col_toggle);
+	std::cout << "INDEX=" << curInd << std::endl;
+	const std::vector<switchcap> ensl(settings_->switchList()->enumSwitchList());
+	std::for_each(ensl.begin(), ensl.end(), [&] (const switchcap &cap){
+		uint enumsSize = cap.items.size();
+		if(cap.name == row.get_value(m_TColumns.m_col_name) && enumsSize > 0) {
+			if(curInd < enumsSize) {
+				++curInd;
+				row[m_TColumns.m_col_sname] = cap.items.at(curInd);
+			}
+		}
+	});
 	m_type_toggled_signal(row.get_value(m_TColumns.m_col_name),
 			      ENUM,
 			      bool(row.get_value(m_TColumns.m_col_toggle)));

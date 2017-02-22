@@ -46,7 +46,12 @@ struct iconPosition {
 	bool trayAtTop_;
 };
 
-typedef std::pair<std::string, bool> switchcap;
+//typedef std::pair<std::string, uint> switchcap;
+struct switchcap {
+	std::string name;
+	uint index;
+	std::vector<std::string> items;
+};
 
 namespace Tools {
 	std::string getCWD();
@@ -59,9 +64,9 @@ namespace Tools {
 	void createDirectory(const std::string &dirName);
 	void saveFile(const std::string &fileName, const std::string &fileData);
 	std::string pathToFileName(const std::string &path);
-#ifdef IS_DEBUG
+//#ifdef IS_DEBUG
 	void printList(const std::vector<std::string> &list);
-#endif
+//#endif
 	//Template functions
 	template <class T>
 	int itemIndex(const std::vector<T> &vect, const T &item) {

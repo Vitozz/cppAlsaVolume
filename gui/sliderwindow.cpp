@@ -21,6 +21,7 @@
 #include <iostream>
 
 #define SLIDER_HEIGHT 120
+#define SLIDER_MIN_WIDTH 20
 
 SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade)
 : Gtk::Window(cobject),
@@ -35,6 +36,17 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
 	add_events(Gdk::LEAVE_NOTIFY_MASK);
 	signal_leave_notify_event().connect(sigc::mem_fun(*this, &SliderWindow::on_focus_out));
 	set_border_width(0);
+
+	int sliderWidth = 0;
+#ifndef IS_GTK_2
+	sliderWidth = volumeSlider_->get_allocated_width();
+
+#else
+	sliderWidth = volumeSlider_->get_width();
+#endif
+	if (sliderWidth < SLIDER_MIN_WIDTH) {
+		set_size_request(SLIDER_MIN_WIDTH, SLIDER_HEIGHT);
+	}
 	set_keep_above(true);
 }
 

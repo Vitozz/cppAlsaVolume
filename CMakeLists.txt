@@ -14,6 +14,12 @@ option( USE_KDE "Enable KStatusNotifierItem support" OFF )
 find_package( PkgConfig REQUIRED )
 find_package( Intl REQUIRED )
 
+if( ${USE_KDE} AND ${USE_APPINDICATOR} )
+	message(FATAL_ERROR "
+Both Flags USE_KDE and USE_APPINDICATOR are enabled!
+Please disable at least one of them.")
+endif( ${USE_KDE} AND ${USE_APPINDICATOR} )
+
 if( ${USE_GTK3} )
 	pkg_check_modules( GTKMM REQUIRED gtkmm-3.0 )
 	if( ${USE_APPINDICATOR} )
@@ -32,9 +38,7 @@ else( ${USE_GTK3} )
 		include_directories( ${APPINDICATOR_INCLUDE_DIRS} )
 	endif( ${USE_APPINDICATOR} )
 endif( ${USE_GTK3} )
-if( ${USE_KDE} )
-	set( USE_APPINDICATOR OFF )
-endif( ${USE_KDE} )
+
 find_package( ALSA REQUIRED )
 set( CUSTOM_LDFLAGS "-Wl,-as-needed" )
 set( CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
@@ -158,7 +162,7 @@ else( ${USE_GTK3} )
 		gladefiles/SettingsFrame_2.glade
 	)
 endif( ${USE_GTK3} )
-	
+
 add_executable( ${PROJECT} ${alsavolume_SRCS} )
 target_link_libraries( ${PROJECT} ${CUSTOM_LDFLAGS} ${DEPLIBS} )
 

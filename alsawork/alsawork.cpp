@@ -215,3 +215,13 @@ int AlsaWork::getCurrentMixerId() const
 {
 	return currentAlsaDevice_->currentMixerId();
 }
+
+uint AlsaWork::getEnumCaps(const std::string &mixer) const
+{
+	return currentAlsaDevice_->enumSwitchCapsCount(mixer);
+}
+
+std::string AlsaWork::getEnumCapName(const std::string &mixer, uint index) const
+{
+	return currentAlsaDevice_->switchcapItemName(mixer, index);
+}
