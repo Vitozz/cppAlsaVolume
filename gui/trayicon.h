@@ -33,7 +33,7 @@
 #include "libappindicator/app-indicator.h"
 typedef std::shared_ptr<AppIndicator> StatusNotifierPtr;
 #elif defined(USE_KDE)
-#include "../third-party/statusnotifier/statusnotifier.h"
+#include "../third-party/statusnotifier/src/statusnotifier.h"
 typedef std::shared_ptr<StatusNotifier> StatusNotifierPtr;
 #endif
 

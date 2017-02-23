@@ -1,4 +1,4 @@
-set( PROJECT alsavolume )
+project(alsavolume)
 cmake_minimum_required( VERSION 2.8.0 )
 
 if( NOT UNIX )
@@ -97,18 +97,55 @@ set( alsavolume_SRCS
 	tools/core.cpp
 )
 
-set( statusnotifier_SRCS
-	third-party/statusnotifier/closures.c
-	third-party/statusnotifier/enums.c
-	third-party/statusnotifier/statusnotifier.c
-)
+if( ${USE_KDE} )
+	set( statusnotifier_SRCS
+		third-party/statusnotifier/src/closures.c
+		third-party/statusnotifier/src/statusnotifier.c
+	)
 
-set( statusnotifier_HDRS
-	third-party/statusnotifier/interfaces.h
-	third-party/statusnotifier/statusnotifier.h
-	third-party/statusnotifier/closures.h
-	third-party/statusnotifier/enums.h
-)
+	set( statusnotifier_HDRS
+		third-party/statusnotifier/src/interfaces.h
+		third-party/statusnotifier/src/statusnotifier.h
+		third-party/statusnotifier/src/closures.h
+	)
+	file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/enums")
+	file(COPY ${PROJECT_SOURCE_DIR}/third-party/statusnotifier/src/statusnotifier.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/enums/)
+	find_program( GLIB_MKENUMS glib-mkenums )
+	mark_as_advanced( GLIB_MKENUMS )
+	set(enums_h "${CMAKE_CURRENT_BINARY_DIR}/enums/enums.h")
+	set(enums_c "${CMAKE_CURRENT_BINARY_DIR}/enums/enums.c")
+	add_custom_command(OUTPUT ${enums_h}
+		COMMAND ${GLIB_MKENUMS} ARGS
+		--fhead \"\#ifndef __STATUS_NOTIFIER_ENUMS_H__\\n\#define __STATUS_NOTIFIER_ENUMS_H__\\n\#include \\\"statusnotifier.h\\\"\"
+		--vhead \"GType \@enum_name\@_get_type \(void\)\;\\n\#define TYPE_\@ENUMNAME\@ \(\@enum_name\@_get_type\(\)\)\"
+		--ftail \"G_END_DECLS\\n\\n\#endif /* __STATUS_NOTIFIER_ENUMS_H__ */\"
+		statusnotifier.h > enums.h
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/enums
+		)
+	message("${enums.h}")
+	add_custom_command(OUTPUT ${enums_c}
+		COMMAND ${GLIB_MKENUMS} ARGS
+		--fhead \"\#include \\\"enums.h\\\"\\n\"
+		--vhead \"GType\\n\@enum_name\@_get_type \(void\)\\n{\\n  static GType etype = 0\;\\n  if \(etype == 0\) {\\n    static const G\@Type\@Value values[] = {\"
+		--vprod \" { \@VALUENAME\@, \\\"\@VALUENAME\@\\\", \\\"\@valuenick\@\\\" },\"
+		--vtail \"      { 0, NULL, NULL }\\n    }\;\\n    etype = g_\@type\@_register_static \(\\\"\@EnumName\@\\\", values\)\;\\n  }\\n  return etype\;\\n}\\n\"
+		statusnotifier.h > enums.c
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/enums
+		)
+	add_custom_target(build_enums_h DEPENDS ${enums_h} SOURCES "${statusnotifier_SRCS}")
+	add_custom_target(build_enums_c DEPENDS ${enums_c} SOURCES "${statusnotifier_SRCS}")
+	set( statusnotifier_SRCS
+		${statusnotifier_SRCS}
+		${CMAKE_CURRENT_BINARY_DIR}/enums/enums.c
+		)
+	set( statusnotifier_HDRS
+		${statusnotifier_HDRS}
+		${CMAKE_CURRENT_BINARY_DIR}/enums/enums.h
+		)
+	include_directories(
+		${CMAKE_CURRENT_BINARY_DIR}/enums
+		)
+endif()
 
 if( USE_PULSE )
 	find_package( PulseAudio REQUIRED )
@@ -163,8 +200,11 @@ else( ${USE_GTK3} )
 	)
 endif( ${USE_GTK3} )
 
-add_executable( ${PROJECT} ${alsavolume_SRCS} )
-target_link_libraries( ${PROJECT} ${CUSTOM_LDFLAGS} ${DEPLIBS} )
+add_executable( ${PROJECT_NAME} ${alsavolume_SRCS} )
+if( ${USE_KDE} )
+	add_dependencies(${PROJECT_NAME} build_enums_h build_enums_c)
+endif()
+target_link_libraries( ${PROJECT_NAME} ${CUSTOM_LDFLAGS} ${DEPLIBS} )
 
 set( DATADIR_PATH ${CMAKE_INSTALL_PREFIX}/share )
 
