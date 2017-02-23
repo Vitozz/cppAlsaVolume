@@ -1,0 +1,3 @@
+[submodule "third-party/statusnotifier"]
+	path = third-party/statusnotifier
+	url = git@github.com:Vitozz/statusnotifier.git
