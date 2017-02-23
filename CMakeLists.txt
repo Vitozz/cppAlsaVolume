@@ -177,7 +177,7 @@ if( ${USE_KDE} )
 	add_definitions( -DUSE_KDE )
 endif( ${USE_KDE} )
 
-set( DESKTOP_FILES ${PROJECT}.desktop )
+set( DESKTOP_FILES ${PROJECT_NAME}.desktop )
 set( ICON_FILES
 	icons/tb_icon0.png
 	icons/tb_icon20.png
@@ -208,10 +208,10 @@ target_link_libraries( ${PROJECT_NAME} ${CUSTOM_LDFLAGS} ${DEPLIBS} )
 
 set( DATADIR_PATH ${CMAKE_INSTALL_PREFIX}/share )
 
-INSTALL( TARGETS ${PROJECT} RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin )
+INSTALL( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin )
 INSTALL( FILES ${DESKTOP_FILES} DESTINATION ${DATADIR_PATH}/applications )
-INSTALL( FILES ${ICON_FILES} DESTINATION ${DATADIR_PATH}/${PROJECT}/icons )
-INSTALL( FILES ${GLADE_FILES} DESTINATION ${DATADIR_PATH}/${PROJECT}/gladefiles )
+INSTALL( FILES ${ICON_FILES} DESTINATION ${DATADIR_PATH}/${PROJECT_NAME}/icons )
+INSTALL( FILES ${GLADE_FILES} DESTINATION ${DATADIR_PATH}/${PROJECT_NAME}/gladefiles )
 
 #TOOLS FOR BUILD LOCALES
 find_program( AV_XGETTEXT xgettext )
@@ -237,7 +237,7 @@ set( LOCALES_WORKDIR
 	${PROJECT_BINARY_DIR}/locale
 )
 set( LOCALES_INSTALLPATH
-	${DATADIR_PATH}/${PROJECT}/locale
+	${DATADIR_PATH}/${PROJECT_NAME}/locale
 )
 #ADD SOURCES PREFIX
 file( STRINGS ${PO_FULL_DIR}/POTFILES.in POTFILES_LINES )
@@ -254,15 +254,15 @@ add_custom_target(alsavolume-update-sources
 	AV_INTLTOOL -m
 	WORKING_DIRECTORY ${PO_FULL_DIR}
 )
-add_custom_command(OUTPUT ${PO_FULL_DIR}/${PROJECT}.pot
-	COMMAND ${AV_XGETTEXT} --files-from ${PO_FULL_DIR}/POTFILES.in --keyword=_ -o ${PO_FULL_DIR}/${PROJECT}.pot --no-wrap --no-location
+add_custom_command(OUTPUT ${PO_FULL_DIR}/${PROJECT_NAME}.pot
+	COMMAND ${AV_XGETTEXT} --files-from ${PO_FULL_DIR}/POTFILES.in --keyword=_ -o ${PO_FULL_DIR}/${PROJECT_NAME}.pot --no-wrap --no-location
 	DEPENDS ${PO_FULL_DIR}/POTFILES.in
 	WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 )
 set( AV_CATALOG_TARGETS )
 foreach( locale ${alsavolume_LOCALES} )
 		add_custom_target( alsavolume-update-${locale}.po
-			${AV_MSGMERGE} ${locale} ${PO_FULL_DIR}/${PROJECT}.pot -o ${locale}.po --no-wrap
+			${AV_MSGMERGE} ${locale} ${PO_FULL_DIR}/${PROJECT_NAME}.pot -o ${locale}.po --no-wrap
 			DEPENDS ${locale}.po
 			WORKING_DIRECTORY ${PO_FULL_DIR}
 		)
@@ -271,28 +271,28 @@ foreach( locale ${alsavolume_LOCALES} )
 		)
 		add_custom_command(
 			OUTPUT
-			${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT}.mo
+			${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT_NAME}.mo
 			COMMAND
-			${AV_MSGFMT} -c -o ${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT}.mo ${PO_FULL_DIR}/${locale}.po
+			${AV_MSGFMT} -c -o ${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT_NAME}.mo ${PO_FULL_DIR}/${locale}.po
 			DEPENDS
 			${PO_FULL_DIR}/${locale}.po
 		)
 
 		install(
 			FILES
-			${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT}.mo
+			${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT_NAME}.mo
 			DESTINATION
 			${LOCALES_INSTALLPATH}/${locale}/LC_MESSAGES
 		)
 
 		set(AV_CATALOG_TARGETS
 			${AV_CATALOG_TARGETS}
-			${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT}.mo
+			${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT_NAME}.mo
 		)
 endforeach( locale )
 add_custom_target(alsavolume-transtalions
 	ALL
 	DEPENDS
-	${PO_FULL_DIR}/${PROJECT}.pot
+	${PO_FULL_DIR}/${PROJECT_NAME}.pot
 	${AV_CATALOG_TARGETS}
 )
