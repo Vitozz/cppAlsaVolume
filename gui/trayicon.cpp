@@ -82,15 +82,15 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 	g_signal_connect(newIcon_.get(), "scroll-event", (GCallback)TrayIcon::onScrollEventAI, this);
 #elif defined(USE_KDE)
 	if (checkDBusInterfaceExists("org.kde.StatusNotifierWatcher")) {
-		newIcon_ = StatusNotifierPtr(status_notifier_new_from_icon_name("AlsaVolume",
+		newIcon_ = StatusNotifierPtr(status_notifier_item_new_from_icon_name("AlsaVolume",
 										STATUS_NOTIFIER_CATEGORY_APPLICATION_STATUS,
 										iconPath.c_str()));
 		if ( newIcon_ ) {
-			status_notifier_set_status(newIcon_.get(), STATUS_NOTIFIER_STATUS_ACTIVE);
-			status_notifier_set_title(newIcon_.get(), "AlsaVolume");
-			status_notifier_register(newIcon_.get());
-			status_notifier_set_window_id(newIcon_.get(),0);
-			StatusNotifierState state = status_notifier_get_state(newIcon_.get());
+			status_notifier_item_set_status(newIcon_.get(), STATUS_NOTIFIER_STATUS_ACTIVE);
+			status_notifier_item_set_title(newIcon_.get(), "AlsaVolume");
+			status_notifier_item_register(newIcon_.get());
+			status_notifier_item_set_window_id(newIcon_.get(),0);
+			StatusNotifierState state = status_notifier_item_get_state(newIcon_.get());
 #ifdef IS_DEBUG
 			std::cout << "StatusNotifier state " << state << std::endl;
 #endif
@@ -211,7 +211,7 @@ void TrayIcon::onHideRestore()
 }
 
 #ifdef USE_KDE
-void TrayIcon::onActivate(StatusNotifier *sn, gint x, gint y, TrayIcon *userdata)
+void TrayIcon::onActivate(StatusNotifierItem *sn, gint x, gint y, TrayIcon *userdata)
 {
 	(void)sn;
 	Glib::RefPtr<Gdk::Screen> screen = userdata->aboutItem_->get_screen();
@@ -227,7 +227,7 @@ void TrayIcon::onActivate(StatusNotifier *sn, gint x, gint y, TrayIcon *userdata
 	userdata->m_signal_on_restore(pos);
 }
 
-void TrayIcon::onContextMenu(StatusNotifier *sn, gint x, gint y, TrayIcon *userdata)
+void TrayIcon::onContextMenu(StatusNotifierItem *sn, gint x, gint y, TrayIcon *userdata)
 {
 	(void)sn;
 	(void)x;
@@ -235,7 +235,7 @@ void TrayIcon::onContextMenu(StatusNotifier *sn, gint x, gint y, TrayIcon *userd
 	userdata->menu_->popup(0, gtk_get_current_event_time());
 }
 
-void TrayIcon::onSecondaryActivate(StatusNotifier *sn, gint x, gint y, TrayIcon *userdata)
+void TrayIcon::onSecondaryActivate(StatusNotifierItem *sn, gint x, gint y, TrayIcon *userdata)
 {
 	(void)sn;
 	(void)x;
@@ -243,7 +243,7 @@ void TrayIcon::onSecondaryActivate(StatusNotifier *sn, gint x, gint y, TrayIcon 
 	userdata->muteItem_->set_active(!userdata->muteItem_->get_active());
 }
 
-void TrayIcon::onScroll(StatusNotifier *sn, gint delta, StatusNotifierScrollOrientation orient, TrayIcon *userdata)
+void TrayIcon::onScroll(StatusNotifierItem *sn, gint delta, StatusNotifierScrollOrientation orient, TrayIcon *userdata)
 {
 	(void)sn;
 	(void)orient;
@@ -280,7 +280,7 @@ bool TrayIcon::checkDBusInterfaceExists(const Glib::ustring &serviceName)
 	return isExists_;
 }
 
-void TrayIcon::onRegisterError(StatusNotifier *sn, GError *error, TrayIcon *userdata)
+void TrayIcon::onRegisterError(StatusNotifierItem *sn, GError *error, TrayIcon *userdata)
 {
 	(void)sn;
 	std::cerr << error->code << " "<< error->message << std::endl;
@@ -362,7 +362,7 @@ void TrayIcon::setIcon(double value)
 			}
 #elif defined(USE_KDE)
 			else {
-				status_notifier_set_from_icon_name(newIcon_.get(), STATUS_NOTIFIER_ICON, iconPath.c_str());
+				status_notifier_item_set_from_icon_name(newIcon_.get(), STATUS_NOTIFIER_ICON, iconPath.c_str());
 			}
 #endif
 		}
@@ -387,7 +387,7 @@ void TrayIcon::setTooltip(const Glib::ustring &message)
 		else {
 			const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(volumeValue_);
 			const Glib::ustring iconPath = Tools::getResPath(searchPath.c_str());
-			status_notifier_set_tooltip(newIcon_.get(), iconPath.c_str(), "AlsaVolume" ,message.c_str());
+			status_notifier_item_set_tooltip(newIcon_.get(), iconPath.c_str(), "AlsaVolume" ,message.c_str());
 		}
 #endif
 }

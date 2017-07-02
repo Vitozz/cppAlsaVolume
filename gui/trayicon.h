@@ -34,7 +34,7 @@
 typedef std::shared_ptr<AppIndicator> StatusNotifierPtr;
 #elif defined(USE_KDE)
 #include "../third-party/statusnotifier/src/statusnotifier.h"
-typedef std::shared_ptr<StatusNotifier> StatusNotifierPtr;
+typedef std::shared_ptr<StatusNotifierItem> StatusNotifierPtr;
 #endif
 
 class TrayIcon
@@ -84,12 +84,12 @@ private:
 #if defined(USE_APPINDICATOR)
 	static void onScrollEventAI(AppIndicator *ai, gint steps, gint direction, TrayIcon *userdata);
 #elif defined(USE_KDE)
-	static void onActivate(StatusNotifier * sn, gint x, gint y, TrayIcon *userdata);
-	static void onSecondaryActivate(StatusNotifier * sn, gint x, gint y, TrayIcon *userdata);
-	static void onScroll(StatusNotifier * sn, gint delta, StatusNotifierScrollOrientation orient, TrayIcon *userdata);
-	static void onContextMenu(StatusNotifier * sn, gint x, gint y, TrayIcon *userdata);
+	static void onActivate(StatusNotifierItem * sn, gint x, gint y, TrayIcon *userdata);
+	static void onSecondaryActivate(StatusNotifierItem * sn, gint x, gint y, TrayIcon *userdata);
+	static void onScroll(StatusNotifierItem * sn, gint delta, StatusNotifierScrollOrientation orient, TrayIcon *userdata);
+	static void onContextMenu(StatusNotifierItem * sn, gint x, gint y, TrayIcon *userdata);
 	bool checkDBusInterfaceExists(const Glib::ustring &serviceName);
-	static void onRegisterError(StatusNotifier * sn, GError *error, TrayIcon *userdata);
+	static void onRegisterError(StatusNotifierItem * sn, GError *error, TrayIcon *userdata);
 #endif
 
 private:
