@@ -1,12 +1,12 @@
 project(alsavolume)
-cmake_minimum_required( VERSION 2.8.0 )
+cmake_minimum_required( VERSION 2.8.12 )
 
 if( NOT UNIX )
 	message( FATAL_ERROR "Not Unix!" )
-endif( NOT UNIX )
+endif()
 
-set( USE_PULSE OFF CACHE BOOL "Set pulseaudio usage" )
-set( USE_GTK3 ON CACHE BOOL "Build with gtkmm-3.0 support" )
+option( USE_PULSE "Enable pulseaudio support" OFF )
+option( USE_GTK3 "Build with gtkmm-3.0 support" ON )
 set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 option( USE_APPINDICATOR "Use appindicator support" OFF )
 option( USE_KDE "Enable KStatusNotifierItem support" OFF )
@@ -14,38 +14,39 @@ option( USE_KDE "Enable KStatusNotifierItem support" OFF )
 find_package( PkgConfig REQUIRED )
 find_package( Intl REQUIRED )
 
-if( ${USE_KDE} AND ${USE_APPINDICATOR} )
+if( USE_KDE AND USE_APPINDICATOR )
 	message(FATAL_ERROR "
 Both Flags USE_KDE and USE_APPINDICATOR are enabled!
 Please disable at least one of them.")
-endif( ${USE_KDE} AND ${USE_APPINDICATOR} )
+endif()
 
-if( ${USE_GTK3} )
+if( USE_GTK3 )
 	pkg_check_modules( GTKMM REQUIRED gtkmm-3.0 )
-	if( ${USE_APPINDICATOR} )
+	if( USE_APPINDICATOR )
 		pkg_check_modules( APPINDICATOR REQUIRED appindicator3-0.1 )
 		add_definitions( -DUSE_APPINDICATOR )
 		link_directories( ${APPINDICATOR_LIBRARY_DIRS} )
 		include_directories( ${APPINDICATOR_INCLUDE_DIRS} )
-	endif( ${USE_APPINDICATOR} )
-else( ${USE_GTK3} )
+	endif()
+else()
 	pkg_check_modules( GTKMM REQUIRED gtkmm-2.4 )
 	add_definitions( -DIS_GTK_2 )
-	if( ${USE_APPINDICATOR} )
+	if( USE_APPINDICATOR )
 		pkg_check_modules( APPINDICATOR REQUIRED appindicator-0.1 )
 		add_definitions( -DUSE_APPINDICATOR )
 		link_directories( ${APPINDICATOR_LIBRARY_DIRS} )
 		include_directories( ${APPINDICATOR_INCLUDE_DIRS} )
-	endif( ${USE_APPINDICATOR} )
-endif( ${USE_GTK3} )
+	endif()
+endif()
 
 find_package( ALSA REQUIRED )
 set( CUSTOM_LDFLAGS "-Wl,-as-needed" )
 set( CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 
-if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR ( "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo" ) )
 	add_definitions( -DIS_DEBUG )
-endif( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+	set( CMAKE_CXX_FLAGS_DEBUG "-O0 ${CMAKE_CXX_FLAGS_DEBUG}")
+endif()
 
 add_definitions(
 	${GTKMM_CFLAGS_OTHER}
@@ -63,12 +64,11 @@ set( DEPLIBS
 	${ALSA_LIBRARIES}
 )
 
-if( ${USE_APPINDICATOR} )
-	set( DEPLIBS
-		${DEPLIBS}
+if( USE_APPINDICATOR )
+	list(APPEND DEPLIBS
 		${APPINDICATOR_LIBRARIES}
 	)
-endif( ${USE_APPINDICATOR} )
+endif()
 
 set( alsavolume_HDRS
 	alsawork/alsawork.h
@@ -97,7 +97,7 @@ set( alsavolume_SRCS
 	tools/core.cpp
 )
 
-if( ${USE_KDE} )
+if( USE_KDE )
 	set( statusnotifier_SRCS
 		third-party/statusnotifier/src/closures.c
 		third-party/statusnotifier/src/statusnotifier.c
@@ -121,7 +121,7 @@ if( ${USE_KDE} )
 		--ftail \"G_END_DECLS\\n\\n\#endif /* __STATUS_NOTIFIER_ENUMS_H__ */\"
 		statusnotifier.h > enums.h
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/enums
-		)
+	)
 	message("${enums.h}")
 	add_custom_command(OUTPUT ${enums_c}
 		COMMAND ${GLIB_MKENUMS} ARGS
@@ -131,51 +131,42 @@ if( ${USE_KDE} )
 		--vtail \"      { 0, NULL, NULL }\\n    }\;\\n    etype = g_\@type\@_register_static \(\\\"\@EnumName\@\\\", values\)\;\\n  }\\n  return etype\;\\n}\\n\"
 		statusnotifier.h > enums.c
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/enums
-		)
+	)
 	add_custom_target(build_enums_h DEPENDS ${enums_h} SOURCES "${statusnotifier_SRCS}")
 	add_custom_target(build_enums_c DEPENDS ${enums_c} SOURCES "${statusnotifier_SRCS}")
-	set( statusnotifier_SRCS
-		${statusnotifier_SRCS}
+	list(APPEND statusnotifier_SRCS
 		${CMAKE_CURRENT_BINARY_DIR}/enums/enums.c
-		)
-	set( statusnotifier_HDRS
-		${statusnotifier_HDRS}
+	)
+	set(APPEND statusnotifier_HDRS
 		${CMAKE_CURRENT_BINARY_DIR}/enums/enums.h
-		)
+	)
 	include_directories(
 		${CMAKE_CURRENT_BINARY_DIR}/enums
-		)
+	)
+	list(APPEND alsavolume_SRCS
+		${statusnotifier_SRCS}
+	)
+	add_definitions( -DUSE_KDE )
 endif()
 
 if( USE_PULSE )
 	find_package( PulseAudio REQUIRED )
 	include_directories( ${PULSE_INCLUDE_DIR} )
-	set( alsavolume_HDRS
-		${alsavolume_HDRS}
+	list(APPEND alsavolume_HDRS
 		pulsework/pulsecore.h
 		pulsework/pulsedevice.h
 	)
-	set( alsavolume_SRCS
-		${alsavolume_SRCS}
+	list(APPEND alsavolume_SRCS
 		pulsework/pulsecore.cpp
 		pulsework/pulsedevice.cpp
 	)
 	add_definitions(
 		-DHAVE_PULSE
 	)
-	set( DEPLIBS
-		${DEPLIBS}
+	list(APPEND DEPLIBS
 		${PULSEAUDIO_LIBRARY}
 	)
-endif( USE_PULSE )
-
-if( ${USE_KDE} )
-	set( alsavolume_SRCS
-		${alsavolume_SRCS}
-		${statusnotifier_SRCS}
-	)
-	add_definitions( -DUSE_KDE )
-endif( ${USE_KDE} )
+endif()
 
 set( DESKTOP_FILES ${PROJECT_NAME}.desktop )
 set( ICON_FILES
@@ -188,20 +179,20 @@ set( ICON_FILES
 	icons/volume.png
 	icons/volume_ico.png
 )
-if( ${USE_GTK3} )
+if( USE_GTK3 )
 	set(GLADE_FILES
 		gladefiles/SliderFrame.glade
 		gladefiles/SettingsFrame.glade
 	)
-else( ${USE_GTK3} )
+else()
 	set(GLADE_FILES
 		gladefiles/SliderFrame_2.glade
 		gladefiles/SettingsFrame_2.glade
 	)
-endif( ${USE_GTK3} )
+endif()
 
 add_executable( ${PROJECT_NAME} ${alsavolume_SRCS} )
-if( ${USE_KDE} )
+if( USE_KDE )
 	add_dependencies(${PROJECT_NAME} build_enums_h build_enums_c)
 endif()
 target_link_libraries( ${PROJECT_NAME} ${CUSTOM_LDFLAGS} ${DEPLIBS} )
@@ -247,7 +238,7 @@ foreach( line ${POTFILES_LINES} )
 		"${POTFILES_CONTENTS}
 ${PROJECT_SOURCE_DIR}/${line}"
 	)
-endforeach( line ${POTFILES_LINES} )
+endforeach()
 file( WRITE ${PO_FULL_DIR}/POTFILES.in "${POTFILES_CONTENTS}" )
 
 add_custom_target(alsavolume-update-sources
@@ -255,7 +246,9 @@ add_custom_target(alsavolume-update-sources
 	WORKING_DIRECTORY ${PO_FULL_DIR}
 )
 add_custom_command(OUTPUT ${PO_FULL_DIR}/${PROJECT_NAME}.pot
-	COMMAND ${AV_XGETTEXT} --files-from ${PO_FULL_DIR}/POTFILES.in --keyword=_ -o ${PO_FULL_DIR}/${PROJECT_NAME}.pot --no-wrap --no-location
+	COMMAND ${AV_XGETTEXT}
+	ARGS
+	--files-from ${PO_FULL_DIR}/POTFILES.in --keyword=_ -o ${PO_FULL_DIR}/${PROJECT_NAME}.pot --no-wrap --no-location
 	DEPENDS ${PO_FULL_DIR}/POTFILES.in
 	WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 )
@@ -273,7 +266,9 @@ foreach( locale ${alsavolume_LOCALES} )
 			OUTPUT
 			${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT_NAME}.mo
 			COMMAND
-			${AV_MSGFMT} -c -o ${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT_NAME}.mo ${PO_FULL_DIR}/${locale}.po
+			${AV_MSGFMT}
+			ARGS
+			-c -o ${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT_NAME}.mo ${PO_FULL_DIR}/${locale}.po
 			DEPENDS
 			${PO_FULL_DIR}/${locale}.po
 		)
@@ -289,7 +284,7 @@ foreach( locale ${alsavolume_LOCALES} )
 			${AV_CATALOG_TARGETS}
 			${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT_NAME}.mo
 		)
-endforeach( locale )
+endforeach()
 add_custom_target(alsavolume-transtalions
 	ALL
 	DEPENDS
