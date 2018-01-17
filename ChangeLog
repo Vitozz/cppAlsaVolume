@@ -1,3 +1,8 @@
+2018-01-17
+v0.3.2
+  - updated statusnotifier to 1.0.0
+  - added initial cpack support
+
 2015-08-31
 v0.3.1
   - Added KStatusNotifierItem support (optionally / uses third-party lib)
