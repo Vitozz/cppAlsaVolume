@@ -1,0 +1,70 @@
+/* config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* Enable example */
+/* #define EXAMPLE */
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#define HAVE_DLFCN_H @HAVE_DLFCN_H@
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#define HAVE_INTTYPES_H @HAVE_INTTYPES_H@
+
+/* Define to 1 if you have the <memory.h> header file. */
+#define HAVE_MEMORY_H @HAVE_MEMORY_H@
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#define HAVE_STDINT_H @HAVE_MEMORY_H@
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#define HAVE_STDLIB_H @HAVE_MEMORY_H@
+
+/* Define to 1 if you have the <strings.h> header file. */
+#define HAVE_STRINGS_H @HAVE_STRINGS_H@
+
+/* Define to 1 if you have the <string.h> header file. */
+#define HAVE_STRING_H @HAVE_STRING_H@
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#define HAVE_SYS_STAT_H @HAVE_SYS_STAT_H@
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#define HAVE_SYS_TYPES_H @HAVE_SYS_TYPES_H@
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#define HAVE_UNISTD_H @HAVE_UNISTD_H@
+
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
+/* #define LT_OBJDIR @LT_OBJDIR@ */
+
+/* Name of package */
+#define PACKAGE "@PACKAGE@"
+
+/* Define to the address where bug reports for this package should be sent. */
+#define PACKAGE_BUGREPORT "@PACKAGE_BUGREPORT@"
+
+/* Define to the full name of this package. */
+#define PACKAGE_NAME "@PACKAGE_NAME@"
+
+/* Define to the full name and version of this package. */
+#define PACKAGE_STRING "@PACKAGE_STRING@"
+
+/* Define to the one symbol short name of this package. */
+#define PACKAGE_TARNAME "@PACKAGE_TARNAME@"
+
+/* Define to the home page for this package. */
+#define PACKAGE_URL "@PACKAGE_URL@"
+
+/* Define to the version of this package. */
+#define PACKAGE_VERSION "@PACKAGE_VERSION@"
+
+/* Define to 1 if you have the ANSI C header files. */
+#define STDC_HEADERS @STDC_HEADERS@
+
+/* Use dbusmenu */
+/* #define USE_DBUSMENU */
+
+/* Use GIT version */
+/* #define USE_GIT_VERSION */
+
+/* Version number of package */
+#define VERSION "@VERSION@"
