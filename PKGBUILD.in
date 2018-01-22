@@ -25,10 +25,11 @@ build() {
     msg "The local files are updated."
   else
     git clone "$_gitroot" "$_gitname"
-    cd $_gitname
+  fi
+  msg "Updating submodules..."
+  cd "$srcdir/$_gitname"
     git submodule init
     git submodule update
-  fi
 
   msg "GIT checkout done or server timeout"
   msg "Starting build..."
