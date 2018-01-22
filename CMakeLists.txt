@@ -9,15 +9,15 @@ option( USE_PULSE "Enable pulseaudio support" OFF )
 option( USE_GTK3 "Build with gtkmm-3.0 support" ON )
 set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 option( USE_APPINDICATOR "Use appindicator support" OFF )
-option( USE_KDE "Enable KStatusNotifierItem support" OFF )
+option( USE_SNI "Enable StatusNotifierItem support" OFF )
 option( USE_CPACK "Enable CPack" OFF )
 
 find_package( PkgConfig REQUIRED )
 find_package( Intl REQUIRED )
 
-if( USE_KDE AND USE_APPINDICATOR )
+if( USE_SNI AND USE_APPINDICATOR )
 	message(FATAL_ERROR "
-Both Flags USE_KDE and USE_APPINDICATOR are enabled!
+Both Flags USE_SNI and USE_APPINDICATOR are enabled!
 Please disable at least one of them.")
 endif()
 
@@ -98,7 +98,7 @@ set( alsavolume_SRCS
 	tools/core.cpp
 )
 
-if( USE_KDE )
+if( USE_SNI )
     include(statusnotifier-gen.cmake)
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
 	set( statusnotifier_SRCS
@@ -191,7 +191,7 @@ else()
 endif()
 
 add_executable( ${PROJECT_NAME} ${alsavolume_SRCS} )
-if( USE_KDE )
+if( USE_SNI )
 	add_dependencies(${PROJECT_NAME} build_enums_h build_enums_c)
 endif()
 

@@ -1,0 +1,55 @@
+# Maintainer: @PACKAGE_MAINTAINER@
+pkgname=@CPACK_PACKAGE_NAME@-git
+pkgver=@CPACK_PACKAGE_VERSION@
+pkgrel=@CPACK_PACKAGE_RELEASE@
+pkgdesc="@CPACK_PACKAGE_DESCRIPTION@"
+arch=('i686' 'x86_64')
+url="@PACKAGE_URL@"
+license=('GPL3')
+depends=( 'gtkmm3' 'alsa-lib' 'pulseaudio'
+          'pkg-config' 'intltool' 'glibmm' )
+makedepends=('git' 'cmake')
+conflicts=(@CPACK_PACKAGE_NAME@)
+source=(git+https://github.com/Vitozz/cppAlsaVolume)
+md5sums=('SKIP') 
+
+_gitroot=https://github.com/Vitozz/cppAlsaVolume
+_gitname=cppAlsaVolume
+
+build() {
+  cd "$srcdir"
+  msg "Connecting to GIT server...."
+
+  if [[ -d "$_gitname" ]]; then
+    cd "$_gitname" && git pull origin
+    msg "The local files are updated."
+  else
+    git clone "$_gitroot" "$_gitname"
+    cd $_gitname
+    git submodule init
+    git submodule update
+  fi
+
+  msg "GIT checkout done or server timeout"
+  msg "Starting build..."
+
+  rm -rf "$srcdir/$_gitname-build"
+  mkdir -p "$srcdir/$_gitname-build"
+  cd "$srcdir/$_gitname-build/"
+  
+  # BUILD HERE
+
+  cmake -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DUSE_PULSE=ON \
+    -DUSE_SNI=ON \
+    "$srcdir/$_gitname"
+
+  make
+}
+
+package() {
+  cd "$srcdir/$_gitname-build/"
+  make DESTDIR="$pkgdir/"  install
+
+}
