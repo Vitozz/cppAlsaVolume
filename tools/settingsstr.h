@@ -1,6 +1,6 @@
 /*
  * settingsstr.h
- * Copyright (C) 2012-2015 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2019 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,53 +28,53 @@
 class settingsStr
 {
 public:
-	settingsStr();
-	settingsStr(settingsStr &str);
-	~settingsStr();
-	typedef std::shared_ptr<settingsStr> Ptr;
-	unsigned int cardId() const;
-	unsigned int mixerId() const;
-	int pulseDeviceId() const;
-	bool notebookOrientation();
-	bool isAutorun();
-	bool usePulse();
-	bool usePolling();
-	const std::string &pulseDeviceName() const;
-	const std::string &pulseDeviceDesc() const;
-	const std::vector<std::string> &cardList() const;
-	const std::vector<std::string> &mixerList() const;
-	const std::vector<std::string> &pulseDevices() const;
-	MixerSwitches::Ptr switchList() const;
-	void setCardId(unsigned int id);
-	void setMixerId(unsigned int id);
-	void setNotebookOrientation(bool orient);
-	void setIsAutorun(bool autorun);
-	void pushBack(ListType listType, const std::string &item);
-	void addMixerSwitch(const MixerSwitches::Ptr &switchItem);
-	void setList(ListType listType, const std::vector<std::string> &list);
-	void clear(ListType listType);
-	void clearSwitches();
-	void setPulseDeviceId(int id);
-	void setPulseDeviceName(const std::string &name);
-	void setPulseDeviceDesc(const std::string &description);
-	void setPulseDevices(const std::vector<std::string> &devices);
-	void setUsePulse(bool use);
-	void setUsePolling(bool use);
+    settingsStr();
+    settingsStr(settingsStr &str);
+    ~settingsStr();
+    typedef std::shared_ptr<settingsStr> Ptr;
+    unsigned int cardId() const;
+    unsigned int mixerId() const;
+    int pulseDeviceId() const;
+    bool notebookOrientation();
+    bool isAutorun();
+    bool usePulse();
+    bool usePolling();
+    const std::string &pulseDeviceName() const;
+    const std::string &pulseDeviceDesc() const;
+    const std::vector<std::string> &cardList() const;
+    const std::vector<std::string> &mixerList() const;
+    const std::vector<std::string> &pulseDevices() const;
+    MixerSwitches::Ptr switchList() const;
+    void setCardId(unsigned int id);
+    void setMixerId(unsigned int id);
+    void setNotebookOrientation(bool orient);
+    void setIsAutorun(bool autorun);
+    void pushBack(ListType listType, const std::string &item);
+    void addMixerSwitch(const MixerSwitches::Ptr &switchItem);
+    void setList(ListType listType, const std::vector<std::string> &list);
+    void clear(ListType listType);
+    void clearSwitches();
+    void setPulseDeviceId(int id);
+    void setPulseDeviceName(const std::string &name);
+    void setPulseDeviceDesc(const std::string &description);
+    void setPulseDevices(const std::vector<std::string> &devices);
+    void setUsePulse(bool use);
+    void setUsePolling(bool use);
 
 private:
-	unsigned int cardId_;
-	unsigned int mixerId_;
-	bool notebookOrientation_;
-	bool isAutorun_;
-	bool usePulse_;
-	bool usePolling_;
-	std::vector<std::string> cardList_;
-	std::vector<std::string> mixerList_;
-	MixerSwitches::Ptr switchList_;
-	std::vector<std::string> pulseDevices_;
-	int pulseDeviceId_;
-	std::string pulseDeviceName_;
-	std::string pulseDeviceDesc_;
+    unsigned int cardId_;
+    unsigned int mixerId_;
+    bool notebookOrientation_;
+    bool isAutorun_;
+    bool usePulse_;
+    bool usePolling_;
+    std::vector<std::string> cardList_;
+    std::vector<std::string> mixerList_;
+    MixerSwitches::Ptr switchList_;
+    std::vector<std::string> pulseDevices_;
+    int pulseDeviceId_;
+    std::string pulseDeviceName_;
+    std::string pulseDeviceDesc_;
 };
 
 #endif // SETTINGSSTR_H

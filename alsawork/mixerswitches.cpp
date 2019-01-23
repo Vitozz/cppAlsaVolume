@@ -1,6 +1,6 @@
 /*
  * mixerswitches.cpp
- * Copyright (C) 2012 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2019 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,89 +24,89 @@ MixerSwitches::MixerSwitches()
 }
 
 MixerSwitches::MixerSwitches(const MixerSwitches &ms)
-: captureSwitchList_(ms.captureSwitchList()),
-  playbackSwitchList_(ms.playbackSwitchList()),
-  enumSwitchList_(ms.enumSwitchList())
+    : captureSwitchList_(ms.captureSwitchList()),
+      playbackSwitchList_(ms.playbackSwitchList()),
+      enumSwitchList_(ms.enumSwitchList())
 {
 }
 
 void MixerSwitches::setCaptureSwitchList(const std::vector<switchcap> &list)
 {
-	captureSwitchList_.assign(list.begin(), list.end());
+    captureSwitchList_.assign(list.begin(), list.end());
 }
 
 void MixerSwitches::setPlaybackSwitchList(const std::vector<switchcap> &list)
 {
-	playbackSwitchList_.assign(list.begin(), list.end());
+    playbackSwitchList_.assign(list.begin(), list.end());
 }
 
 void MixerSwitches::setEnumSwitchList(const std::vector<switchcap> &list)
 {
-	enumSwitchList_.assign(list.begin(), list.end());
+    enumSwitchList_.assign(list.begin(), list.end());
 }
 
 void MixerSwitches::pushBack(SwitchType sType, switchcap &item)
 {
-	switch (sType) {
-	case PLAYBACK:
-		playbackSwitchList_.push_back(item);
-		break;
-	case CAPTURE:
-		captureSwitchList_.push_back(item);
-		break;
-	case ENUM:
-		enumSwitchList_.push_back(item);
-		break;
-	}
+    switch (sType) {
+    case PLAYBACK:
+        playbackSwitchList_.push_back(item);
+        break;
+    case CAPTURE:
+        captureSwitchList_.push_back(item);
+        break;
+    case ENUM:
+        enumSwitchList_.push_back(item);
+        break;
+    }
 }
 
 void MixerSwitches::clear(SwitchType sType)
 {
-	switch (sType) {
-	case PLAYBACK:
-		if (!playbackSwitchList_.empty())
-			playbackSwitchList_.clear();
-		break;
-	case CAPTURE:
-		if (!captureSwitchList_.empty())
-			captureSwitchList_.clear();
-		break;
-	case ENUM:
-		if (!enumSwitchList_.empty())
-			enumSwitchList_.clear();
-		break;
-	}
+    switch (sType) {
+    case PLAYBACK:
+        if (!playbackSwitchList_.empty())
+            playbackSwitchList_.clear();
+        break;
+    case CAPTURE:
+        if (!captureSwitchList_.empty())
+            captureSwitchList_.clear();
+        break;
+    case ENUM:
+        if (!enumSwitchList_.empty())
+            enumSwitchList_.clear();
+        break;
+    }
 }
 
 void MixerSwitches::clearAll()
 {
-	if (!playbackSwitchList_.empty()) {
-		playbackSwitchList_.clear();
-	}
-	if (!captureSwitchList_.empty()) {
-		captureSwitchList_.clear();
-	}
-	if (!enumSwitchList_.empty()) {
-		enumSwitchList_.clear();
-	}
+    if (!playbackSwitchList_.empty()) {
+        playbackSwitchList_.clear();
+    }
+    if (!captureSwitchList_.empty()) {
+        captureSwitchList_.clear();
+    }
+    if (!enumSwitchList_.empty()) {
+        enumSwitchList_.clear();
+    }
 }
 
 bool MixerSwitches::isEmpty()
 {
-	return (playbackSwitchList_.empty() && captureSwitchList_.empty() && enumSwitchList_.empty());
+    return (playbackSwitchList_.empty() && captureSwitchList_.empty() && enumSwitchList_.empty());
 }
 
 const std::vector<switchcap> &MixerSwitches::captureSwitchList() const
 {
-	return captureSwitchList_;
+    return captureSwitchList_;
 }
 
 const std::vector<switchcap> &MixerSwitches::playbackSwitchList() const
 {
-	return playbackSwitchList_;
+    return playbackSwitchList_;
 }
 
 const std::vector<switchcap> &MixerSwitches::enumSwitchList() const
 {
-	return enumSwitchList_;
+    return enumSwitchList_;
 }

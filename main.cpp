@@ -1,6 +1,6 @@
 /*
  * main.cpp
- * Copyright (C) 2012-2015 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2019 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,72 +37,72 @@
 
 int main (int argc, char *argv[])
 {
-	bindtextdomain(PACKAGE, Tools::getDirPath("locale").c_str());
-	bind_textdomain_codeset(PACKAGE, CODEC);
-	textdomain(PACKAGE);
+    bindtextdomain(PACKAGE, Tools::getDirPath("locale").c_str());
+    bind_textdomain_codeset(PACKAGE, CODEC);
+    textdomain(PACKAGE);
 #ifndef IS_GTK_2
-	Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "org.gtkmm.alsavolume");
-	Glib::ustring slider_ui_ = Tools::getResPath("gladefiles/SliderFrame.glade");
-	Glib::ustring settings_ui_ = Tools::getResPath("gladefiles/SettingsFrame.glade");
+    Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "org.gtkmm.alsavolume");
+    Glib::ustring slider_ui_ = Tools::getResPath("gladefiles/SliderFrame.glade");
+    Glib::ustring settings_ui_ = Tools::getResPath("gladefiles/SettingsFrame.glade");
 #else
-	Gtk::Main app(argc, argv);
-	Glib::ustring slider_ui_ = Tools::getResPath("gladefiles/SliderFrame_2.glade");
-	Glib::ustring settings_ui_ = Tools::getResPath("gladefiles/SettingsFrame_2.glade");
+    Gtk::Main app(argc, argv);
+    Glib::ustring slider_ui_ = Tools::getResPath("gladefiles/SliderFrame_2.glade");
+    Glib::ustring settings_ui_ = Tools::getResPath("gladefiles/SettingsFrame_2.glade");
 #endif
-	if (slider_ui_.empty()) {
-		std::cerr << "No SliderFrame.glade file found" << std::endl;
-		return 1;
-	}
-	if (settings_ui_.empty()) {
-		std::cerr << "No SettingsFrame.glade file found" << std::endl;
-		return 1;
-	}
-	Glib::RefPtr<Gtk::Builder> refBuilder = Gtk::Builder::create();
-	try {
-		refBuilder->add_from_file(slider_ui_);
-		refBuilder->add_from_file(settings_ui_);
-	}
-	catch(const Gtk::BuilderError& ex) {
-		std::cerr << "BuilderError::main.cpp::62 " << ex.what() << std::endl;
-		return 1;
-	}
-	catch(const Glib::MarkupError& ex) {
-		std::cerr << "MarkupError::main.cpp::62 " << ex.what() << std::endl;
-		return 1;
-	}
-	catch(const Glib::FileError& ex) {
-		std::cerr << "FileError::main.cpp::62 " << ex.what() << std::endl;
-		return 1;
-	}
-	Core::Ptr core(new Core(refBuilder));
+    if (slider_ui_.empty()) {
+        std::cerr << "No SliderFrame.glade file found" << std::endl;
+        return 1;
+    }
+    if (settings_ui_.empty()) {
+        std::cerr << "No SettingsFrame.glade file found" << std::endl;
+        return 1;
+    }
+    Glib::RefPtr<Gtk::Builder> refBuilder = Gtk::Builder::create();
+    try {
+        refBuilder->add_from_file(slider_ui_);
+        refBuilder->add_from_file(settings_ui_);
+    }
+    catch(const Gtk::BuilderError& ex) {
+        std::cerr << "BuilderError::main.cpp::62 " << ex.what() << std::endl;
+        return 1;
+    }
+    catch(const Glib::MarkupError& ex) {
+        std::cerr << "MarkupError::main.cpp::62 " << ex.what() << std::endl;
+        return 1;
+    }
+    catch(const Glib::FileError& ex) {
+        std::cerr << "FileError::main.cpp::62 " << ex.what() << std::endl;
+        return 1;
+    }
+    Core::Ptr core(new Core(refBuilder));
 #ifndef IS_GTK_2
-	app->hold();
+    app->hold();
 #endif
-	SliderWindow *sliderWindow = 0;
-	refBuilder->get_widget_derived("volumeFrame", sliderWindow);
-	TrayIcon::Ptr trayIcon(new TrayIcon(core->getVolumeValue(),
-					    core->getSoundCardName(),
-					    core->getActiveMixer(),
-					    core->getMuted()));
-	if (trayIcon && sliderWindow) {
-		sliderWindow->setVolumeValue(core->getVolumeValue());
-		core->signal_value_changed().connect(sigc::mem_fun(*trayIcon, &TrayIcon::on_signal_volume_changed));
-		core->signal_mixer_muted().connect(sigc::mem_fun(*trayIcon, &TrayIcon::setMuted));
-		core->signal_volume_changed().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::setVolumeValue));
-		sliderWindow->signal_volume_changed().connect(sigc::mem_fun(*core, &Core::onVolumeSlider));
-		trayIcon->signal_ask_dialog().connect(sigc::mem_fun(*core, &Core::runAboutDialog));
-		trayIcon->signal_ask_settings().connect(sigc::mem_fun(*core, &Core::runSettings));
-		trayIcon->signal_on_restore().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::setWindowPosition));
-		trayIcon->signal_save_settings().connect(sigc::mem_fun(*core, &Core::saveSettings));
-		trayIcon->signal_on_mute().connect(sigc::mem_fun(*core, &Core::soundMuted));
-		trayIcon->signal_value_changed().connect(sigc::mem_fun(*core, &Core::onTrayIconScroll));
-		sliderWindow->set_visible(false);
+    SliderWindow *sliderWindow = nullptr;
+    refBuilder->get_widget_derived("volumeFrame", sliderWindow);
+    TrayIcon::Ptr trayIcon(new TrayIcon(core->getVolumeValue(),
+                                        core->getSoundCardName(),
+                                        core->getActiveMixer(),
+                                        core->getMuted()));
+    if (trayIcon && sliderWindow) {
+        sliderWindow->setVolumeValue(core->getVolumeValue());
+        core->signal_value_changed().connect(sigc::mem_fun(*trayIcon, &TrayIcon::on_signal_volume_changed));
+        core->signal_mixer_muted().connect(sigc::mem_fun(*trayIcon, &TrayIcon::setMuted));
+        core->signal_volume_changed().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::setVolumeValue));
+        sliderWindow->signal_volume_changed().connect(sigc::mem_fun(*core, &Core::onVolumeSlider));
+        trayIcon->signal_ask_dialog().connect(sigc::mem_fun(*core, &Core::runAboutDialog));
+        trayIcon->signal_ask_settings().connect(sigc::mem_fun(*core, &Core::runSettings));
+        trayIcon->signal_on_restore().connect(sigc::mem_fun(*sliderWindow, &SliderWindow::setWindowPosition));
+        trayIcon->signal_save_settings().connect(sigc::mem_fun(*core, &Core::saveSettings));
+        trayIcon->signal_on_mute().connect(sigc::mem_fun(*core, &Core::soundMuted));
+        trayIcon->signal_value_changed().connect(sigc::mem_fun(*core, &Core::onTrayIconScroll));
+        sliderWindow->set_visible(false);
 #ifndef IS_GTK_2
-		return app->run();
+        return app->run();
 #else
-		Gtk::Main::run();
+        Gtk::Main::run();
 #endif
-	}
-	delete sliderWindow;
-	return 0;
+    }
+    delete sliderWindow;
+    return 0;
 }

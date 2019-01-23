@@ -1,6 +1,6 @@
 /*
  * tools.h
- * Copyright (C) 2012-2015 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2019 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,57 +25,57 @@
 #include <algorithm>
 
 enum SwitchType {
-	PLAYBACK = 0,
-	CAPTURE = 1,
-	ENUM = 2
+    PLAYBACK = 0,
+    CAPTURE = 1,
+    ENUM = 2
 };
 
 enum ListType {
-	CARDS = 0,
-	MIXERS = 1
+    CARDS = 0,
+    MIXERS = 1
 };
 
 struct iconPosition {
-	int iconX_;
-	int iconY_;
-	int iconWidth_;
-	int iconHeight_;
-	int screenHeight_;
-	int screenWidth_;
-	bool geometryAvailable_;
-	bool trayAtTop_;
+    int iconX_;
+    int iconY_;
+    int iconWidth_;
+    int iconHeight_;
+    int screenHeight_;
+    int screenWidth_;
+    bool geometryAvailable_;
+    bool trayAtTop_;
 };
 
 typedef std::pair<std::string, bool> switchcap;
 
 namespace Tools {
-	std::string getCWD();
-	std::string getHomePath();
-	std::vector<std::string> getProjectPathes();
-	std::string getResPath(const char *resName);
-	std::string getDirPath(const char *dirName);
-	bool checkFileExists(const std::string &fileName);
-	bool checkDirExists(const std::string &fileName);
-	void createDirectory(const std::string &dirName);
-	void saveFile(const std::string &fileName, const std::string &fileData);
-	std::string pathToFileName(const std::string &path);
+std::string getCWD();
+std::string getHomePath();
+std::vector<std::string> getProjectPathes();
+std::string getResPath(const char *resName);
+std::string getDirPath(const char *dirName);
+bool checkFileExists(const std::string &fileName);
+bool checkDirExists(const std::string &fileName);
+void createDirectory(const std::string &dirName);
+void saveFile(const std::string &fileName, const std::string &fileData);
+std::string pathToFileName(const std::string &path);
 #ifdef IS_DEBUG
-	void printList(const std::vector<std::string> &list);
+void printList(const std::vector<std::string> &list);
 #endif
-	//Template functions
-	template <class T>
-	int itemIndex(const std::vector<T> &vect, const T &item) {
-		int index = 0;
-		typename std::vector<T>::const_iterator it = std::find(vect.begin(), vect.end(), item);
-		if (it != vect.end()) {
-			index = it - vect.begin();
-		}
-		return index;
-	}
-	template <class T>
-	bool itemExists(const std::vector<T> &vect, const T &item) {
-		typename std::vector<T>::const_iterator it = std::find(vect.begin(), vect.end(), item);
-		return (it != vect.end());
-	}
+//Template functions
+template <class T>
+int itemIndex(const std::vector<T> &vect, const T &item) {
+    int index = 0;
+    typename std::vector<T>::const_iterator it = std::find(vect.begin(), vect.end(), item);
+    if (it != vect.end()) {
+        index = it - vect.begin();
+    }
+    return index;
+}
+template <class T>
+bool itemExists(const std::vector<T> &vect, const T &item) {
+    typename std::vector<T>::const_iterator it = std::find(vect.begin(), vect.end(), item);
+    return (it != vect.end());
+}
 }
 #endif // FILEWORK_H

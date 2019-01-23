@@ -1,6 +1,6 @@
 /*
  * sliderwindow.h
- * Copyright (C) 2012-2015 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2019 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,22 +29,22 @@
 class SliderWindow : public Gtk::Window
 {
 public:
-	SliderWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>&refGlade);
-	~SliderWindow();
-	void setWindowPosition(const iconPosition& pos);
-	void setVolumeValue(double value);
-	//signal
-	typedef sigc::signal<void, double> type_sliderwindow_signal;
-	type_sliderwindow_signal signal_volume_changed();
+    SliderWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>&refGlade);
+    ~SliderWindow();
+    void setWindowPosition(const iconPosition& pos);
+    void setVolumeValue(double value);
+    //signal
+    typedef sigc::signal<void, double> type_sliderwindow_signal;
+    type_sliderwindow_signal signal_volume_changed();
 
 private:
-	void on_volume_slider();
-	bool on_focus_out(GdkEventCrossing* event);
+    void on_volume_slider();
+    bool on_focus_out(GdkEventCrossing* event);
 protected:
-	type_sliderwindow_signal m_signal_volume_changed;
+    type_sliderwindow_signal m_signal_volume_changed;
 private:
-	Gtk::Scale *volumeSlider_;
-	double volumeValue_;
+    Gtk::Scale *volumeSlider_;
+    double volumeValue_;
 };
 
 #endif // SLIDERWINDOW_H

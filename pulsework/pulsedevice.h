@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Clément Démoulins <clement@archivel.fr>
- * Copyright (C) 2014-2015 Vitaly Tonkacheyev <thetvg@gmail.com>
+ * Copyright (C) 2014-2019 Vitaly Tonkacheyev <thetvg@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,35 +25,35 @@
 #include <memory>
 
 enum device_type {
-	SOURCE,
-	SINK
+    SOURCE,
+    SINK
 };
 
 class PulseDevice
 {
 public:
-	PulseDevice();
-	explicit PulseDevice(const pa_source_info* i_);
-	explicit PulseDevice(const pa_sink_info* i);
-	typedef std::shared_ptr<PulseDevice> Ptr;
-	uint32_t index() const;
-	uint32_t card() const;
-	device_type type() const;
-	const std::string &name() const;
-	const std::string &description() const;
-	pa_cvolume volume;
-	int volume_percent();
-	bool mute() const;
-	double round(double value) const;
+    PulseDevice();
+    explicit PulseDevice(const pa_source_info* i_);
+    explicit PulseDevice(const pa_sink_info* i);
+    typedef std::shared_ptr<PulseDevice> Ptr;
+    uint32_t index() const;
+    uint32_t card() const;
+    device_type type() const;
+    const std::string &name() const;
+    const std::string &description() const;
+    pa_cvolume volume;
+    int volume_percent();
+    bool mute() const;
+    double round(double value) const;
 private:
-	int percent(pa_cvolume& volume) const;
+    int percent(pa_cvolume& volume) const;
 private:
-	uint32_t index_;
-	uint32_t card_;
-	device_type type_;
-	std::string name_;
-	std::string description_;
-	bool mute_;
+    uint32_t index_;
+    uint32_t card_;
+    device_type type_;
+    std::string name_;
+    std::string description_;
+    bool mute_;
 };
 
 #endif // PULSEDEVICE_H

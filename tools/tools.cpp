@@ -1,6 +1,6 @@
 /*
  * tools.cpp
- * Copyright (C) 2012-2015 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2019 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,101 +30,101 @@
 
 bool Tools::checkFileExists(const std::string &fileName)
 {
-	return g_file_test(fileName.c_str(), G_FILE_TEST_EXISTS);
+    return g_file_test(fileName.c_str(), G_FILE_TEST_EXISTS);
 }
 
 bool Tools::checkDirExists(const std::string &fileName)
 {
-	return g_file_test(fileName.c_str(), G_FILE_TEST_IS_DIR);
+    return g_file_test(fileName.c_str(), G_FILE_TEST_IS_DIR);
 }
 
 std::string Tools::getCWD()
 {
-	const size_t cwdSize = 255;
-	char cwdBuffer[255];
-	return getcwd(cwdBuffer, cwdSize);
+    const size_t cwdSize = 255;
+    char cwdBuffer[255];
+    return getcwd(cwdBuffer, cwdSize);
 }
 
 std::string Tools::getHomePath()
 {
-	return std::string(getenv("HOME"));
+    return std::string(getenv("HOME"));
 }
 
 std::vector<std::string> Tools::getProjectPathes()
 {
-	const std::string cwd = getCWD();
-	std::vector<std::string> list;
-	list.push_back(getHomePath() + std::string("/.local") + PATH_SUFFIX);
-	list.push_back(cwd + "/");
-	list.push_back(cwd + "/" + PATH_SUFFIX);
-	list.push_back(cwd.substr(0, cwd.find_last_of("/")) + PATH_SUFFIX);
-	list.push_back(std::string("/usr") + PATH_SUFFIX);
-	list.push_back(std::string("/usr/local") + PATH_SUFFIX);
-	return list;
+    const std::string cwd = getCWD();
+    std::vector<std::string> list({getHomePath() + std::string("/.local") + PATH_SUFFIX,
+                                   cwd + "/",
+                                   cwd + "/" + PATH_SUFFIX,
+                                   cwd.substr(0, cwd.find_last_of("/")) + PATH_SUFFIX,
+                                   std::string("/usr") + PATH_SUFFIX,
+                                   std::string("/usr/local") + PATH_SUFFIX}
+                                  );
+    return list;
 }
 
 std::string Tools::getResPath(const char *resName)
 {
-	const std::string resName_(resName);
-	const std::vector<std::string> list = getProjectPathes();
-	std::string fileName;
-	std::vector<std::string>::const_iterator it = std::find_if(list.begin(),
-								   list.end(),
-								   [&](const std::string &path){
-		fileName = path + resName_;
-		return checkFileExists(fileName);
-	});
-	return (it != list.end()) ? fileName : std::string();
+    const std::string resName_(resName);
+    const std::vector<std::string> list = getProjectPathes();
+    std::string fileName;
+    auto it = std::find_if(list.begin(),
+                           list.end(),
+                           [&](const std::string &path){
+        fileName = path + resName_;
+        return checkFileExists(fileName);
+    });
+    return (it != list.end()) ? fileName : std::string();
 }
 
 std::string Tools::getDirPath(const char *dirName)
 {
-	const std::string dirName_(dirName);
-	const std::vector<std::string> list = getProjectPathes();
-	std::string directoryName;
-	std::vector<std::string>::const_iterator it = std::find_if(list.begin(),
-								   list.end(),
-								   [&](const std::string &path){
-		directoryName = path + dirName_;
-		return checkDirExists(directoryName);
-	});
-	return (it != list.end()) ? directoryName : std::string();
+    const std::string dirName_(dirName);
+    const std::vector<std::string> list = getProjectPathes();
+    std::string directoryName;
+    auto it = std::find_if(list.begin(),
+                           list.end(),
+                           [&](const std::string &path){
+        directoryName = path + dirName_;
+        return checkDirExists(directoryName);
+    });
+    return (it != list.end()) ? directoryName : std::string();
 }
 
 void Tools::createDirectory(const std::string &dirName)
 {
-	if (!checkDirExists(dirName)) {
-		std::cerr << "Directory " << dirName << " not found. Attempting to create it.." << std::endl;
-		gint err  = g_mkdir_with_parents(dirName.c_str(), MK_RIGHTS);
-		if (err < 0) {
-			std::cerr << "tools.cpp::102::createDirectory:: " << g_file_error_from_errno(err) << std::endl;
-		}
-	}
+    if (!checkDirExists(dirName)) {
+        std::cerr << "Directory " << dirName << " not found. Attempting to create it.." << std::endl;
+        gint err  = g_mkdir_with_parents(dirName.c_str(), MK_RIGHTS);
+        if (err < 0) {
+            std::cerr << "tools.cpp::102::createDirectory:: " << g_file_error_from_errno(err) << std::endl;
+        }
+    }
 }
 
 void Tools::saveFile(const std::string &fileName, const std::string &fileData)
 {
-	try {
-		std::ofstream ofile(fileName.c_str());
-		ofile << fileData << std::endl;
-		ofile.close();
-	}
-	catch ( const std::exception & ex ) {
-		std::cerr << "tools.cpp::112::saveFile:: " << ex.what() << std::endl;
-	}
+    try {
+        std::ofstream ofile(fileName.c_str());
+        ofile << fileData << std::endl;
+        ofile.close();
+    }
+    catch ( const std::exception & ex ) {
+        std::cerr << "tools.cpp::112::saveFile:: " << ex.what() << std::endl;
+    }
 }
 
 std::string Tools::pathToFileName(const std::string &path)
 {
-	return g_path_get_basename(path.c_str());
+    return g_path_get_basename(path.c_str());
 }
 
 #ifdef IS_DEBUG
 void Tools::printList(const std::vector<std::string> &list)
 {
-	std::cout << "Printing vector contents" << std::endl;
-	std::for_each(list.begin(),
-		      list.end(),
-		      []( const std::string &item){ std::cout << item << std::endl; });
+    std::cout << "Printing vector contents" << std::endl;
+    for(const std::string &item : list) {
+        std::cout << item << std::endl;
+    }
 }
 #endif
