@@ -56,9 +56,10 @@ std::string getResPath(const char *resName);
 std::string getDirPath(const char *dirName);
 bool checkFileExists(const std::string &fileName);
 bool checkDirExists(const std::string &fileName);
+bool compareDouble(const double &a, const double &b);
 void createDirectory(const std::string &dirName);
 void saveFile(const std::string &fileName, const std::string &fileData);
-std::string pathToFileName(const std::string &path);
+
 #ifdef IS_DEBUG
 void printList(const std::vector<std::string> &list);
 #endif

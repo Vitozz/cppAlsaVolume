@@ -18,17 +18,20 @@
  */
 
 #include "alsadevice.h"
+
+#include <memory>
+#include <utility>
 #include "cmath"
 
-#define ZERO 0.0;
+#define ZERO 0.0
 
-AlsaDevice::AlsaDevice(int id, const std::string &card)
+AlsaDevice::AlsaDevice(int id, std::string card)
     : id_(id),
-      name_(card),
+      name_(std::move(card)),
       volumeMixers_(std::vector<std::string>()),
       captureMixers_(std::vector<std::string>()),
       mixers_(std::vector<std::string>()),
-      switches_(MixerSwitches::Ptr(new MixerSwitches())),
+      switches_(std::make_shared<MixerSwitches>()),
       currentMixerId_(0),
       currentMixerName_(std::string())
 {
@@ -36,8 +39,7 @@ AlsaDevice::AlsaDevice(int id, const std::string &card)
 }
 
 AlsaDevice::~AlsaDevice()
-{
-}
+= default;
 
 void AlsaDevice::updateElements()
 {
@@ -147,8 +149,8 @@ snd_mixer_selem_channel_id_t AlsaDevice::checkMixerChannels(snd_mixer_elem_t *el
     }
     else {
         for (int channel = 0; channel <= SND_MIXER_SCHN_LAST; channel++) {
-            if (snd_mixer_selem_has_playback_channel(element, (snd_mixer_selem_channel_id_t)channel)) {
-                return (snd_mixer_selem_channel_id_t)channel;
+            if (snd_mixer_selem_has_playback_channel(element, static_cast<snd_mixer_selem_channel_id_t>(channel))) {
+                return static_cast<snd_mixer_selem_channel_id_t>(channel);
             }
         }
     }
@@ -157,8 +159,8 @@ snd_mixer_selem_channel_id_t AlsaDevice::checkMixerChannels(snd_mixer_elem_t *el
     }
     else {
         for (int channel = 0; channel <= SND_MIXER_SCHN_LAST; channel++) {
-            if (snd_mixer_selem_has_capture_channel(element, (snd_mixer_selem_channel_id_t)channel)) {
-                return (snd_mixer_selem_channel_id_t)channel;
+            if (snd_mixer_selem_has_capture_channel(element, static_cast<snd_mixer_selem_channel_id_t>(channel))) {
+                return static_cast<snd_mixer_selem_channel_id_t>(channel);
             }
         }
     }
@@ -189,18 +191,18 @@ double AlsaDevice::getNormVolume(snd_mixer_elem_t *element)
             if (err < 0) {
                 return 0;
             }
-            return (value - min) / (double)(max-min);
+            return double(value - min) / double(max-min);
         }
         err = snd_mixer_selem_get_playback_dB(element, chanelid, &value);
         if (err < 0) {
             return 0;
         }
         if (useLinearDb(min, max)) {
-            return (value - min) / (double)(max-min);
+            return double(value - min) / double(max-min);
         }
-        norm = getExp10((value - max) / 6000.0);
+        norm = getExp10(double(value - max) / 6000.0);
         if (min != SND_CTL_TLV_DB_GAIN_MUTE) {
-            minNorm = getExp10((min - max) / 6000.0);
+            minNorm = getExp10(double(min - max) / 6000.0);
             norm = (norm - minNorm)/(1 - minNorm);
         }
         return norm;
@@ -216,7 +218,7 @@ double AlsaDevice::getNormVolume(snd_mixer_elem_t *element)
             if (err < 0) {
                 return 0;
             }
-            return (value - min) / (double)(max-min);
+            return double(value - min) / double(max - min);
         }
 
         err = snd_mixer_selem_get_capture_dB(element, chanelid, &value);
@@ -224,11 +226,11 @@ double AlsaDevice::getNormVolume(snd_mixer_elem_t *element)
             return 0;
         }
         if (useLinearDb(min, max)) {
-            return (value - min) / (double)(max-min);
+            return double(value - min) / double(max - min);
         }
-        norm = getExp10((value - max) / 6000.0);
+        norm = getExp10(double(value - max) / 6000.0);
         if (min != SND_CTL_TLV_DB_GAIN_MUTE) {
-            minNorm = getExp10((min - max) / 6000.0);
+            minNorm = getExp10(double(min - max) / 6000.0);
             norm = (norm - minNorm)/(1 - minNorm);
         }
         return norm;
@@ -254,17 +256,17 @@ void AlsaDevice::setNormVolume(snd_mixer_elem_t *element, double volume)
             if (err < 0) {
                 return;
             }
-            value = lrint(volume*(max-min)) + min;
+            value = lrint(volume*double(max-min)) + min;
             checkError(snd_mixer_selem_set_playback_volume_all(element, value));
             return;
         }
         if (useLinearDb(min, max)) {
-            value = lrint(volume*(max-min)) + min;
+            value = lrint(volume*double(max-min)) + min;
             checkError(snd_mixer_selem_set_playback_dB_all(element, value, 1));
             return;
         }
         if (min != SND_CTL_TLV_DB_GAIN_MUTE) {
-            min_norm = getExp10((min-max)/6000.0);
+            min_norm = getExp10(double(min-max)/6000.0);
             volume = volume * (1-min_norm) + min_norm;
         }
         value = lrint(6000.0 * log10(volume))+max;
@@ -278,17 +280,17 @@ void AlsaDevice::setNormVolume(snd_mixer_elem_t *element, double volume)
             if (err < 0) {
                 return;
             }
-            value = lrint(volume*(max-min)) + min;
+            value = lrint(volume*double(max-min)) + min;
             checkError(snd_mixer_selem_set_capture_volume_all(element, value));
             return;
         }
         if (useLinearDb(min, max)) {
-            value = lrint(volume*(max-min)) + min;
+            value = lrint(volume*double(max-min)) + min;
             checkError(snd_mixer_selem_set_capture_dB_all(element, value, 1));
             return;
         }
         if (min != SND_CTL_TLV_DB_GAIN_MUTE) {
-            min_norm = getExp10((min-max)/6000.0);
+            min_norm = getExp10(double(min-max)/6000.0);
             volume = volume * (1-min_norm) + min_norm;
         }
         value = lrint(6000.0 * log10(volume))+max;
@@ -331,6 +333,7 @@ void AlsaDevice::setSwitch(const std::string &mixer, int id, bool enabled)
     if (!snd_mixer_elem_empty(elem)) {
         switch (id) {
         case PLAYBACK:
+        default:
             checkError(snd_mixer_selem_set_playback_switch_all(elem, int(enabled)));
             break;
         case CAPTURE:
@@ -404,7 +407,7 @@ void AlsaDevice::setCurrentMixer(int id)
 {
     if(id >= 0 && id < int(mixers_.size())) {
         currentMixerId_ = id;
-        currentMixerName_ = mixers_.at(id);
+        currentMixerName_ = mixers_.at(ulong(id));
     }
 }
 
@@ -471,4 +474,10 @@ int AlsaDevice::currentMixerId() const
 const std::string &AlsaDevice::currentMixer() const
 {
     return currentMixerName_;
+}
+
+AlsaDevice::AlsaDevice(AlsaDevice const &ad)
+ : currentMixerId_(ad.currentMixerId()),
+   id_(ad.id())
+{
 }

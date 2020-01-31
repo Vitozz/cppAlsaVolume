@@ -49,7 +49,6 @@ public:
     type_trayicon_simple_signal signal_ask_dialog();
     type_trayicon_simple_signal signal_ask_settings();
     type_trayicon_simple_signal signal_save_settings();
-    type_trayicon_simple_signal signal_ask_extmixer();
     typedef sigc::signal<void, iconPosition> type_trayicon_4int_signal;
     type_trayicon_4int_signal signal_on_restore();
     typedef sigc::signal<void, double> type_trayicon_double_signal;
@@ -80,7 +79,7 @@ private:
     void setIcon(double value);
     void setTooltip(const Glib::ustring &message);
     Glib::ustring getIconName(double value) const;
-    void setMousePos(const int X, const int Y);
+    void setMousePos(int X, int Y);
 #if defined(USE_APPINDICATOR)
     static void onScrollEventAI(AppIndicator *ai, gint steps, gint direction, TrayIcon *userdata);
 #elif defined(USE_KDE)

@@ -30,7 +30,7 @@
 class AlsaDevice
 {
 public:
-    AlsaDevice(int id, const std::string &card);
+    AlsaDevice(int id, std::string card);
     ~AlsaDevice();
     AlsaDevice(AlsaDevice const &);
     typedef std::shared_ptr<AlsaDevice> Ptr;
@@ -53,15 +53,15 @@ public:
     static std::string formatCardName(long long int id);
 
 private:
-    snd_mixer_t *getMixerHanlde(int id);
-    snd_mixer_selem_channel_id_t checkMixerChannels(snd_mixer_elem_t *element);
-    snd_mixer_elem_t *initMixerElement(snd_mixer_t *handle, const char *mixer);
-    void checkError (int errorIndex);
+    static snd_mixer_t *getMixerHanlde(int id);
+    static snd_mixer_selem_channel_id_t checkMixerChannels(snd_mixer_elem_t *element);
+    static snd_mixer_elem_t *initMixerElement(snd_mixer_t *handle, const char *mixer);
+    static void checkError (int errorIndex);
     void initMixerList();
-    double getNormVolume(snd_mixer_elem_t *element);
-    double getExp10(double value);
-    bool useLinearDb(long min, long max);
-    void setNormVolume(snd_mixer_elem_t *element, double volume);
+    static double getNormVolume(snd_mixer_elem_t *element);
+    static double getExp10(double value);
+    static bool useLinearDb(long min, long max);
+    static void setNormVolume(snd_mixer_elem_t *element, double volume);
     void updateElements();
 
 private:

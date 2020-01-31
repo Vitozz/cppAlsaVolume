@@ -45,11 +45,11 @@ public:
     PulseCore(PulseCore const &);
     typedef std::shared_ptr<PulseCore> Ptr;
     state pState;
-    const std::string defaultSink();
+    std::string defaultSink();
     const std::vector<std::string> &getCardList() const;
     const std::vector<std::string> &getCardNames() const;
-    const std::string getDeviceDescription(const std::string &name);
-    const std::string getDeviceNameByIndex(int index);
+    std::string getDeviceDescription(const std::string &name);
+    std::string getDeviceNameByIndex(int index);
     int getCurrentDeviceIndex();
     int getVolume();
     int getCardIndex();
@@ -77,7 +77,7 @@ private:
     void setVolume_(const PulseDevice::Ptr &device, int value);
     void setMute_(const PulseDevice::Ptr &device, bool mute);
     void iterate(pa_operation* op);
-    inline void onError(const std::string &message){ std::cerr << "Error: " << message << std::endl; }
+    static inline void onError(const std::string &message);
     void updateDevices();
     void clearLists();
 private:

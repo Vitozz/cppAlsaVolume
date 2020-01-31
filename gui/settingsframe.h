@@ -36,13 +36,12 @@ class SettingsFrame : public Gtk::Dialog
 public:
     SettingsFrame(BaseObjectType* cobject,
                   const Glib::RefPtr<Gtk::Builder>& refGlade);
-    ~SettingsFrame();
+    ~SettingsFrame() override;
     enum RESPONCES {
         OK_RESPONSE = 1,
         CANCEL_RESPONSE = 0
     };
     void initParms(const settingsStr::Ptr &str);
-    void updateControls(const settingsStr::Ptr &str);
     void updateMixers(const std::vector<std::string> &mixers);
     void updateSwitches(const MixerSwitches::Ptr &slist);
     void disablePulseCheckButton();
@@ -130,8 +129,8 @@ private:
     Glib::RefPtr<Gtk::ListStore> capSwitches_;
     Glib::RefPtr<Gtk::ListStore> enumSwitches_;
     settingsStr::Ptr settings_;
-    int mixerId_;
-    int cardId_;
+    uint mixerId_;
+    uint cardId_;
     bool isPulse_;
 };
 

@@ -25,11 +25,12 @@
 static uint32_t getCardId(pa_proplist *pl)
 {
     const char* cardId = pa_proplist_gets(pl, ALSA_CARDID_PROPERTY);
-    return (cardId != nullptr) ? std::stoi(std::string(cardId)) : 0;
+    return (cardId != nullptr) ? uint(std::stoi(std::string(cardId))) : 0;
 }
 
 PulseDevice::PulseDevice()
-    : index_(0),
+    : volume({0,0}),
+      index_(0),
       card_(0),
       type_(SINK),
       name_(std::string()),
@@ -39,7 +40,8 @@ PulseDevice::PulseDevice()
 }
 
 PulseDevice::PulseDevice(const pa_source_info* i)
-    : index_(i->index),
+    : volume({0,0}),
+      index_(i->index),
       card_(getCardId(i->proplist)),
       type_(SOURCE),
       name_(std::string(i->name)),
@@ -54,7 +56,8 @@ PulseDevice::PulseDevice(const pa_source_info* i)
 }
 
 PulseDevice::PulseDevice(const pa_sink_info* i)
-    : index_(i->index),
+    : volume({0,0}),
+      index_(i->index),
       card_(getCardId(i->proplist)),
       type_(SINK),
       name_(std::string(i->name)),
@@ -70,7 +73,7 @@ PulseDevice::PulseDevice(const pa_sink_info* i)
 
 int PulseDevice::percent(pa_cvolume& volume_) const
 {
-    return (int) round(((double) pa_cvolume_avg(&volume_) * 100.) / PA_VOLUME_NORM);
+    return int(round((double(pa_cvolume_avg(&volume_) * 100.) / PA_VOLUME_NORM)));
 }
 
 double PulseDevice::round(double value) const

@@ -30,9 +30,6 @@ public:
     MixerSwitches(const MixerSwitches &ms);
     typedef std::shared_ptr<MixerSwitches> Ptr;
     void pushBack(SwitchType sType, switchcap &item);
-    void setCaptureSwitchList(const std::vector<switchcap> &list);
-    void setPlaybackSwitchList(const std::vector<switchcap> &list);
-    void setEnumSwitchList(const std::vector<switchcap> &list);
     void clear(SwitchType sType);
     void clearAll();
     const std::vector<switchcap> &captureSwitchList() const;

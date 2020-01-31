@@ -24,7 +24,6 @@
 #include "fstream"
 
 #define MAIN "main"
-#define VOLUME "volume"
 #define CARD "card"
 #define MIXER "mixer"
 #define MIXERID "mixerid"
@@ -156,7 +155,7 @@ int Settings::getSoundCard() const
 {
     int card = 0;
     try {
-        card = (int)configFile_->get_integer(Glib::ustring(MAIN),Glib::ustring(CARD));
+        card = int(configFile_->get_integer(Glib::ustring(MAIN),Glib::ustring(CARD)));
     }
     catch (const Glib::KeyFileError& ex) {
         std::cerr << "settings.cpp::160::KeyFileError " << ex.what() << std::endl;
@@ -168,7 +167,7 @@ int Settings::getMixerId() const
 {
     int id = 0;
     try {
-        id = (int)configFile_->get_integer(Glib::ustring(MAIN),Glib::ustring(MIXERID));
+        id = int(configFile_->get_integer(Glib::ustring(MAIN),Glib::ustring(MIXERID)));
     }
     catch (const Glib::KeyFileError& ex) {
         std::cerr << "settings.cpp::172::KeyFileError " << ex.what() << std::endl;
@@ -214,7 +213,7 @@ bool Settings::getAutorun()
 
 std::string Settings::pulseDeviceName() const
 {
-    std::string device("");
+    std::string device;
     try {
         device = std::string(configFile_->get_string(Glib::ustring(MAIN),Glib::ustring(PULSEDEV)));
     }
@@ -246,4 +245,10 @@ bool Settings::usePolling()
         std::cerr << "settings.cpp::244::KeyFileError " << ex.what() << std::endl;
     }
     return isPolling;
+}
+
+Settings::Settings(Settings const &s)
+        : configFile_(s.configFile_),
+          desktopFile_(s.desktopFile_)
+{
 }

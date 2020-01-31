@@ -30,6 +30,8 @@
 #include "../pulsework/pulsecore.h"
 #endif
 
+
+
 class Core
 {
 public:
@@ -40,13 +42,11 @@ public:
     void runAboutDialog();
     std::string getSoundCardName() const;
     std::string getActiveMixer() const;
-    void setActiveMixer(int index);
     void saveSettings();
     void runSettings();
     void switchChanged (const std::string& name, int id, bool enabled);
     void soundMuted(bool mute);
     bool getMuted();
-    void onExtMixerSignal();
     double getVolumeValue() const;
     void onTrayIconScroll(double value);
     void onVolumeSlider(double value);
@@ -69,10 +69,9 @@ private:
     void updatePulseDevices(int deviceId);
     void initPulseAudio();
 #endif
-    void updateSettings(int cardId);
     void updateTrayIcon(double value);
     void blockAllSignals(bool isblock);
-    void errorDialog(const std::string &errorMessage);
+    static void errorDialog(const std::string &errorMessage);
     bool onTimeout();
 
 private:
@@ -93,7 +92,6 @@ private:
     PulseCore::Ptr pulse_;
     std::string pulseDevice_;
     std::string pulseDeviceDesc_;
-    std::vector<std::string> pulseDevices_;
     sigc::connection signal_pulsdev_;
     sigc::connection signal_pulsedevices_;
 

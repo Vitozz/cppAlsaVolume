@@ -49,7 +49,6 @@ public:
     void setMixerId(unsigned int id);
     void setNotebookOrientation(bool orient);
     void setIsAutorun(bool autorun);
-    void pushBack(ListType listType, const std::string &item);
     void addMixerSwitch(const MixerSwitches::Ptr &switchItem);
     void setList(ListType listType, const std::vector<std::string> &list);
     void clear(ListType listType);

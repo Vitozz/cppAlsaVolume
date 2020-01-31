@@ -30,7 +30,7 @@ class SliderWindow : public Gtk::Window
 {
 public:
     SliderWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>&refGlade);
-    ~SliderWindow();
+    ~SliderWindow() override;
     void setWindowPosition(const iconPosition& pos);
     void setVolumeValue(double value);
     //signal

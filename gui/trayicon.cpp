@@ -34,7 +34,6 @@
 #include "giomm/dbusproxy.h"
 #endif
 #define _(String) gettext(String)
-#define N_(String) gettext_noop (String)
 #define MUTEITEM _("Mute")
 #define SETTSITEM _("Settings")
 #define ABOUTITEM _("About")
@@ -94,16 +93,16 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 #ifdef IS_DEBUG
             std::cout << "StatusNotifier state " << state << std::endl;
 #endif
-            g_signal_connect(newIcon_.get(), "registration-failed", (GCallback)TrayIcon::onRegisterError, this);
+            g_signal_connect(newIcon_.get(), "registration-failed", GCallback(TrayIcon::onRegisterError), this);
             if ( state != STATUS_NOTIFIER_STATE_NOT_REGISTERED && state != STATUS_NOTIFIER_STATE_FAILED ) {
                 isLegacyIcon_ = false;
 #ifdef IS_DEBUG
                 std::cout << "New Icon created" << std::endl;
 #endif
-                g_signal_connect(newIcon_.get(), "activate", (GCallback)TrayIcon::onActivate, this);
-                g_signal_connect(newIcon_.get(), "context-menu", (GCallback)TrayIcon::onContextMenu, this);
-                g_signal_connect(newIcon_.get(), "secondary-activate", (GCallback)TrayIcon::onSecondaryActivate, this);
-                g_signal_connect(newIcon_.get(), "scroll", (GCallback)TrayIcon::onScroll, this);
+                g_signal_connect(newIcon_.get(), "activate", GCallback(TrayIcon::onActivate), this);
+                g_signal_connect(newIcon_.get(), "context-menu", GCallback(TrayIcon::onContextMenu), this);
+                g_signal_connect(newIcon_.get(), "secondary-activate", GCallback(TrayIcon::onSecondaryActivate), this);
+                g_signal_connect(newIcon_.get(), "scroll", GCallback(TrayIcon::onScroll), this);
             }
         }
     }
@@ -157,7 +156,7 @@ void TrayIcon::onHideRestore()
     Glib::RefPtr<Gdk::Screen> screen;
     Gdk::Rectangle area;
     Gtk::Orientation orientation;
-    iconPosition pos;
+    iconPosition pos = {0,0,0,0,0,0,false,false};
     if (isLegacyIcon_) {
         if (legacyIcon_->get_geometry(screen, area, orientation)) {
             pos.iconX_ = area.get_x();
@@ -212,7 +211,7 @@ void TrayIcon::onActivate(StatusNotifierItem *sn, gint x, gint y, TrayIcon *user
 {
     (void)sn;
     Glib::RefPtr<Gdk::Screen> screen = userdata->aboutItem_->get_screen();
-    iconPosition pos;
+    iconPosition pos = {0,0,0,0,0,0,false,false};
     pos.iconX_ = x + userdata->pixbufWidth_/2;
     pos.iconY_ = y;
     pos.screenHeight_ = screen->get_height();
@@ -330,7 +329,7 @@ Glib::ustring TrayIcon::getIconName(double value) const
     int number = 100;
     Glib::ustring iconPath = Glib::ustring::compose("%1%2.png",ICON_PREFIX, Glib::ustring::format(number));
     value = (value <= 0) ? 0 : (value > 100) ? 100 : value;
-    number = (value < 20) ? 20 : floor(value/20+0.5)*20;
+    number = (value < 20) ? 20 : int(floor(value/20+0.5)*20);
     if (value <= 0 || muted_) {
         number = 0;
     }
@@ -426,7 +425,7 @@ bool TrayIcon::onButtonClick(GdkEventButton* event)
 #ifdef IS_DEBUG
         std::cout << "Pressed" << std::endl;
 #endif
-        setMousePos(event->x_root, event->y_root);
+        setMousePos(int(event->x_root), int(event->y_root));
     }
     return false;
 }

@@ -20,7 +20,6 @@
 #include "tools/core.h"
 #include "gui/sliderwindow.h"
 #include "gui/trayicon.h"
-#include "tools/tools.h"
 #ifndef IS_GTK_2
 #include "gtkmm/application.h"
 #else
@@ -28,7 +27,6 @@
 #endif
 #include "gtkmm/builder.h"
 #include "glibmm.h"
-#include "memory.h"
 #include "libintl.h"
 #define _(String) gettext(String)
 #define N_(String) gettext_noop (String)

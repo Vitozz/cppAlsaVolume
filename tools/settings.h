@@ -48,7 +48,7 @@ public:
     void setUsePolling(bool use);
 
 private:
-    void parseConfig(const Glib::ustring& keyFileName, const Glib::ustring& keyFileData);
+    static void parseConfig(const Glib::ustring& keyFileName, const Glib::ustring& keyFileData);
     void loadConfig(const std::string& fileName);
     void loadDesktopFile(const std::string& fileName);
     void initDesktopFileData();

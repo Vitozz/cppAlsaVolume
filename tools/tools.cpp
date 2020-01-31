@@ -18,9 +18,7 @@
  */
 
 #include "tools.h"
-#include "glibmm/fileutils.h"
 #include "glib.h"
-#include "glib/gstdio.h"
 #include "unistd.h"
 #include <fstream>
 #include <cstdlib>
@@ -36,6 +34,12 @@ bool Tools::checkFileExists(const std::string &fileName)
 bool Tools::checkDirExists(const std::string &fileName)
 {
     return g_file_test(fileName.c_str(), G_FILE_TEST_IS_DIR);
+}
+
+bool Tools::compareDouble(const double &a, const double &b)
+{
+    const double EPSILON = 1.0e-5;
+    return (a-b) < EPSILON;
 }
 
 std::string Tools::getCWD()
@@ -56,7 +60,7 @@ std::vector<std::string> Tools::getProjectPathes()
     std::vector<std::string> list({getHomePath() + std::string("/.local") + PATH_SUFFIX,
                                    cwd + "/",
                                    cwd + "/" + PATH_SUFFIX,
-                                   cwd.substr(0, cwd.find_last_of("/")) + PATH_SUFFIX,
+                                   cwd.substr(0, cwd.find_last_of('/')) + PATH_SUFFIX,
                                    std::string("/usr") + PATH_SUFFIX,
                                    std::string("/usr/local") + PATH_SUFFIX}
                                   );
@@ -112,11 +116,6 @@ void Tools::saveFile(const std::string &fileName, const std::string &fileData)
     catch ( const std::exception & ex ) {
         std::cerr << "tools.cpp::112::saveFile:: " << ex.what() << std::endl;
     }
-}
-
-std::string Tools::pathToFileName(const std::string &path)
-{
-    return g_path_get_basename(path.c_str());
 }
 
 #ifdef IS_DEBUG

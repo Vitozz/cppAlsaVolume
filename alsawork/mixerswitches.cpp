@@ -20,29 +20,13 @@
 #include "mixerswitches.h"
 
 MixerSwitches::MixerSwitches()
-{
-}
+= default;
 
 MixerSwitches::MixerSwitches(const MixerSwitches &ms)
     : captureSwitchList_(ms.captureSwitchList()),
       playbackSwitchList_(ms.playbackSwitchList()),
       enumSwitchList_(ms.enumSwitchList())
 {
-}
-
-void MixerSwitches::setCaptureSwitchList(const std::vector<switchcap> &list)
-{
-    captureSwitchList_.assign(list.begin(), list.end());
-}
-
-void MixerSwitches::setPlaybackSwitchList(const std::vector<switchcap> &list)
-{
-    playbackSwitchList_.assign(list.begin(), list.end());
-}
-
-void MixerSwitches::setEnumSwitchList(const std::vector<switchcap> &list)
-{
-    enumSwitchList_.assign(list.begin(), list.end());
 }
 
 void MixerSwitches::pushBack(SwitchType sType, switchcap &item)

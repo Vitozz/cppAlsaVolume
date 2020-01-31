@@ -54,8 +54,7 @@ settingsStr::settingsStr(settingsStr &str)
 }
 
 settingsStr::~settingsStr()
-{
-}
+= default;
 
 unsigned int settingsStr::cardId() const
 {
@@ -135,18 +134,6 @@ void settingsStr::setNotebookOrientation(bool orient)
 void settingsStr::setIsAutorun(bool autorun)
 {
     isAutorun_ = autorun;
-}
-
-void settingsStr::pushBack(ListType listType, const std::string &item)
-{
-    switch (listType) {
-    case CARDS:
-        cardList_.push_back(item);
-        break;
-    case MIXERS:
-        mixerList_.push_back(item);
-        break;
-    }
 }
 
 void settingsStr::addMixerSwitch(const MixerSwitches::Ptr &switchItem)
