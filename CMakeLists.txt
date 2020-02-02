@@ -150,7 +150,10 @@ endif()
 
 if( USE_PULSE )
 	find_package( PulseAudio REQUIRED )
-	include_directories( ${PULSE_INCLUDE_DIR} )
+	if( PulseAudio_FOUND )
+		message(STATUS "Found PulseAudio: (found version \"${PulseAudio_VERSION}\")")
+	endif()
+	include_directories( ${PULSEAUDIO_INCLUDE_DIR} )
 	list(APPEND alsavolume_HDRS
 		pulsework/pulsecore.h
 		pulsework/pulsedevice.h
