@@ -45,7 +45,7 @@ public:
     void updateMixers(const std::vector<std::string> &mixers);
     void updateSwitches(const MixerSwitches::Ptr &slist);
     void disablePulseCheckButton();
-    settingsStr::Ptr getSettings() const;
+    settingsStr::Ptr getSettings() const {return settings_;};
     //
     typedef sigc::signal<void, std::string, int ,bool> type_toggled_signal;
     type_toggled_signal signal_switches_toggled();

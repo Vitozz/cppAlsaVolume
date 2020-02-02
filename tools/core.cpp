@@ -28,7 +28,6 @@
 #include <memory>
 #include "libintl.h"
 #define _(String) gettext(String)
-#define N_(String) gettext_noop (String)
 
 #define TITLE _("About AlsaVolume")
 #define PROGNAME _("Alsa Volume Changer")
@@ -64,9 +63,7 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
     settingsStr_->setIsAutorun(settings_->getAutorun());
     int cardId = settings_->getSoundCard();
     cardId = (alsaWork_->cardExists(settings_->getSoundCard())) ? cardId : alsaWork_->getFirstCardWithMixers();
-    if (mixerName_.empty()) {
-        mixerName_ = alsaWork_->getMixerName(int(settingsStr_->mixerId()));
-    }
+    mixerName_ = (mixerName_.empty()) ? alsaWork_->getMixerName(int(settingsStr_->mixerId())) : mixerName_;
     updateControls(cardId);
 #ifdef IS_DEBUG
     std::cout << "Id in settings - " << settingsStr_->mixerId() << std::endl;
@@ -168,8 +165,7 @@ void Core::runSettings()
         settingsDialog_->updateMixers(settingsStr_->mixerList());
         settingsDialog_->updateSwitches(settingsStr_->switchList());
         blockAllSignals(false);
-        int response = settingsDialog_->run();
-        if ( response == settingsDialog_->OK_RESPONSE ) {
+        if ( settingsDialog_->run() == settingsDialog_->OK_RESPONSE ) {
             onSettingsDialogOk(settingsDialog_->getSettings());
         }
     }
@@ -200,9 +196,8 @@ void Core::onSettingsDialogOk(const settingsStr::Ptr &str)
     settingsStr_->setUsePolling(str->usePolling());
     updateControls(int(settingsStr_->cardId()));
 #ifdef HAVE_PULSE
-    if (isPulse_ && pulse_) {
-        volumeValue_ = pulse_->getVolume();
-    }
+    if (isPulse_ && pulse_)
+        volumeValue_ =  pulse_->getVolume();
 #endif
     saveSettings();
 }
@@ -243,13 +238,11 @@ void Core::soundMuted(bool mute)
 bool Core::getMuted()
 {
     if (!isPulse_) {
-        isMuted_ = !alsaWork_->getMute();
-        return isMuted_;
+        return isMuted_ = !alsaWork_->getMute();
     }
 #ifdef HAVE_PULSE
     else if (pulse_) {
-        isMuted_ = pulse_->getMute();
-        return isMuted_;
+        return isMuted_ = pulse_->getMute();
     }
 #endif
     return false;
@@ -448,6 +441,11 @@ Core::type_bool_signal Core::signal_mixer_muted()
     return m_signal_mixer_muted;
 }
 
-Core::Core(Core const &) {
-
+Core::Core(Core const &core)
+ : volumeValue_(core.volumeValue_),
+   pollVolume_(core.pollVolume_),
+   settingsDialog_(core.settingsDialog_),
+   isPulse_(core.isPulse_),
+   isMuted_(core.isMuted_)
+{
 }

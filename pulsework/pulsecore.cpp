@@ -76,7 +76,8 @@ void success_cb(pa_context* c, int success, void* raw) {
 PulseCore::PulseCore(const char *clientName)
     : mainLoop_(pa_mainloop_new()),
       mainLoopApi_(pa_mainloop_get_api(mainLoop_)),
-      context_(pa_context_new(mainLoopApi_,clientName))
+      context_(pa_context_new(mainLoopApi_,clientName)),
+      retval_(0)
 {
     isAvailable_ = true;
     pState = CONNECTING;
@@ -143,7 +144,7 @@ PulseDevice::Ptr PulseCore::getSink(const std::string &name)
 {
     auto it = std::find_if(sinks_.begin(),
                            sinks_.end(),
-                           [=](const PulseDevice::Ptr &device){return (device->name() == name);});
+                           [name](const PulseDevice::Ptr &device){return (device->name() == name);});
     return (it != sinks_.end()) ? *it : getDefaultSink();
 }
 
@@ -162,7 +163,7 @@ PulseDevice::Ptr PulseCore::getSource(const std::string &name)
 {
     auto it = std::find_if(sources_.begin(),
                            sources_.end(),
-                           [=](const PulseDevice::Ptr &device){return (device->name() == name);});
+                           [name](const PulseDevice::Ptr &device){return (device->name() == name);});
     return (it != sinks_.end()) ? *it : getDefaultSource();
 }
 
@@ -300,24 +301,18 @@ void PulseCore::updateDevices()
 
 void PulseCore::clearLists()
 {
-    if (!sinks_.empty()) {
+    if (!sinks_.empty())
         sinks_.clear();
-    }
-    if (!sources_.empty()) {
+    if (!sources_.empty())
         sources_.clear();
-    }
-    if (!sinksDescriptions_.empty()) {
+    if (!sinksDescriptions_.empty())
         sinksDescriptions_.clear();
-    }
-    if(!sourcesDescriptions_.empty()) {
+    if(!sourcesDescriptions_.empty())
         sourcesDescriptions_.clear();
-    }
-    if(!devicesNames_.empty()) {
+    if(!devicesNames_.empty())
         devicesNames_.clear();
-    }
-    if(!devicesDescs_.empty()) {
+    if(!devicesDescs_.empty())
         devicesDescs_.clear();
-    }
 }
 
 int PulseCore::getVolume()

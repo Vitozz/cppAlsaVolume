@@ -10,7 +10,7 @@ option( USE_GTK3 "Build with gtkmm-3.0 support" ON )
 set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 option( USE_APPINDICATOR "Use appindicator support" OFF )
 option( USE_SNI "Enable StatusNotifierItem support" OFF )
-option( USE_CPACK "Enable CPack" OFF )
+option( USE_CPACK "Enable CPack support" OFF )
 
 find_package( PkgConfig REQUIRED )
 find_package( Intl REQUIRED )

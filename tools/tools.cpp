@@ -49,11 +49,6 @@ std::string Tools::getCWD()
     return getcwd(cwdBuffer, cwdSize);
 }
 
-std::string Tools::getHomePath()
-{
-    return std::string(getenv("HOME"));
-}
-
 std::vector<std::string> Tools::getProjectPathes()
 {
     const std::string cwd = getCWD();
@@ -70,29 +65,23 @@ std::vector<std::string> Tools::getProjectPathes()
 std::string Tools::getResPath(const char *resName)
 {
     const std::string resName_(resName);
-    const std::vector<std::string> list = getProjectPathes();
-    std::string fileName;
-    auto it = std::find_if(list.begin(),
-                           list.end(),
-                           [&](const std::string &path){
-        fileName = path + resName_;
-        return checkFileExists(fileName);
-    });
-    return (it != list.end()) ? fileName : std::string();
+    for(const std::string &path : getProjectPathes()) {
+        std::string fileName = path + resName_;
+        if (checkFileExists(fileName))
+            return fileName;
+    }
+    return std::string();
 }
 
 std::string Tools::getDirPath(const char *dirName)
 {
     const std::string dirName_(dirName);
-    const std::vector<std::string> list = getProjectPathes();
-    std::string directoryName;
-    auto it = std::find_if(list.begin(),
-                           list.end(),
-                           [&](const std::string &path){
-        directoryName = path + dirName_;
-        return checkDirExists(directoryName);
-    });
-    return (it != list.end()) ? directoryName : std::string();
+    for(const std::string &path : getProjectPathes()) {
+        std::string directoryName = path + dirName_;
+        if (checkDirExists(directoryName))
+            return directoryName;
+    }
+    return std::string();
 }
 
 void Tools::createDirectory(const std::string &dirName)

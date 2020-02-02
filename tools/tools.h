@@ -50,7 +50,7 @@ typedef std::pair<std::string, bool> switchcap;
 
 namespace Tools {
 std::string getCWD();
-std::string getHomePath();
+inline std::string getHomePath() {return std::string(getenv("HOME"));};
 std::vector<std::string> getProjectPathes();
 std::string getResPath(const char *resName);
 std::string getDirPath(const char *dirName);

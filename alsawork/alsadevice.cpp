@@ -105,15 +105,13 @@ void AlsaDevice::updateElements()
 
 void AlsaDevice::initMixerList()
 {
-    bool isplay = havePlaybackMixers();
-    bool isrec = haveCaptureMixers();
     if (!mixers_.empty()) {
         mixers_.clear();
     }
-    if (isplay) {
+    if (havePlaybackMixers()) {
         mixers_.assign(volumeMixers_.begin(), volumeMixers_.end());
     }
-    if (isrec && !mixers_.empty()) {
+    if (haveCaptureMixers() && !mixers_.empty()) {
         mixers_.insert(mixers_.end(), captureMixers_.begin(), captureMixers_.end());
     }
     if (!mixers_.empty()) {

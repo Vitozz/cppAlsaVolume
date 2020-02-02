@@ -1,5 +1,15 @@
 cmake_minimum_required( VERSION 2.8.12 )
 
+
+
+if(USE_PULSE)
+    set(PULSE_DEP 'pulseaudio')
+endif()
+if(USE_GTK3)
+    set(GTK_DEP 'gtkmm3')
+else()
+    set(GTK_DEP 'gtkmm2')
+endif()
 #CPack section start
 set(CPACK_PACKAGE_VERSION ${_VERSION_STRING})
 set(CPACK_PACKAGE_VERSION_MAJOR "${_VERSION_MAJOR}")

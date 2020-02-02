@@ -53,9 +53,6 @@ settingsStr::settingsStr(settingsStr &str)
 {
 }
 
-settingsStr::~settingsStr()
-= default;
-
 unsigned int settingsStr::cardId() const
 {
     return cardId_;

@@ -40,7 +40,6 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
     int sliderWidth = 0;
 #ifndef IS_GTK_2
     sliderWidth = volumeSlider_->get_allocated_width();
-
 #else
     sliderWidth = volumeSlider_->get_width();
 #endif

@@ -30,7 +30,7 @@ class settingsStr
 public:
     settingsStr();
     settingsStr(settingsStr &str);
-    ~settingsStr();
+    ~settingsStr() = default;
     typedef std::shared_ptr<settingsStr> Ptr;
     unsigned int cardId() const;
     unsigned int mixerId() const;

@@ -6,7 +6,7 @@ pkgdesc="@CPACK_PACKAGE_DESCRIPTION@"
 arch=('i686' 'x86_64')
 url="@PACKAGE_URL@"
 license=('GPL3')
-depends=( 'gtkmm3' 'alsa-lib' 'pulseaudio'
+depends=( @GTK_DEP@ 'alsa-lib' @PULSE_DEP@
           'pkg-config' 'intltool' 'glibmm' )
 makedepends=('git' 'cmake')
 conflicts=(@CPACK_PACKAGE_NAME@)
@@ -42,8 +42,9 @@ build() {
 
   cmake -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_BUILD_TYPE=Release \
-    -DUSE_PULSE=ON \
-    -DUSE_SNI=ON \
+    -DUSE_PULSE=@USE_PULSE@ \
+    -DUSE_SNI=@USE_SNI@ \
+    -DUSE_GTK3=@USE_GTK3@ \
     "$srcdir/$_gitname"
 
   make

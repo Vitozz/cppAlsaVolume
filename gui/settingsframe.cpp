@@ -80,34 +80,25 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
     builder->get_widget("pulseDevices", pulseBox_);
 #endif
     //signals
-    if (tabPos_) {
+    if (tabPos_)
         tabPos_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onTabPos));
-    }
-    if (okButton_) {
+    if (okButton_)
         okButton_->signal_pressed().connect(sigc::mem_fun(*this, &SettingsFrame::onOkButton));
-    }
-    if (cancelButton_) {
+    if (cancelButton_)
         cancelButton_->signal_pressed().connect(sigc::mem_fun(*this, &SettingsFrame::onCancelButton));
-    }
-    if (isAutoRun_) {
+    if (isAutoRun_)
         isAutoRun_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onAutorunToggled));
-    }
-    if (sndCardBox_) {
+    if (sndCardBox_)
         sndCardBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::sndBoxChanged));
-    }
-    if (mixerBox_) {
+    if (mixerBox_)
         mixerBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::mixerBoxChanged));
-    }
-    if (usePolling_) {
+    if (usePolling_)
         usePolling_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onUsePollingToggled));
-    }
 #ifdef HAVE_PULSE
-    if (usePulse_) {
+    if (usePulse_)
         usePulse_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onPulseToggled));
-    }
-    if (pulseBox_) {
+    if (pulseBox_)
         pulseBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::onPulseDeviceChanged));
-    }
 #else
     pulseHBox_->set_visible(false);
     usePulse_->set_visible(false);
@@ -138,19 +129,15 @@ SettingsFrame::~SettingsFrame()
 void SettingsFrame::initParms(const settingsStr::Ptr &str)
 {
     settings_ = str;
-    if (tabPos_) {
+    if (tabPos_)
         tabPos_->set_active(settings_->notebookOrientation());
-    }
-    if (isAutoRun_) {
+    if (isAutoRun_)
         isAutoRun_->set_active(settings_->isAutorun());
-    }
-    if (usePolling_) {
+    if (usePolling_)
         usePolling_->set_active(settings_->usePolling());
-    }
 #ifdef HAVE_PULSE
-    if (usePulse_) {
+    if (usePulse_)
         usePulse_->set_active(settings_->usePulse());
-    }
     pulseDev_ = settings_->pulseDeviceId();
 #endif
     mixerId_ = settings_->mixerId();
@@ -195,11 +182,6 @@ bool SettingsFrame::onDeleteEvent(GdkEventAny *event)
     if (event->type == GDK_DESTROY || event->type == GDK_DELETE)
         onCancelButton();
     return true;
-}
-
-settingsStr::Ptr SettingsFrame::getSettings() const
-{
-    return settings_;
 }
 
 void SettingsFrame::setupTreeModels()
@@ -292,9 +274,8 @@ void SettingsFrame::updateSwitchTree()
         Gtk::TreeModel::Row row;
         const int colsCount = playbackSwitchTree_->append_column(STATUS, *pcell);
         Gtk::TreeViewColumn* pColumn = playbackSwitchTree_->get_column(colsCount -1);
-        if (colsCount) {
+        if (colsCount)
             pColumn->add_attribute(pcell->property_active(), m_TColumns.m_col_toggle);
-        }
         for(const switchcap &scap : settings_->switchList()->playbackSwitchList()) {
             row = *(pbSwitches_->append());
             row[m_TColumns.m_col_toggle] = scap.second;
@@ -316,9 +297,8 @@ void SettingsFrame::updateSwitchTree()
         Gtk::TreeModel::Row row;
         const int colsCount = captureSwitchTree_->append_column(STATUS, *rcell);
         Gtk::TreeViewColumn* pColumn = captureSwitchTree_->get_column(colsCount -1);
-        if (colsCount) {
+        if (colsCount)
             pColumn->add_attribute(rcell->property_active(), m_TColumns.m_col_toggle);
-        }
         for (const switchcap &scap : settings_->switchList()->captureSwitchList()) {
             row = *(capSwitches_->append());
             row[m_TColumns.m_col_toggle] = scap.second;
@@ -339,9 +319,8 @@ void SettingsFrame::updateSwitchTree()
         Gtk::TreeModel::Row row;
         const int colsCount = otherSwitchTree_->append_column(STATUS, *ecell);
         Gtk::TreeViewColumn* pColumn = otherSwitchTree_->get_column(colsCount -1);
-        if (colsCount) {
+        if (colsCount)
             pColumn->add_attribute(ecell->property_active(), m_TColumns.m_col_toggle);
-        }
         for(const switchcap &scap : settings_->switchList()->enumSwitchList()) {
             row = *(enumSwitches_->append());
             row[m_TColumns.m_col_toggle] = scap.second;
