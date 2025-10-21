@@ -1,5 +1,5 @@
 project(alsavolume)
-cmake_minimum_required( VERSION 2.8.12 )
+cmake_minimum_required( VERSION 3.5 )
 
 if( NOT UNIX )
 	message( FATAL_ERROR "Not Unix!" )
@@ -11,6 +11,7 @@ set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake
 option( USE_APPINDICATOR "Use appindicator support" OFF )
 option( USE_SNI "Enable StatusNotifierItem support" OFF )
 option( USE_CPACK "Enable CPack support" OFF )
+option( DEV_MODE "Developer mode" OFF)
 
 find_package( PkgConfig REQUIRED )
 find_package( Intl REQUIRED )
@@ -116,36 +117,32 @@ if( USE_SNI )
 	file(COPY ${PROJECT_SOURCE_DIR}/third-party/statusnotifier/src/statusnotifier.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/enums/)
 	find_program( GLIB_MKENUMS glib-mkenums )
 	mark_as_advanced( GLIB_MKENUMS )
-	set(enums_h "${CMAKE_CURRENT_BINARY_DIR}/enums/enums.h")
-	set(enums_c "${CMAKE_CURRENT_BINARY_DIR}/enums/enums.c")
-	add_custom_command(OUTPUT ${enums_h}
+	if(NOT "${GLIB_MKENUMS}" STREQUAL "glib-mkenums_NOTFOUND")
+		message(STATUS "GLIB_MKENUMS- ${GLIB_MKENUMS}")
+	endif()
+	set(enums_h_out "${CMAKE_CURRENT_BINARY_DIR}/enums/enums.h")
+	set(enums_c_out "${CMAKE_CURRENT_BINARY_DIR}/enums/enums.c")
+	add_custom_command(OUTPUT ${enums_h_out}
 		COMMAND ${GLIB_MKENUMS} ARGS
                 --template ${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/enums.h.template
-                ${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/statusnotifier.h > enums.h
+		${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/statusnotifier.h > enums.h
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/enums
 	)
-	message("${enums.h}")
-	add_custom_command(OUTPUT ${enums_c}
+        add_custom_command(OUTPUT ${enums_c_out}
 		COMMAND ${GLIB_MKENUMS} ARGS
                 --template ${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/enums.c.template
-                ${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/statusnotifier.h > enums.c
+		${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/statusnotifier.h > enums.c
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/enums
 	)
-	add_custom_target(build_enums_h DEPENDS ${enums_h} SOURCES "${statusnotifier_SRCS}")
-	add_custom_target(build_enums_c DEPENDS ${enums_c} SOURCES "${statusnotifier_SRCS}")
+        add_custom_target(build_enums_h DEPENDS "${enums_h_out}")
+	add_custom_target(build_enums_c DEPENDS "${enums_c_out}")
+	message(STATUS "ENUMS - ${enums_h_out}")
 	list(APPEND statusnotifier_SRCS
-		${CMAKE_CURRENT_BINARY_DIR}/enums/enums.c
+		${enums_c_out}
 	)
 	set(APPEND statusnotifier_HDRS
-		${CMAKE_CURRENT_BINARY_DIR}/enums/enums.h
+		${enums_h_out}
 	)
-	include_directories(
-		${CMAKE_CURRENT_BINARY_DIR}/enums
-	)
-	list(APPEND alsavolume_SRCS
-		${statusnotifier_SRCS}
-	)
-	add_definitions( -DUSE_KDE )
 endif()
 
 if( USE_PULSE )
@@ -193,9 +190,17 @@ else()
 	)
 endif()
 
-add_executable( ${PROJECT_NAME} ${alsavolume_SRCS} )
+add_executable( ${PROJECT_NAME} ${alsavolume_SRCS} ${alsavolume_HDRS})
 if( USE_SNI )
+	target_sources(${PROJECT_NAME} PRIVATE ${statusnotifier_SRCS} ${statusnotifier_HDRS})
+	target_compile_definitions(${PROJECT_NAME} PRIVATE -DUSE_KDE )
 	add_dependencies(${PROJECT_NAME} build_enums_h build_enums_c)
+	target_include_directories(${PROJECT_NAME} BEFORE PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/enums")
+endif()
+
+if(DEV_MODE)
+	file(COPY ${GLADE_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gladefiles")
+	file(COPY ${ICON_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/icons")
 endif()
 
 if(USE_CPACK)

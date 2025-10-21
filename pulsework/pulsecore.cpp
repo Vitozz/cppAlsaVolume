@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Clément Démoulins <clement@archivel.fr>
- * Copyright (C) 2014-2019 Vitaly Tonkacheyev <thetvg@gmail.com>
+ * Copyright (C) 2014-2025 Vitaly Tonkacheyev <thetvg@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,56 +23,6 @@
 #include <vector>
 #include <cmath>
 
-//Callbacks
-void state_cb(pa_context* context, void* raw) {
-    auto *state = static_cast<PulseCore*> (raw);
-    switch(pa_context_get_state(context)) {
-    case PA_CONTEXT_READY:
-        state->pState = CONNECTED;
-        break;
-    case PA_CONTEXT_FAILED:
-        state->pState = ERROR;
-        break;
-    case PA_CONTEXT_UNCONNECTED:
-    case PA_CONTEXT_AUTHORIZING:
-    case PA_CONTEXT_SETTING_NAME:
-    case PA_CONTEXT_CONNECTING:
-    case PA_CONTEXT_TERMINATED:
-        break;
-    }
-}
-
-void sink_list_cb(pa_context *c, const pa_sink_info *i, int eol, void *raw) {
-    (void)c;
-    if (eol != 0) return;
-    auto *sinks = static_cast<PulseDevicePtrList*>(raw);
-    const PulseDevice::Ptr s(new PulseDevice(i));
-    sinks->push_back(s);
-}
-
-void source_list_cb(pa_context *c, const pa_source_info *i, int eol, void *raw) {
-    (void)c;
-    if (eol != 0) return;
-    auto sources = static_cast<PulseDevicePtrList*>(raw);
-    const PulseDevice::Ptr s(new PulseDevice(i));
-    sources->push_back(s);
-}
-
-void server_info_cb(pa_context* c, const pa_server_info* i, void* raw) {
-    (void)c;
-    auto info = static_cast<ServerInfo*>(raw);
-    info->defaultSinkName = std::string(i->default_sink_name);
-    info->defaultSourceName = std::string(i->default_source_name);
-}
-
-void success_cb(pa_context* c, int success, void* raw) {
-    (void)c;
-    (void)success;
-    (void)raw;
-}
-//
-
-
 PulseCore::PulseCore(const char *clientName)
     : mainLoop_(pa_mainloop_new()),
       mainLoopApi_(pa_mainloop_get_api(mainLoop_)),
@@ -81,7 +31,26 @@ PulseCore::PulseCore(const char *clientName)
 {
     isAvailable_ = true;
     pState = CONNECTING;
-    pa_context_set_state_callback(context_, &state_cb, this);
+    pa_context_set_state_callback(
+        context_,
+        [](pa_context *context, void *raw) {
+            auto *state = static_cast<PulseCore *>(raw);
+            switch (pa_context_get_state(context)) {
+            case PA_CONTEXT_READY:
+                state->pState = CONNECTED;
+                break;
+            case PA_CONTEXT_FAILED:
+                state->pState = ERROR;
+                break;
+            case PA_CONTEXT_UNCONNECTED:
+            case PA_CONTEXT_AUTHORIZING:
+            case PA_CONTEXT_SETTING_NAME:
+            case PA_CONTEXT_CONNECTING:
+            case PA_CONTEXT_TERMINATED:
+                break;
+            }
+        },
+        this);
     pa_context_connect(context_, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
     while (pState == CONNECTING) {
         pa_mainloop_iterate(mainLoop_, 1, &retval_);
@@ -117,14 +86,34 @@ void PulseCore::iterate(pa_operation *op)
 
 void PulseCore::getSinks()
 {
-    pa_operation* op = pa_context_get_sink_info_list(context_, &sink_list_cb, &sinks_);
+    pa_operation *op = pa_context_get_sink_info_list(
+        context_,
+        [](pa_context *c, const pa_sink_info *i, int eol, void *raw) {
+            std::ignore = c;
+            if (eol != 0)
+                return;
+            auto *core = static_cast<PulseCore *>(raw);
+            const PulseDevice::Ptr s(new PulseDevice(i));
+            core->sinks_.push_back(s);
+        },
+        this);
     iterate(op);
     pa_operation_unref(op);
 }
 
 void PulseCore::getSources()
 {
-    pa_operation* op = pa_context_get_source_info_list(context_, &source_list_cb, &sources_);
+    pa_operation *op = pa_context_get_source_info_list(
+        context_,
+        [](pa_context *c, const pa_source_info *i, int eol, void *raw) {
+            std::ignore = c;
+            if (eol != 0)
+                return;
+            auto *core = static_cast<PulseCore *>(raw);
+            const PulseDevice::Ptr s(new PulseDevice(i));
+            core->sources_.push_back(s);
+        },
+        this);
     iterate(op);
     pa_operation_unref(op);
 }
@@ -170,7 +159,15 @@ PulseDevice::Ptr PulseCore::getSource(const std::string &name)
 PulseDevice::Ptr PulseCore::getDefaultSink()
 {
     ServerInfo info;
-    pa_operation* op = pa_context_get_server_info(context_, &server_info_cb, &info);
+    pa_operation *op = pa_context_get_server_info(
+        context_,
+        [](pa_context *c, const pa_server_info *i, void *raw) {
+            std::ignore = c;
+            auto info = static_cast<ServerInfo *>(raw);
+            info->defaultSinkName = std::string(i->default_sink_name);
+            info->defaultSourceName = std::string(i->default_source_name);
+        },
+        &info);
     iterate(op);
     pa_operation_unref(op);
     if (!info.defaultSinkName.empty()) {
@@ -183,7 +180,15 @@ PulseDevice::Ptr PulseCore::getDefaultSink()
 PulseDevice::Ptr PulseCore::getDefaultSource()
 {
     ServerInfo info;
-    pa_operation* op = pa_context_get_server_info(context_, &server_info_cb, &info);
+    pa_operation *op = pa_context_get_server_info(
+        context_,
+        [](pa_context *c, const pa_server_info *i, void *raw) {
+            std::ignore = c;
+            auto info = static_cast<ServerInfo *>(raw);
+            info->defaultSinkName = std::string(i->default_sink_name);
+            info->defaultSourceName = std::string(i->default_source_name);
+        },
+        &info);
     iterate(op);
     pa_operation_unref(op);
     if (!info.defaultSourceName.empty()) {
@@ -243,10 +248,20 @@ void PulseCore::setVolume_(const PulseDevice::Ptr &device, int value)
                                              );
     pa_operation* op;
     if (device->type() == SINK) {
-        op = pa_context_set_sink_volume_by_index(context_, device->index(), new_cvolume, success_cb, nullptr);
+        op = pa_context_set_sink_volume_by_index(
+            context_,
+            device->index(),
+            new_cvolume,
+            [](pa_context *c = nullptr, int success = 0, void *raw = nullptr) {},
+            nullptr);
     }
     else {
-        op = pa_context_set_source_volume_by_index(context_, device->index(), new_cvolume, success_cb, nullptr);
+        op = pa_context_set_source_volume_by_index(
+            context_,
+            device->index(),
+            new_cvolume,
+            [](pa_context *c = nullptr, int success = 0, void *raw = nullptr) {},
+            nullptr);
     }
     iterate(op);
     pa_operation_unref(op);
@@ -256,10 +271,20 @@ void PulseCore::setMute_(const PulseDevice::Ptr &device, bool mute)
 {
     pa_operation* op;
     if (device->type() == SINK) {
-        op = pa_context_set_sink_mute_by_index(context_, device->index(), int(mute), success_cb, nullptr);
+        op = pa_context_set_sink_mute_by_index(
+            context_,
+            device->index(),
+            int(mute),
+            [](pa_context *c = nullptr, int success = 0, void *raw = nullptr) {},
+            nullptr);
     }
     else {
-        op = pa_context_set_source_mute_by_index(context_, device->index(), int(mute), success_cb, nullptr);
+        op = pa_context_set_source_mute_by_index(
+            context_,
+            device->index(),
+            int(mute),
+            [](pa_context *c = nullptr, int success = 0, void *raw = nullptr) {},
+            nullptr);
     }
     iterate(op);
     pa_operation_unref(op);
