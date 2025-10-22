@@ -1,8 +1,5 @@
 cmake_minimum_required( VERSION 3.5 )
 
-if(USE_PULSE)
-    set(PULSE_DEP 'pulseaudio')
-endif()
 if(USE_GTK3)
     set(GTK_DEP 'gtkmm3')
 else()
