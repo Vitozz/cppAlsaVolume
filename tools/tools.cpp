@@ -46,7 +46,8 @@ std::string Tools::getCWD()
 {
     const size_t cwdSize = 255;
     char cwdBuffer[255];
-    return getcwd(cwdBuffer, cwdSize);
+    auto result = getcwd(cwdBuffer, cwdSize);
+    return result != nullptr ? result : std::string();
 }
 
 std::vector<std::string> Tools::getProjectPathes()

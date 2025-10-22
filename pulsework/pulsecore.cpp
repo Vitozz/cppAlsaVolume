@@ -34,13 +34,13 @@ PulseCore::PulseCore(const char *clientName)
     pa_context_set_state_callback(
         context_,
         [](pa_context *context, void *raw) {
-            auto *state = static_cast<PulseCore *>(raw);
+            auto *core = static_cast<PulseCore *>(raw);
             switch (pa_context_get_state(context)) {
             case PA_CONTEXT_READY:
-                state->pState = CONNECTED;
+                core->pState = CONNECTED;
                 break;
             case PA_CONTEXT_FAILED:
-                state->pState = ERROR;
+                core->pState = ERROR;
                 break;
             case PA_CONTEXT_UNCONNECTED:
             case PA_CONTEXT_AUTHORIZING:

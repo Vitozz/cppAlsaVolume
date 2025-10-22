@@ -99,6 +99,7 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 #ifdef IS_DEBUG
                 std::cout << "New Icon created" << std::endl;
 #endif
+                status_notifier_item_set_context_menu(newIcon_.get(), (GObject *)menu_->gobj());
                 g_signal_connect(newIcon_.get(), "activate", GCallback(TrayIcon::onActivate), this);
                 g_signal_connect(newIcon_.get(), "context-menu", GCallback(TrayIcon::onContextMenu), this);
                 g_signal_connect(newIcon_.get(), "secondary-activate", GCallback(TrayIcon::onSecondaryActivate), this);
@@ -228,7 +229,10 @@ void TrayIcon::onContextMenu(StatusNotifierItem *sn, gint x, gint y, TrayIcon *u
     (void)sn;
     (void)x;
     (void)y;
-    userdata->menu_->popup(0, gtk_get_current_event_time());
+    (void)userdata;
+#ifdef IS_DEBUG
+    std::cout << "Menu called " << std::endl;
+#endif
 }
 
 void TrayIcon::onSecondaryActivate(StatusNotifierItem *sn, gint x, gint y, TrayIcon *userdata)

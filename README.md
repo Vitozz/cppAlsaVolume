@@ -9,8 +9,11 @@ Build Deps:
 	- glib (libglibmm-2.4-dev package in Ubuntu)
 	- alsa/asoundlib (libasound2-dev package in Ubuntu)
 	- libpulse (only for pulseaudio support / optional)
-	- cmake >= 2.8.0
+	- cmake >= 3.5.0
 	- libappindicator (libappindicator3 for GTK3 / optional)
+	- libdbusmenu-gtk2 (libdbusmenu for GTK2 / optional)
+	- libdbusmenu-gtk3 (libdbusmenu for GTK3 / optional)
+	- glib2-devel (for glib-mkenums binary)
 
 Howto build application:
 
