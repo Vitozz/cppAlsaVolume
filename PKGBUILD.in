@@ -7,8 +7,8 @@ arch=('i686' 'x86_64')
 url="@PACKAGE_URL@"
 license=('GPL3')
 depends=( @GTK_DEP@ 'alsa-lib' @PULSE_DEP@
-          'pkg-config' 'intltool' 'glibmm' )
-makedepends=('git' 'cmake')
+          'pkg-config' 'intltool' 'glibmm' @DBUSMENU_DEP@)
+makedepends=('git' 'cmake' 'glib2-devel')
 conflicts=(@CPACK_PACKAGE_NAME@)
 source=(git+https://github.com/Vitozz/cppAlsaVolume)
 md5sums=('SKIP') 
