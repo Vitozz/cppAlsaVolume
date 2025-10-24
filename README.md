@@ -33,7 +33,7 @@ to build with pulseaudio support:
 
 to build with gtkmm-2.4 support:
 
->cmake -DUSE_GTK3=OFF ..
+>cmake -DGTKMM=2 ..
 
 >make
 
@@ -49,6 +49,11 @@ to build with StatusNotifier support:
 
 >make
 
+to disable DBus menu dependency (if USE_SNI flag enabled):
+
+> cmake -DUSE_DBUSMENU=OFF ..
+
+>make
 
 What features available:
 

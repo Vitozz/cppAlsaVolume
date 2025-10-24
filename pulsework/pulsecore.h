@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Clément Démoulins <clement@archivel.fr>
- * Copyright (C) 2014-2019 Vitaly Tonkacheyev <thetvg@gmail.com>
+ * Copyright (C) 2014-2025 Vitaly Tonkacheyev <thetvg@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,9 @@
 #define PULSECORE_H
 
 #include "pulsedevice.h"
-#include "pulse/pulseaudio.h"
+#include <pulse/mainloop.h>
+#include <pulse/mainloop-api.h>
+#include <pulse/context.h>
 #include <vector>
 #include <memory>
 

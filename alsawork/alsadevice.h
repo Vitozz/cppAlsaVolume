@@ -1,6 +1,6 @@
 /*
  * alsadevice.h
- * Copyright (C) 2014-2019 Vitaly Tonkacheyev
+ * Copyright (C) 2014-2025 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,7 @@
 #define ALSADEVICE_H
 
 #include "alsa/asoundlib.h"
-#include "../tools/tools.h"
 #include "mixerswitches.h"
-#include <iostream>
 #include <vector>
 #include <memory>
 

@@ -18,10 +18,11 @@
  */
 
 #include "pulsecore.h"
-#include "pulse/pulseaudio.h"
 #include "../tools/tools.h"
 #include <vector>
 #include <cmath>
+#include <pulse/operation.h>
+#include <iostream>
 
 PulseCore::PulseCore(const char *clientName)
     : mainLoop_(pa_mainloop_new()),

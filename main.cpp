@@ -1,6 +1,6 @@
 /*
  * main.cpp
- * Copyright (C) 2012-2019 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2025 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,15 @@
 #include "gui/sliderwindow.h"
 #include "gui/trayicon.h"
 #ifndef IS_GTK_2
-#include "gtkmm/application.h"
+#include <gtkmm/application.h>
 #else
-#include "gtkmm/main.h"
+#include <gtkmm/main.h>
 #endif
-#include "gtkmm/builder.h"
-#include "glibmm.h"
-#include "libintl.h"
+#include <gtkmm/builder.h>
+#include <glibmm/fileutils.h>
+#include <glibmm/markup.h>
+#include <iostream>
+#include <libintl.h>
 #define _(String) gettext(String)
 #define N_(String) gettext_noop (String)
 #define PACKAGE "alsavolume"

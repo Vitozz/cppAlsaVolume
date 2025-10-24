@@ -1,6 +1,6 @@
 /*
  * settings.cpp
- * Copyright (C) 2012-2019 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2025 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,9 @@
 
 #include "settings.h"
 #include "tools.h"
-#include "glibmm/keyfile.h"
-#include "glibmm/fileutils.h"
-#include "fstream"
+#include <glibmm/keyfile.h>
+#include <glibmm/fileutils.h>
+#include <iostream>
 
 #define MAIN "main"
 #define CARD "card"

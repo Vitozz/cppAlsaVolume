@@ -1,11 +1,11 @@
 cmake_minimum_required( VERSION 3.5 )
 
-if(USE_GTK3)
+if("${GTKMM}" STREQUAL "3")
     set(GTK_DEP 'gtkmm3')
 else()
     set(GTK_DEP 'gtkmm2')
 endif()
-if(USE_DBUSMENU AND USE_GTK3)
+if(USE_DBUSMENU AND ("${GTKMM}" STREQUAL "3" ))
     set(DBUSMENU_DEP 'libdbusmenu-gtk3')
 elseif(USE_DBUSMENU)
     set(DBUSMENU_DEP 'libdbusmenu-gtk2')

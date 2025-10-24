@@ -1,6 +1,6 @@
 /*
  * trayicon.cpp
- * Copyright (C) 2012-2019 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2025 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,19 +19,18 @@
 
 #include "trayicon.h"
 #include "../tools/tools.h"
-#include "gtkmm/separatormenuitem.h"
-#include "gtkmm/stock.h"
-#include "glibmm.h"
-#include "libintl.h"
+#include <gtkmm/separatormenuitem.h>
+#include <glibmm/fileutils.h>
+#include <libintl.h>
 #include <iostream>
 #ifdef IS_GTK_2
 #define GDK_BUTTON_MIDDLE 2
 #define GDK_BUTTON_PRIMARY 1
 #endif
 #if defined(USE_APPINDICATOR)
-#include "gdkmm/devicemanager.h"
+#include <gdkmm/devicemanager.h>
 #elif defined(USE_KDE)
-#include "giomm/dbusproxy.h"
+#include <giomm/dbusproxy.h>
 #endif
 #define _(String) gettext(String)
 #define MUTEITEM _("Mute")
@@ -99,7 +98,7 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
 #ifdef IS_DEBUG
                 std::cout << "New Icon created" << std::endl;
 #endif
-                status_notifier_item_set_context_menu(newIcon_.get(), (GObject *)menu_->gobj());
+                status_notifier_item_set_context_menu(newIcon_.get(), reinterpret_cast<GObject *>(menu_->gobj()));
                 g_signal_connect(newIcon_.get(), "activate", GCallback(TrayIcon::onActivate), this);
                 g_signal_connect(newIcon_.get(), "context-menu", GCallback(TrayIcon::onContextMenu), this);
                 g_signal_connect(newIcon_.get(), "secondary-activate", GCallback(TrayIcon::onSecondaryActivate), this);
@@ -117,14 +116,11 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
         legacyIcon_->signal_button_press_event().connect(sigc::mem_fun(*this, &TrayIcon::onButtonClick));
         //
     }
+
     Gtk::SeparatorMenuItem *separator2 = Gtk::manage(new Gtk::SeparatorMenuItem());
     settingsItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::runSettings));
-#ifdef USE_APPINDICATOR
-    if (!isLegacyIcon_) {
-        restoreItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onHideRestore));
-        menu_->append(*Gtk::manage(restoreItem_));
-    }
-#endif
+    restoreItem_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onHideRestore));
+    menu_->append(*Gtk::manage(restoreItem_));
     menu_->append(*Gtk::manage(settingsItem_));
     muteItem_->signal_toggled().connect(sigc::mem_fun(*this, &TrayIcon::onMute));
     menu_->append(*Gtk::manage(muteItem_));
@@ -137,6 +133,7 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
     on_signal_volume_changed(volumeValue_, cardName, mixerName);
     muteItem_->set_active(muted_);
 }
+
 #ifdef USE_APPINDICATOR
 void TrayIcon::onScrollEventAI(AppIndicator *ai, gint steps, gint direction, TrayIcon *userdata)
 {
@@ -204,6 +201,8 @@ void TrayIcon::onHideRestore()
         pos.geometryAvailable_ = false;
         m_signal_on_restore(pos);
     }
+#elif USE_KDE
+    onActivate(nullptr, 0, 0, this);
 #endif
 }
 
@@ -375,21 +374,20 @@ void TrayIcon::setIcon(double value)
 
 void TrayIcon::setTooltip(const Glib::ustring &message)
 {
-    if (!message.empty())
+    if (!message.empty()) {
         if (isLegacyIcon_) {
             legacyIcon_->set_tooltip_text(message);
         }
+        else {
 #if defined(USE_APPINDICATOR)
-        else {
             app_indicator_set_title(newIcon_.get(), message.c_str());
-        }
 #elif defined(USE_KDE)
-        else {
             const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(volumeValue_);
             const Glib::ustring iconPath = Tools::getResPath(searchPath.c_str());
             status_notifier_item_set_tooltip(newIcon_.get(), iconPath.c_str(), "AlsaVolume" ,message.c_str());
-        }
 #endif
+        }
+    }
 }
 
 void TrayIcon::setMuted(bool isit)

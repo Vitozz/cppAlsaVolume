@@ -1,6 +1,6 @@
 /*
  * core.cpp
- * Copyright (C) 2013-2019 Vitaly Tonkacheyev
+ * Copyright (C) 2013-2025 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,21 +18,20 @@
  */
 
 #include "core.h"
-#include "gtkmm/builder.h"
-#include "gtkmm/aboutdialog.h"
-#include "gtkmm/messagedialog.h"
-#include "glibmm/fileutils.h"
-#include "glibmm/main.h"
+#include <gtkmm/builder.h>
+#include <gtkmm/aboutdialog.h>
+#include <gtkmm/messagedialog.h>
+#include <glibmm/main.h>
 #include "../gui/settingsframe.h"
 #include <iostream>
 #include <memory>
-#include "libintl.h"
+#include <libintl.h>
 #define _(String) gettext(String)
 
 #define TITLE _("About AlsaVolume")
 #define PROGNAME _("Alsa Volume Changer")
 #define COMMENTS _("Tray Alsa Volume Changer written using gtkmm")
-#define COPYRIGHT _("2012-2025 (c) Vitaly Tonkacheyev (thetvg@gmail.com)")
+#define COPYRIGHT _("2012-2025 (c) Vitaly Tonkacheyev")
 #define WEBSITE "http://sites.google.com/site/thesomeprojects/"
 #define WEBSITELABEL _("Program Website")
 #define VERSION "0.3.5"
@@ -97,7 +96,8 @@ void Core::runAboutDialog()
     dialog->set_program_name(PROGNAME);
     dialog->set_comments(COMMENTS);
     dialog->set_version(VERSION);
-    dialog->set_copyright(COPYRIGHT);
+    Glib::ustring copyrightString(COPYRIGHT);
+    dialog->set_copyright(copyrightString.append(" (thetvg@gmail.com)"));
     dialog->set_website(WEBSITE);
     dialog->set_website_label(WEBSITELABEL);
     const std::string logoName = Tools::getResPath("icons/volume.png");

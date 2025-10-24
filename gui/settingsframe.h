@@ -1,6 +1,6 @@
 /*
  * settingsframe.h
- * Copyright (C) 2012-2019 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2025 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,15 +20,14 @@
 #ifndef SETTINGSFRAME_H
 #define SETTINGSFRAME_H
 #include "../tools/settingsstr.h"
-#include "gtkmm/dialog.h"
-#include "gtkmm/builder.h"
-#include "gtkmm/button.h"
-#include "gtkmm/combobox.h"
-#include "gtkmm/entry.h"
-#include "gtkmm/checkbutton.h"
-#include "gtkmm/treeview.h"
-#include "gtkmm/notebook.h"
-#include "gtkmm/liststore.h"
+#include <gtkmm/dialog.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/button.h>
+#include <gtkmm/combobox.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/treeview.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/liststore.h>
 #include <vector>
 
 class SettingsFrame : public Gtk::Dialog

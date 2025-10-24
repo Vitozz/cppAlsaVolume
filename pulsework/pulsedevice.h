@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Clément Démoulins <clement@archivel.fr>
- * Copyright (C) 2014-2019 Vitaly Tonkacheyev <thetvg@gmail.com>
+ * Copyright (C) 2014-2025 Vitaly Tonkacheyev <thetvg@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@
 #ifndef PULSEDEVICE_H
 #define PULSEDEVICE_H
 
-#include "pulse/pulseaudio.h"
-#include <iostream>
+#include <pulse/volume.h>
+#include <pulse/introspect.h>
+#include <string>
 #include <memory>
 
 enum device_type {

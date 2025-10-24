@@ -9,6 +9,7 @@ if(POLICY CMP0058)
     cmake_policy(SET CMP0058 NEW)
 endif()
 
+set( GTKMM "3" CACHE STRING "Gtkmm version to use: 2 | 3" )
 option( USE_PULSE "Enable pulseaudio support" OFF )
 option( USE_GTK3 "Build with gtkmm-3.0 support" ON )
 set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
@@ -30,7 +31,7 @@ if( USE_SNI )
 	option(USE_DBUSMENU "Use libdbusmenu to create context menu for StatusNotifierItem" ON)
 endif()
 
-if( USE_GTK3 )
+if( "${GTKMM}" STREQUAL "3" )
 	set( GTKMM_NAME "gtkmm-3.0" )
 	if( USE_APPINDICATOR )
 		set(APPINDICATOR_NAME "appindicator3-0.1")
@@ -117,8 +118,8 @@ set( alsavolume_SRCS
 )
 
 if( USE_SNI )
-    include(statusnotifier-gen.cmake)
-    include_directories(${CMAKE_CURRENT_BINARY_DIR})
+	include(statusnotifier-gen)
+	include_directories(${CMAKE_CURRENT_BINARY_DIR})
 	set( statusnotifier_SRCS
 		third-party/statusnotifier/src/closures.c
 		third-party/statusnotifier/src/statusnotifier.c
@@ -208,7 +209,7 @@ set( ICON_FILES
 	icons/volume.png
 	icons/volume_ico.png
 )
-if( USE_GTK3 )
+if( "${GTKMM}" STREQUAL "3"  )
 	set(GLADE_FILES
 		gladefiles/SliderFrame.glade
 		gladefiles/SettingsFrame.glade
@@ -249,8 +250,8 @@ if( DEV_MODE )
 endif()
 
 if(USE_CPACK)
-    include(version.cmake)
-    include(use_cpack.cmake)
+	include(version)
+	include(use_cpack)
 endif()
 
 target_link_libraries( ${PROJECT_NAME} ${CUSTOM_LDFLAGS} ${DEPLIBS} )

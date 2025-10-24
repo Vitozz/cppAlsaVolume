@@ -1,6 +1,6 @@
 /*
  * tools.cpp
- * Copyright (C) 2012-2019 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2025 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include "unistd.h"
 #include <fstream>
 #include <cstdlib>
+#include <iostream>
 #include <vector>
 #define PATH_SUFFIX "/share/alsavolume/"
 #define MK_RIGHTS 0755

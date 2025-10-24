@@ -30,12 +30,12 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkBox" id="box1">
+              <object class="GtkVBox" id="box1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkScale" id="volume_slider">
+                  <object class="GtkVScale" id="volume_slider">
                     <property name="height_request">120</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>

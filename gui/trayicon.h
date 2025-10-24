@@ -1,6 +1,6 @@
 /*
  * trayicon.h
- * Copyright (C) 2012-2019 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2025 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,12 @@
 #ifndef TRAYICON_H
 #define TRAYICON_H
 
-#include "gtkmm/statusicon.h"
-#include "gtkmm/menu.h"
-#include "gtkmm/menuitem.h"
-#include "gtkmm/imagemenuitem.h"
-#include "gtkmm/checkmenuitem.h"
-#include "gtkmm/aboutdialog.h"
-#include "../tools/tools.h"
+#include <gtkmm/statusicon.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/menuitem.h>
+#include <gtkmm/checkmenuitem.h>
 #include <memory>
+#include "../tools/tools.h"
 
 #if defined(USE_APPINDICATOR)
 #include "libappindicator/app-indicator.h"
@@ -46,14 +44,14 @@ public:
     void setMuted(bool isit);
     //signals
     typedef sigc::signal<void> type_trayicon_simple_signal;
+    typedef sigc::signal<void, iconPosition> type_trayicon_4int_signal;
+    typedef sigc::signal<void, double> type_trayicon_double_signal;
+    typedef sigc::signal<void, double> type_trayicon_bool_signal;
+    type_trayicon_double_signal signal_value_changed();
+    type_trayicon_4int_signal signal_on_restore();
     type_trayicon_simple_signal signal_ask_dialog();
     type_trayicon_simple_signal signal_ask_settings();
     type_trayicon_simple_signal signal_save_settings();
-    typedef sigc::signal<void, iconPosition> type_trayicon_4int_signal;
-    type_trayicon_4int_signal signal_on_restore();
-    typedef sigc::signal<void, double> type_trayicon_double_signal;
-    type_trayicon_double_signal signal_value_changed();
-    typedef sigc::signal<void, double> type_trayicon_bool_signal;
     type_trayicon_bool_signal signal_on_mute();
 
 protected:
