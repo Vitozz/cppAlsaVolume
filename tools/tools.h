@@ -36,14 +36,14 @@ enum ListType {
 };
 
 struct iconPosition {
-    int iconX_;
-    int iconY_;
-    int iconWidth_;
-    int iconHeight_;
-    int screenHeight_;
-    int screenWidth_;
-    bool geometryAvailable_;
-    bool trayAtTop_;
+    int iconX_ = 0;
+    int iconY_ = 0;
+    int iconWidth_ = 0;
+    int iconHeight_ = 0;
+    int screenHeight_ = 0;
+    int screenWidth_ = 0;
+    bool geometryAvailable_ = false;
+    bool trayAtTop_ = false;
 };
 
 typedef std::pair<std::string, bool> switchcap;

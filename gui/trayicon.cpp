@@ -27,9 +27,8 @@
 #define GDK_BUTTON_MIDDLE 2
 #define GDK_BUTTON_PRIMARY 1
 #endif
-#if defined(USE_APPINDICATOR)
 #include <gdkmm/devicemanager.h>
-#elif defined(USE_KDE)
+#ifdef USE_KDE
 #include <giomm/dbusproxy.h>
 #endif
 #define _(String) gettext(String)
@@ -44,26 +43,30 @@
 
 static const int OFFSET = 2;
 
-TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string &mixerName, bool muted)
-    : volumeValue_(volume),
-      cardName_(cardName),
-      mixerName_(mixerName),
-      muted_(muted),
-      menu_(Gtk::manage(new Gtk::Menu())),
-      restoreItem_(Gtk::manage(new Gtk::MenuItem(RESTOREITEM))),
-      settingsItem_(Gtk::manage(new Gtk::MenuItem(SETTSITEM))),
-      aboutItem_(Gtk::manage(new Gtk::MenuItem(ABOUTITEM))),
-      quitItem_(Gtk::manage(new Gtk::MenuItem(QUITITEM))),
-      muteItem_(Gtk::manage(new Gtk::CheckMenuItem(MUTEITEM))),
-      mouseX_(0),
-      mouseY_(0),
-      pixbufWidth_(0),
-      pixbufHeight_(0),
-      isLegacyIcon_(true),
-      #if defined(USE_APPINDICATOR) || defined(USE_KDE)
-      newIcon_(nullptr),
-      #endif
-      legacyIcon_(nullptr)
+TrayIcon::TrayIcon(double volume,
+                   const std::string &cardName,
+                   const std::string &mixerName,
+                   bool muted)
+    : volumeValue_(volume)
+    , cardName_(cardName)
+    , mixerName_(mixerName)
+    , muted_(muted)
+    , menu_(Gtk::manage(new Gtk::Menu()))
+    , restoreItem_(Gtk::manage(new Gtk::MenuItem(RESTOREITEM)))
+    , settingsItem_(Gtk::manage(new Gtk::MenuItem(SETTSITEM)))
+    , aboutItem_(Gtk::manage(new Gtk::MenuItem(ABOUTITEM)))
+    , quitItem_(Gtk::manage(new Gtk::MenuItem(QUITITEM)))
+    , muteItem_(Gtk::manage(new Gtk::CheckMenuItem(MUTEITEM)))
+    , mouseX_(0)
+    , mouseY_(0)
+    , pixbufWidth_(0)
+    , pixbufHeight_(0)
+    , isLegacyIcon_(true)
+    , screen_(aboutItem_->get_screen())
+#if defined(USE_APPINDICATOR) || defined(USE_KDE)
+    , newIcon_(nullptr)
+#endif
+    , legacyIcon_(nullptr)
 {
     const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(100);
     const Glib::ustring iconPath = Tools::getResPath(searchPath.c_str());
@@ -151,58 +154,49 @@ void TrayIcon::onScrollEventAI(AppIndicator *ai, gint steps, gint direction, Tra
 #endif
 void TrayIcon::onHideRestore()
 {
-    Glib::RefPtr<Gdk::Screen> screen;
     Gdk::Rectangle area;
     Gtk::Orientation orientation;
-    iconPosition pos = {0,0,0,0,0,0,false,false};
+    iconPosition pos;
     if (isLegacyIcon_) {
-        if (legacyIcon_->get_geometry(screen, area, orientation)) {
+        if (legacyIcon_->get_geometry(screen_, area, orientation)) {
             pos.iconX_ = area.get_x();
             pos.iconY_ = area.get_y();
             const int areaHeight = area.get_height();
             const int areaWidth = area.get_width();
             pos.iconHeight_ = (areaHeight > 0) ? areaHeight : pixbufHeight_;
             pos.iconWidth_ = (areaWidth > 0) ? areaWidth : pixbufWidth_;
-            pos.screenHeight_ = screen->get_height();
-            pos.screenWidth_ = screen->get_width();
+            pos.screenHeight_ = screen_->get_height();
+            pos.screenWidth_ = screen_->get_width();
             pos.geometryAvailable_ = bool(pos.iconX_ > 0 || pos.iconY_ > 0);
             if (!pos.geometryAvailable_) {
+                getMousePosition();
                 pos.iconX_ = mouseX_;
                 pos.iconY_ = mouseY_;
             }
-            pos.trayAtTop_ = bool(pos.iconY_ < pos.screenHeight_/2);
+            pos.trayAtTop_ = bool(pos.iconY_ < pos.screenHeight_ / 2);
             m_signal_on_restore(pos);
         }
     }
 #ifdef USE_APPINDICATOR
     else {
-        screen = restoreItem_->get_screen();
-        //Dirty hack to obtain mouse position
-#ifdef IS_GTK_2
-        Glib::RefPtr<Gdk::Display> display = restoreItem_->get_display();
-        Gdk::ModifierType type;
-        display->get_pointer(pos.iconX_, pos.iconY_, type);
-#else
-        Glib::RefPtr<Gdk::Display> display = restoreItem_->get_display();
-        Glib::RefPtr<Gdk::DeviceManager> manager = display->get_device_manager();
-        for(Glib::RefPtr<Gdk::Device> item : manager->list_devices(Gdk::DEVICE_TYPE_MASTER)) {
-            item->get_position(pos.iconX_, pos.iconY_);
-        }
+        getMousePosition();
+        pos.iconX_ = (pos.iconX_ != mouseX_) ? mouseX_ : pos.iconX_;
+        pos.iconY_ = (pos.iconY_ != mouseY_) ? mouseY_ : pos.iconY_;
 #ifdef IS_DEBUG
         std::cout << "X=" << pos.iconX_ << " Y=" << pos.iconY_ << std::endl;
 #endif
-#endif
         //
-        pos.screenHeight_ = screen->get_height();
-        pos.screenWidth_ = screen->get_width();
-        pos.trayAtTop_ = bool(pos.iconY_ < pos.screenHeight_/2);
+        pos.screenHeight_ = screen_->get_height();
+        pos.screenWidth_ = screen_->get_width();
+        pos.trayAtTop_ = bool(pos.iconY_ < pos.screenHeight_ / 2);
         pos.iconHeight_ = pixbufHeight_;
         pos.iconWidth_ = pixbufWidth_;
         pos.geometryAvailable_ = false;
         m_signal_on_restore(pos);
     }
 #elif USE_KDE
-    onActivate(nullptr, 0, 0, this);
+    getMousePosition();
+    onActivate(isLegacyIcon_ ? nullptr : newIcon_.get(), mouseX_, mouseY_, this);
 #endif
 }
 
@@ -210,13 +204,13 @@ void TrayIcon::onHideRestore()
 void TrayIcon::onActivate(StatusNotifierItem *sn, gint x, gint y, TrayIcon *userdata)
 {
     (void)sn;
-    Glib::RefPtr<Gdk::Screen> screen = userdata->aboutItem_->get_screen();
-    iconPosition pos = {0,0,0,0,0,0,false,false};
-    pos.iconX_ = x + userdata->pixbufWidth_/2;
+    iconPosition pos;
+    auto screen = userdata->screen_;
+    pos.iconX_ = x;
     pos.iconY_ = y;
     pos.screenHeight_ = screen->get_height();
     pos.screenWidth_ = screen->get_width();
-    pos.trayAtTop_ = bool(pos.iconY_ < pos.screenHeight_/2);
+    pos.trayAtTop_ = bool(y < pos.screenHeight_ / 2);
     pos.iconHeight_ = userdata->pixbufHeight_;
     pos.iconWidth_ = userdata->pixbufWidth_;
     pos.geometryAvailable_ = false;
@@ -253,8 +247,13 @@ void TrayIcon::onScroll(StatusNotifierItem *sn, gint delta, StatusNotifierScroll
     else {
         value-=OFFSET;
     }
+    //Hack to detect right scroll direction
+    int screenHeight = userdata->screen_->get_height();
+    userdata->getMousePosition();
+    if (userdata->mouseY_ < screenHeight / 2)
+        value = (-1) * value;
 #ifdef IS_DEBUG
-    std::cout << "Value " << value << std::endl;
+    std::cout << "Offset: " << value << std::endl;
 #endif
     userdata->m_signal_value_changed(value);
 }
@@ -413,6 +412,9 @@ bool TrayIcon::onScrollEvent(GdkEventScroll* event)
     else if(event->direction == GDK_SCROLL_DOWN) {
         value-=OFFSET;
     }
+#ifdef IS_DEBUG
+    std::cout << "Offset: " << value << std::endl;
+#endif
     m_signal_value_changed(value);
     return false;
 }
@@ -436,6 +438,24 @@ void TrayIcon::setMousePos(const int X, const int Y)
 {
     mouseX_ = X;
     mouseY_ = Y;
+}
+
+void TrayIcon::getMousePosition()
+{
+    int x = 0, y = 0;
+#ifdef IS_GTK_2
+    Glib::RefPtr<Gdk::Display> display = restoreItem_->get_display();
+    Gdk::ModifierType type;
+    display->get_pointer(x, y, type);
+#else
+    Glib::RefPtr<Gdk::Display> display = aboutItem_->get_display();
+    Glib::RefPtr<Gdk::DeviceManager> manager = display->get_device_manager();
+    for (Glib::RefPtr<Gdk::Device> &item : manager->list_devices(Gdk::DEVICE_TYPE_MASTER)) {
+        if (item->get_source() == Gdk::SOURCE_MOUSE)
+            item->get_position(x, y);
+    }
+#endif
+    setMousePos(x, y);
 }
 
 void TrayIcon::on_signal_volume_changed(double volume, const std::string &cardName, const std::string &mixerName)

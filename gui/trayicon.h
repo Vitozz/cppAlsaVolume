@@ -78,6 +78,8 @@ private:
     void setTooltip(const Glib::ustring &message);
     Glib::ustring getIconName(double value) const;
     void setMousePos(int X, int Y);
+    void getMousePosition();
+    void getIconPositionInfo();
 #if defined(USE_APPINDICATOR)
     static void onScrollEventAI(AppIndicator *ai, gint steps, gint direction, TrayIcon *userdata);
 #elif defined(USE_KDE)
@@ -102,6 +104,7 @@ private:
     int pixbufWidth_;
     int pixbufHeight_;
     bool isLegacyIcon_;
+    Glib::RefPtr<Gdk::Screen> screen_;
 #if defined(USE_APPINDICATOR) || defined(USE_KDE)
     StatusNotifierPtr newIcon_;
 #endif

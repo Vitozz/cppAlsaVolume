@@ -57,6 +57,7 @@ SliderWindow::~SliderWindow()
 void SliderWindow::setWindowPosition(const iconPosition &pos)
 {
     if (!get_visible()) {
+        show_all();
 #ifndef IS_GTK_2
         const int wWidth = volumeSlider_->get_allocated_width();
         const int wHeight = volumeSlider_->get_allocated_height();
@@ -68,21 +69,20 @@ void SliderWindow::setWindowPosition(const iconPosition &pos)
         std::cout << "Screen height = " << pos.screenHeight_ << std::endl;
         std::cout << "At top = " << pos.trayAtTop_ << std::endl;
         std::cout << "wHeight = " << wHeight << std::endl;
+        std::cout << "wWidth = " << wWidth << std::endl;
         std::cout << "iconHeight = " << pos.iconHeight_ << std::endl;
+        std::cout << "iconWidth = " << pos.iconWidth_ << std::endl;
 #endif
         const int wY = pos.trayAtTop_ ? pos.iconHeight_ + 4 : pos.screenHeight_ - wHeight - pos.iconHeight_ - 4;
-        int wX;
+        int wX = pos.iconX_ - wWidth / 2;
         if (pos.geometryAvailable_) {
+            wX += pos.iconWidth_ / 2;
+        }
 #ifdef IS_DEBUG
-            std::cout << "Geometry available" << std::endl;
-            std::cout << "wY = " << wY << std::endl;
+        std::cout << "Geometry available: " << pos.geometryAvailable_ << std::endl;
+        std::cout << "wY = " << wY << std::endl;
+        std::cout << "wX = " << wX << std::endl;
 #endif
-            wX = (wWidth > 1) ? pos.iconX_ - (wWidth/2 - pos.iconWidth_/2) : pos.iconX_ - pos.iconWidth_/2;
-        }
-        else{
-            wX = (wWidth > 1) ? pos.iconX_ - wWidth/2 : pos.iconX_ - pos.iconWidth_;
-        }
-        show_all();
         this->move(wX, wY);
     }
     else {
