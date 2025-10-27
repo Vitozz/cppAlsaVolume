@@ -27,7 +27,8 @@
 #define GDK_BUTTON_MIDDLE 2
 #define GDK_BUTTON_PRIMARY 1
 #endif
-#include <gdkmm/devicemanager.h>
+#include <gdkmm/display.h>
+#include <gdkmm/seat.h>
 #ifdef USE_KDE
 #include <giomm/dbusproxy.h>
 #endif
@@ -194,9 +195,6 @@ void TrayIcon::onHideRestore()
         pos.geometryAvailable_ = false;
         m_signal_on_restore(pos);
     }
-#elif USE_KDE
-    getMousePosition();
-    onActivate(isLegacyIcon_ ? nullptr : newIcon_.get(), mouseX_, mouseY_, this);
 #endif
 }
 
@@ -247,14 +245,23 @@ void TrayIcon::onScroll(StatusNotifierItem *sn, gint delta, StatusNotifierScroll
     else {
         value-=OFFSET;
     }
-    //Hack to detect right scroll direction
-    int screenHeight = userdata->screen_->get_height();
-    userdata->getMousePosition();
-    if (userdata->mouseY_ < screenHeight / 2)
-        value = (-1) * value;
+    // Hack to detect right scroll direction
+    // Obtain the mouse cursor global position and if y-coordinate is smaller than half of the screen height
+    // than trayicon is placed on top of the screen and scroll direction should be reversed
+    // Not working in Wayland.
+    auto env = getenv("XDG_SESSION_TYPE");
+    bool isWayland = std::string(env != nullptr ? env : "") == std::string("wayland");
+    if(!isWayland) {
+        int screenHalfHeight = userdata->screen_->get_height() / 2;
+        userdata->getMousePosition();
+        auto mouseY = userdata->mouseY_;
+        if (mouseY < screenHalfHeight)
+            value = (-1) * value;
 #ifdef IS_DEBUG
-    std::cout << "Offset: " << value << std::endl;
+        std::cout << "ScreenH: " << screenHalfHeight << std::endl;
+        std::cout << "Offset: " << value << std::endl;
 #endif
+    }
     userdata->m_signal_value_changed(value);
 }
 
@@ -448,12 +455,19 @@ void TrayIcon::getMousePosition()
     Gdk::ModifierType type;
     display->get_pointer(x, y, type);
 #else
-    Glib::RefPtr<Gdk::Display> display = aboutItem_->get_display();
-    Glib::RefPtr<Gdk::DeviceManager> manager = display->get_device_manager();
-    for (Glib::RefPtr<Gdk::Device> &item : manager->list_devices(Gdk::DEVICE_TYPE_MASTER)) {
-        if (item->get_source() == Gdk::SOURCE_MOUSE)
-            item->get_position(x, y);
+    Glib::RefPtr<Gdk::Display> display = Gdk::Display::get_default();
+    if(!display)
+        return;
+    auto seats = display->list_seats();
+    for (auto &item : seats) {
+        auto pointer = item->get_pointer();
+        if (pointer->get_source() == Gdk::SOURCE_MOUSE)
+            pointer->get_position(x, y);
     }
+#endif
+#ifdef IS_DEBUG
+    std::cout << "mouse_x: " << x << std::endl;
+    std::cout << "mouse_y: " << y << std::endl;
 #endif
     setMousePos(x, y);
 }

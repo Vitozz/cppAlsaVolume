@@ -51,6 +51,12 @@ std::string Tools::getCWD()
     return result != nullptr ? result : std::string();
 }
 
+std::string  Tools::getHomePath()
+{
+    auto home = getenv("HOME");
+    return home != nullptr ? std::string(home) : std::string();
+}
+
 std::vector<std::string> Tools::getProjectPathes()
 {
     const std::string cwd = getCWD();
