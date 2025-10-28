@@ -157,6 +157,7 @@ void TrayIcon::onHideRestore()
 {
     Gdk::Rectangle area;
     Gtk::Orientation orientation;
+    getMousePosition();
     iconPosition pos;
     if (isLegacyIcon_) {
         if (legacyIcon_->get_geometry(screen_, area, orientation)) {
@@ -170,7 +171,6 @@ void TrayIcon::onHideRestore()
             pos.screenWidth_ = screen_->get_width();
             pos.geometryAvailable_ = bool(pos.iconX_ > 0 || pos.iconY_ > 0);
             if (!pos.geometryAvailable_) {
-                getMousePosition();
                 pos.iconX_ = mouseX_;
                 pos.iconY_ = mouseY_;
             }
@@ -180,7 +180,6 @@ void TrayIcon::onHideRestore()
     }
 #ifdef USE_APPINDICATOR
     else {
-        getMousePosition();
         pos.iconX_ = (pos.iconX_ != mouseX_) ? mouseX_ : pos.iconX_;
         pos.iconY_ = (pos.iconY_ != mouseY_) ? mouseY_ : pos.iconY_;
 #ifdef IS_DEBUG
@@ -195,6 +194,9 @@ void TrayIcon::onHideRestore()
         pos.geometryAvailable_ = false;
         m_signal_on_restore(pos);
     }
+#elif USE_KDE
+    else
+        onActivate(newIcon_.get(), mouseX_, mouseY_, this);
 #endif
 }
 
