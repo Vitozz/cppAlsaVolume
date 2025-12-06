@@ -159,6 +159,7 @@ PulseDevice::Ptr PulseCore::getSource(const std::string &name)
 
 PulseDevice::Ptr PulseCore::getDefaultSink()
 {
+    updateDevices();
     ServerInfo info;
     pa_operation *op = pa_context_get_server_info(
         context_,
@@ -180,6 +181,7 @@ PulseDevice::Ptr PulseCore::getDefaultSink()
 
 PulseDevice::Ptr PulseCore::getDefaultSource()
 {
+    updateDevices();
     ServerInfo info;
     pa_operation *op = pa_context_get_server_info(
         context_,

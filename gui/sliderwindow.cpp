@@ -72,11 +72,16 @@ void SliderWindow::setWindowPosition(const iconPosition &pos)
         std::cout << "wWidth = " << wWidth << std::endl;
         std::cout << "iconHeight = " << pos.iconHeight_ << std::endl;
         std::cout << "iconWidth = " << pos.iconWidth_ << std::endl;
+        std::cout << "iconX = " << pos.iconX_ << std::endl;
+        std::cout << "iconY = " << pos.iconY_ << std::endl;
 #endif
-        const int wY = pos.trayAtTop_ ? pos.iconHeight_ + 4 : pos.screenHeight_ - wHeight - pos.iconHeight_ - 4;
+        int wY = pos.trayAtTop_ ? pos.iconHeight_ + 4
+                                : pos.screenHeight_ - wHeight - pos.iconHeight_ - 4;
         int wX = pos.iconX_ - wWidth / 2;
         if (pos.geometryAvailable_) {
             wX += pos.iconWidth_ / 2;
+            wY = pos.trayAtTop_ ? pos.iconY_ + pos.iconHeight_ + 4
+                                : pos.iconY_ - pos.iconHeight_ - wHeight - 4;
         }
 #ifdef IS_DEBUG
         std::cout << "Geometry available: " << pos.geometryAvailable_ << std::endl;
