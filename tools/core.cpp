@@ -32,7 +32,7 @@
 #define PROGNAME _("Alsa Volume Changer")
 #define COMMENTS _("Tray Alsa Volume Changer written using gtkmm")
 #define COPYRIGHT _("2012-2025 (c) Vitaly Tonkacheyev")
-#define WEBSITE "http://sites.google.com/site/thesomeprojects/"
+#define WEBSITE "https://sourceforge.net/projects/kukuruzo/files/alsavolume/"
 #define WEBSITELABEL _("Program Website")
 #define VERSION "0.3.5"
 
