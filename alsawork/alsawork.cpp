@@ -17,18 +17,16 @@
  *
  */
 
-#include "mixerswitches.h"
 #include "alsawork.h"
-#include <memory>
+#include "mixerswitches.h"
 #include <iostream>
+#include <memory>
 
-AlsaWork::AlsaWork()
-    : cardList_(std::vector<std::string>()),
-    totalCards_(0)
+AlsaWork::AlsaWork() : cardList_(std::vector<std::string>()), totalCards_(0)
 {
     getCards();
     int id = 0;
-    for(const std::string &name : cardList_){
+    for (const std::string &name : cardList_) {
         devices_.push_back(std::make_shared<AlsaDevice>(id, name));
         ++id;
     }
@@ -44,39 +42,27 @@ AlsaWork::~AlsaWork()
     snd_config_update_free_global();
 }
 
-//public
+// public
 void AlsaWork::setCurrentCard(int cardId)
 {
-    if(cardId < int(devices_.size())) {
+    if (cardId < int(devices_.size())) {
         currentAlsaDevice_ = devices_.at(ulong(cardId));
     }
 }
 
-void AlsaWork::setCurrentMixer(const std::string &mixer)
-{
-    currentAlsaDevice_->setCurrentMixer(mixer);
-}
+void AlsaWork::setCurrentMixer(const std::string &mixer) { currentAlsaDevice_->setCurrentMixer(mixer); }
 
-void AlsaWork::setCurrentMixer(int id)
-{
-    currentAlsaDevice_->setCurrentMixer(id);
-}
+void AlsaWork::setCurrentMixer(int id) { currentAlsaDevice_->setCurrentMixer(id); }
 
-void AlsaWork::setAlsaVolume(double volume)
-{
-    currentAlsaDevice_->setDeviceVolume(volume);
-}
+void AlsaWork::setAlsaVolume(double volume) { currentAlsaDevice_->setDeviceVolume(volume); }
 
-double AlsaWork::getAlsaVolume() const
-{
-    return currentAlsaDevice_->getVolume();
-}
+double AlsaWork::getAlsaVolume() const { return currentAlsaDevice_->getVolume(); }
 
 std::string AlsaWork::getCardName(int index)
 {
     const std::string card(AlsaDevice::formatCardName(index));
-    snd_ctl_t *ctl;
-    int err = snd_ctl_open(&ctl, card.c_str(), SND_CTL_NONBLOCK);
+    snd_ctl_t        *ctl;
+    int               err = snd_ctl_open(&ctl, card.c_str(), SND_CTL_NONBLOCK);
     if (err < 0) {
         checkError(err);
         return std::string();
@@ -102,43 +88,25 @@ std::string AlsaWork::getMixerName(int index)
     return mixerName;
 }
 
-std::string AlsaWork::getCurrentMixerName() const
-{
-    return currentAlsaDevice_->currentMixer();
-}
+std::string AlsaWork::getCurrentMixerName() const { return currentAlsaDevice_->currentMixer(); }
 
-const std::vector<std::string> &AlsaWork::getCardsList() const
-{
-    return cardList_;
-}
+const std::vector<std::string> &AlsaWork::getCardsList() const { return cardList_; }
 
-const std::vector<std::string> &AlsaWork::getVolumeMixers() const
-{
-    return currentAlsaDevice_->mixers();
-}
+const std::vector<std::string> &AlsaWork::getVolumeMixers() const { return currentAlsaDevice_->mixers(); }
 
-MixerSwitches::Ptr AlsaWork::getSwitchList() const
-{
-    return currentAlsaDevice_->switches();
-}
+MixerSwitches::Ptr AlsaWork::getSwitchList() const { return currentAlsaDevice_->switches(); }
 
-void AlsaWork::setMute(bool enabled)
-{
-    currentAlsaDevice_->setMute(enabled);
-}
+void AlsaWork::setMute(bool enabled) { currentAlsaDevice_->setMute(enabled); }
 
-bool AlsaWork::getMute()
-{
-    return currentAlsaDevice_->getMute();
-}
+bool AlsaWork::getMute() { return currentAlsaDevice_->getMute(); }
 
 void AlsaWork::setSwitch(const std::string &mixer, int id, bool enabled)
 {
     currentAlsaDevice_->setSwitch(mixer, id, enabled);
 }
 
-//private
-void AlsaWork::checkError (int errorIndex)
+// private
+void AlsaWork::checkError(int errorIndex)
 {
     if (errorIndex < 0) {
         std::cerr << snd_strerror(errorIndex) << std::endl;
@@ -172,20 +140,13 @@ void AlsaWork::getCards()
     }
 }
 
-bool AlsaWork::cardExists(int id)
-{
-    return bool(id >= 0 && id < totalCards_);
-}
+bool AlsaWork::cardExists(int id) { return bool(id >= 0 && id < totalCards_); }
 
 int AlsaWork::getFirstCardWithMixers()
 {
-    auto it = std::find_if(devices_.begin(),
-                           devices_.end(),
-                           [](const AlsaDevice::Ptr &dev){return dev->haveMixers();});
+    auto it
+        = std::find_if(devices_.begin(), devices_.end(), [](const AlsaDevice::Ptr &dev) { return dev->haveMixers(); });
     return (it != devices_.end()) ? int(it - devices_.begin()) : 0;
 }
 
-AlsaWork::AlsaWork(AlsaWork const &aw)
-: totalCards_(aw.totalCards_)
-{
-}
+AlsaWork::AlsaWork(AlsaWork const &aw) : totalCards_(aw.totalCards_) { }

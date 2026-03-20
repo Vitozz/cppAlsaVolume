@@ -1,3 +1,8 @@
+2026-03-20
+v0.3.6
+  * Working with ALSA should be safer
+  * Codestyle fixed. Now there is cmake module to fix codestyle using clang-format
+
 2025-10-22
 v0.3.5
   + Added libdbusmenu-gtk support for statusnotifieritem can be disabled with USE_DBUSMENU flag

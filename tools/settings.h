@@ -22,43 +22,42 @@
 #include <glibmm/keyfile.h>
 #include <memory>
 
-class Settings
-{
+class Settings {
 public:
     Settings();
     Settings(Settings const &);
     ~Settings();
     typedef std::shared_ptr<Settings> Ptr;
-    int getSoundCard() const;
-    int getMixerId() const;
-    Glib::ustring getMixer() const;
-    bool getNotebookOrientation();
-    bool getAutorun();
-    bool usePulse();
-    bool usePolling();
-    std::string pulseDeviceName() const;
-    void saveSoundCard(int soundCard);
-    void saveMixer(const std::string& mixerName);
-    void saveMixerId(int mixerId);
-    void saveNotebookOrientation(bool orient);
-    void setAutorun(bool isAutorun);
-    void setVersion(const Glib::ustring& version);
-    void setUsePulse(bool use);
-    void savePulseDeviceName(const std::string &name);
-    void setUsePolling(bool use);
+    int                               getSoundCard() const;
+    int                               getMixerId() const;
+    Glib::ustring                     getMixer() const;
+    bool                              getNotebookOrientation();
+    bool                              getAutorun();
+    bool                              usePulse();
+    bool                              usePolling();
+    std::string                       pulseDeviceName() const;
+    void                              saveSoundCard(int soundCard);
+    void                              saveMixer(const std::string &mixerName);
+    void                              saveMixerId(int mixerId);
+    void                              saveNotebookOrientation(bool orient);
+    void                              setAutorun(bool isAutorun);
+    void                              setVersion(const Glib::ustring &version);
+    void                              setUsePulse(bool use);
+    void                              savePulseDeviceName(const std::string &name);
+    void                              setUsePolling(bool use);
 
 private:
-    static void parseConfig(const Glib::ustring& keyFileName, const Glib::ustring& keyFileData);
-    void loadConfig(const std::string& fileName);
-    void loadDesktopFile(const std::string& fileName);
-    void initDesktopFileData();
+    static void parseConfig(const Glib::ustring &keyFileName, const Glib::ustring &keyFileData);
+    void        loadConfig(const std::string &fileName);
+    void        loadDesktopFile(const std::string &fileName);
+    void        initDesktopFileData();
 
 private:
     Glib::KeyFile *configFile_;
     Glib::KeyFile *desktopFile_;
-    std::string iniFileName_;
-    std::string desktopFilePath_;
-    std::string version_;
+    std::string    iniFileName_;
+    std::string    desktopFilePath_;
+    std::string    version_;
 };
 
 #endif // SETTINGS_H

@@ -19,142 +19,70 @@
 
 #include "settingsstr.h"
 
-settingsStr::settingsStr()
-    : cardId_(0),
-      mixerId_(0),
-      notebookOrientation_(false),
-      isAutorun_(false),
-      usePulse_(false),
-      usePolling_(true),
-      cardList_(std::vector<std::string>()),
-      mixerList_(std::vector<std::string>()),
-      switchList_(MixerSwitches::Ptr()),
-      pulseDevices_(std::vector<std::string>()),
-      pulseDeviceId_(0),
-      pulseDeviceName_(std::string()),
-      pulseDeviceDesc_(std::string())
+settingsStr::settingsStr() :
+    cardId_(0), mixerId_(0), notebookOrientation_(false), isAutorun_(false), usePulse_(false), usePolling_(true),
+    cardList_(std::vector<std::string>()), mixerList_(std::vector<std::string>()), switchList_(MixerSwitches::Ptr()),
+    pulseDevices_(std::vector<std::string>()), pulseDeviceId_(0), pulseDeviceName_(std::string()),
+    pulseDeviceDesc_(std::string())
 {
 }
 
-settingsStr::settingsStr(settingsStr &str)
-    : cardId_(str.cardId()),
-      mixerId_(str.mixerId()),
-      notebookOrientation_(str.notebookOrientation()),
-      isAutorun_(str.isAutorun()),
-      usePulse_(str.usePulse()),
-      usePolling_(str.usePolling()),
-      cardList_(str.cardList()),
-      mixerList_(str.mixerList()),
-      switchList_(str.switchList()),
-      pulseDevices_(str.pulseDevices()),
-      pulseDeviceId_(str.pulseDeviceId()),
-      pulseDeviceName_(str.pulseDeviceName()),
-      pulseDeviceDesc_(str.pulseDeviceDesc())
+settingsStr::settingsStr(settingsStr &str) :
+    cardId_(str.cardId()), mixerId_(str.mixerId()), notebookOrientation_(str.notebookOrientation()),
+    isAutorun_(str.isAutorun()), usePulse_(str.usePulse()), usePolling_(str.usePolling()), cardList_(str.cardList()),
+    mixerList_(str.mixerList()), switchList_(str.switchList()), pulseDevices_(str.pulseDevices()),
+    pulseDeviceId_(str.pulseDeviceId()), pulseDeviceName_(str.pulseDeviceName()),
+    pulseDeviceDesc_(str.pulseDeviceDesc())
 {
 }
 
-unsigned int settingsStr::cardId() const
-{
-    return cardId_;
-}
+unsigned int settingsStr::cardId() const { return cardId_; }
 
-unsigned int settingsStr::mixerId() const
-{
-    return mixerId_;
-}
+unsigned int settingsStr::mixerId() const { return mixerId_; }
 
-bool settingsStr::notebookOrientation()
-{
-    return notebookOrientation_;
-}
+bool settingsStr::notebookOrientation() { return notebookOrientation_; }
 
-bool settingsStr::isAutorun()
-{
-    return isAutorun_;
-}
+bool settingsStr::isAutorun() { return isAutorun_; }
 
-bool settingsStr::usePolling()
-{
-    return usePolling_;
-}
+bool settingsStr::usePolling() { return usePolling_; }
 
-const std::vector<std::string> &settingsStr::cardList() const
-{
-    return cardList_;
-}
+const std::vector<std::string> &settingsStr::cardList() const { return cardList_; }
 
-const std::vector<std::string> &settingsStr::mixerList() const
-{
-    return mixerList_;
-}
+const std::vector<std::string> &settingsStr::mixerList() const { return mixerList_; }
 
-int settingsStr::pulseDeviceId() const
-{
-    return pulseDeviceId_;
-}
+int settingsStr::pulseDeviceId() const { return pulseDeviceId_; }
 
-const std::string &settingsStr::pulseDeviceName() const
-{
-    return pulseDeviceName_;
-}
+const std::string &settingsStr::pulseDeviceName() const { return pulseDeviceName_; }
 
-const std::string &settingsStr::pulseDeviceDesc() const
-{
-    return pulseDeviceDesc_;
-}
+const std::string &settingsStr::pulseDeviceDesc() const { return pulseDeviceDesc_; }
 
-const std::vector<std::string> &settingsStr::pulseDevices() const
-{
-    return pulseDevices_;
-}
+const std::vector<std::string> &settingsStr::pulseDevices() const { return pulseDevices_; }
 
-bool settingsStr::usePulse()
-{
-    return usePulse_;
-}
+bool settingsStr::usePulse() { return usePulse_; }
 
-void settingsStr::setCardId(unsigned int id)
-{
-    cardId_ = id;
-}
+void settingsStr::setCardId(unsigned int id) { cardId_ = id; }
 
-void settingsStr::setMixerId(unsigned int id)
-{
-    mixerId_ = id;
-}
+void settingsStr::setMixerId(unsigned int id) { mixerId_ = id; }
 
-void settingsStr::setNotebookOrientation(bool orient)
-{
-    notebookOrientation_ = orient;
-}
+void settingsStr::setNotebookOrientation(bool orient) { notebookOrientation_ = orient; }
 
-void settingsStr::setIsAutorun(bool autorun)
-{
-    isAutorun_ = autorun;
-}
+void settingsStr::setIsAutorun(bool autorun) { isAutorun_ = autorun; }
 
-void settingsStr::addMixerSwitch(const MixerSwitches::Ptr &switchItem)
-{
-    switchList_ = switchItem;
-}
+void settingsStr::addMixerSwitch(const MixerSwitches::Ptr &switchItem) { switchList_ = switchItem; }
 
-void settingsStr::setList(ListType listType,const  std::vector<std::string> &list)
+void settingsStr::setList(ListType listType, const std::vector<std::string> &list)
 {
     switch (listType) {
     case CARDS:
-        cardList_.assign(list.begin(),list.end());
+        cardList_.assign(list.begin(), list.end());
         break;
     case MIXERS:
-        mixerList_.assign(list.begin(),list.end());
+        mixerList_.assign(list.begin(), list.end());
         break;
     }
-
 }
 
-MixerSwitches::Ptr settingsStr::switchList() const
-{
-    return switchList_;
-}
+MixerSwitches::Ptr settingsStr::switchList() const { return switchList_; }
 
 void settingsStr::clear(ListType listType)
 {
@@ -168,7 +96,6 @@ void settingsStr::clear(ListType listType)
             mixerList_.clear();
         break;
     }
-
 }
 
 void settingsStr::clearSwitches()
@@ -180,34 +107,19 @@ void settingsStr::clearSwitches()
     }
 }
 
-void settingsStr::setPulseDeviceId(int id)
-{
-    pulseDeviceId_ = id;
-}
+void settingsStr::setPulseDeviceId(int id) { pulseDeviceId_ = id; }
 
-void settingsStr::setPulseDeviceName(const std::string &name)
-{
-    pulseDeviceName_ = name;
-}
+void settingsStr::setPulseDeviceName(const std::string &name) { pulseDeviceName_ = name; }
 
-void settingsStr::setPulseDeviceDesc(const std::string &description)
-{
-    pulseDeviceDesc_ = description;
-}
+void settingsStr::setPulseDeviceDesc(const std::string &description) { pulseDeviceDesc_ = description; }
 
 void settingsStr::setPulseDevices(const std::vector<std::string> &devices)
 {
-    if(!pulseDevices_.empty() && !devices.empty())
+    if (!pulseDevices_.empty() && !devices.empty())
         pulseDevices_.clear();
     pulseDevices_.assign(devices.begin(), devices.end());
 }
 
-void settingsStr::setUsePulse(bool use)
-{
-    usePulse_ = use;
-}
+void settingsStr::setUsePulse(bool use) { usePulse_ = use; }
 
-void settingsStr::setUsePolling(bool use)
-{
-    usePolling_ = use;
-}
+void settingsStr::setUsePolling(bool use) { usePolling_ = use; }

@@ -27,40 +27,21 @@
 #define CP_SWITCH_NAME _("Capture Switch")
 #define EN_SWITCH_NAME _("Enumerated Control")
 
-SettingsFrame::SettingsFrame(BaseObjectType* cobject,
-                             const Glib::RefPtr<Gtk::Builder>& refGlade)
-    : Gtk::Dialog(cobject),
-      okButton_(nullptr),
-      cancelButton_(nullptr),
-      sndCardBox_(nullptr),
-      mixerBox_(nullptr),
-      playbackSwitchTree_(nullptr),
-      captureSwitchTree_(nullptr),
-      otherSwitchTree_(nullptr),
-      isAutoRun_(nullptr),
-      tabPos_(nullptr),
-      tabWidget_(nullptr),
-      pulseHBox_(nullptr),
-      alsaHBox_(nullptr),
-      usePulse_(nullptr),
-      usePolling_(nullptr),
-      #ifdef HAVE_PULSE
-      pulseBox_(nullptr),
-      pulseDev_(0),
-      pulseCards_(Glib::RefPtr<Gtk::ListStore>()),
-      #endif
-      cards_(Glib::RefPtr<Gtk::ListStore>()),
-      mixers_(Glib::RefPtr<Gtk::ListStore>()),
-      pbSwitches_(Glib::RefPtr<Gtk::ListStore>()),
-      capSwitches_(Glib::RefPtr<Gtk::ListStore>()),
-      enumSwitches_(Glib::RefPtr<Gtk::ListStore>()),
-      settings_(settingsStr::Ptr()),
-      mixerId_(0),
-      cardId_(0),
-      isPulse_(false)
+SettingsFrame::SettingsFrame(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade) :
+    Gtk::Dialog(cobject), okButton_(nullptr), cancelButton_(nullptr), sndCardBox_(nullptr), mixerBox_(nullptr),
+    playbackSwitchTree_(nullptr), captureSwitchTree_(nullptr), otherSwitchTree_(nullptr), isAutoRun_(nullptr),
+    tabPos_(nullptr), tabWidget_(nullptr), pulseHBox_(nullptr), alsaHBox_(nullptr), usePulse_(nullptr),
+    usePolling_(nullptr),
+#ifdef HAVE_PULSE
+    pulseBox_(nullptr), pulseDev_(0), pulseCards_(Glib::RefPtr<Gtk::ListStore>()),
+#endif
+    cards_(Glib::RefPtr<Gtk::ListStore>()), mixers_(Glib::RefPtr<Gtk::ListStore>()),
+    pbSwitches_(Glib::RefPtr<Gtk::ListStore>()), capSwitches_(Glib::RefPtr<Gtk::ListStore>()),
+    enumSwitches_(Glib::RefPtr<Gtk::ListStore>()), settings_(settingsStr::Ptr()), mixerId_(0), cardId_(0),
+    isPulse_(false)
 {
-    //init all lists
-    const Glib::RefPtr<Gtk::Builder>& builder = refGlade;
+    // init all lists
+    const Glib::RefPtr<Gtk::Builder> &builder = refGlade;
     builder->get_widget("ok_button", okButton_);
     builder->get_widget("cancel_button", cancelButton_);
     builder->get_widget("sndcardbox", sndCardBox_);
@@ -78,7 +59,7 @@ SettingsFrame::SettingsFrame(BaseObjectType* cobject,
 #ifdef HAVE_PULSE
     builder->get_widget("pulseDevices", pulseBox_);
 #endif
-    //signals
+    // signals
     if (tabPos_)
         tabPos_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onTabPos));
     if (okButton_)
@@ -140,27 +121,23 @@ void SettingsFrame::initParms(const settingsStr::Ptr &str)
     pulseDev_ = settings_->pulseDeviceId();
 #endif
     mixerId_ = settings_->mixerId();
-    cardId_ = settings_->cardId();
+    cardId_  = settings_->cardId();
     setupTreeModels();
 }
 
 void SettingsFrame::setTabPos(bool orient)
 {
     if (tabWidget_) {
-        if(orient) {
+        if (orient) {
             tabWidget_->set_tab_pos(Gtk::POS_TOP);
-        }
-        else {
+        } else {
             tabWidget_->set_tab_pos(Gtk::POS_LEFT);
         }
         settings_->setNotebookOrientation(orient);
     }
 }
 
-void SettingsFrame::onTabPos()
-{
-    setTabPos(tabPos_->get_active());
-}
+void SettingsFrame::onTabPos() { setTabPos(tabPos_->get_active()); }
 
 void SettingsFrame::onOkButton()
 {
@@ -185,7 +162,7 @@ bool SettingsFrame::onDeleteEvent(GdkEventAny *event)
 
 void SettingsFrame::setupTreeModels()
 {
-    //treeview setup
+    // treeview setup
     setupSoundCards();
 #ifdef HAVE_PULSE
     setupPulseDevices();
@@ -194,14 +171,14 @@ void SettingsFrame::setupTreeModels()
 
 void SettingsFrame::setupSoundCards()
 {
-    if (sndCardBox_ && settings_){
+    if (sndCardBox_ && settings_) {
         sndCardBox_->clear();
         cards_ = Gtk::ListStore::create(m_Columns);
         sndCardBox_->set_model(cards_);
         Gtk::TreeModel::Row row;
-        uint i = 0;
-        for(const std::string &name : settings_->cardList()){
-            row = *(cards_->append());
+        uint                i = 0;
+        for (const std::string &name : settings_->cardList()) {
+            row                       = *(cards_->append());
             row[m_Columns.m_col_name] = Glib::ustring(name);
             if (i == cardId_) {
                 sndCardBox_->set_active(row);
@@ -215,14 +192,14 @@ void SettingsFrame::setupSoundCards()
 #ifdef HAVE_PULSE
 void SettingsFrame::setupPulseDevices()
 {
-    if(pulseBox_ && settings_) {
+    if (pulseBox_ && settings_) {
         pulseBox_->clear();
         pulseCards_ = Gtk::ListStore::create(m_Columns);
         pulseBox_->set_model(pulseCards_);
         Gtk::TreeModel::Row row;
-        uint i = 0;
-        for(const std::string &name : settings_->pulseDevices()){
-            row = *(pulseCards_->append());
+        uint                i = 0;
+        for (const std::string &name : settings_->pulseDevices()) {
+            row                       = *(pulseCards_->append());
             row[m_Columns.m_col_name] = Glib::ustring(name);
             if (i == uint(pulseDev_)) {
                 pulseBox_->set_active(row);
@@ -242,9 +219,9 @@ void SettingsFrame::setupMixers()
         mixerBox_->set_model(mixers_);
         if (!settings_->mixerList().empty()) {
             Gtk::TreeModel::Row row;
-            uint i = 0;
-            for(const std::string &name : settings_->mixerList()) {
-                row = *(mixers_->append());
+            uint                i = 0;
+            for (const std::string &name : settings_->mixerList()) {
+                row                       = *(mixers_->append());
                 row[m_Columns.m_col_name] = Glib::ustring(name);
                 if (i == mixerId_) {
                     mixerBox_->set_active(row);
@@ -270,15 +247,15 @@ void SettingsFrame::updateSwitchTree()
             pbSwitches_->clear();
         pbSwitches_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_TColumns));
         playbackSwitchTree_->set_model(pbSwitches_);
-        Gtk::TreeModel::Row row;
-        const int colsCount = playbackSwitchTree_->append_column(STATUS, *pcell);
-        Gtk::TreeViewColumn* pColumn = playbackSwitchTree_->get_column(colsCount -1);
+        Gtk::TreeModel::Row  row;
+        const int            colsCount = playbackSwitchTree_->append_column(STATUS, *pcell);
+        Gtk::TreeViewColumn *pColumn   = playbackSwitchTree_->get_column(colsCount - 1);
         if (colsCount)
             pColumn->add_attribute(pcell->property_active(), m_TColumns.m_col_toggle);
-        for(const switchcap &scap : settings_->switchList()->playbackSwitchList()) {
-            row = *(pbSwitches_->append());
+        for (const switchcap &scap : settings_->switchList()->playbackSwitchList()) {
+            row                          = *(pbSwitches_->append());
             row[m_TColumns.m_col_toggle] = scap.second;
-            row[m_TColumns.m_col_name] = scap.first;
+            row[m_TColumns.m_col_name]   = scap.first;
         }
         playbackSwitchTree_->append_column(PB_SWITCH_NAME, m_TColumns.m_col_name);
         playbackSwitchTree_->show_all_children();
@@ -293,15 +270,15 @@ void SettingsFrame::updateSwitchTree()
             capSwitches_->clear();
         capSwitches_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_TColumns));
         captureSwitchTree_->set_model(capSwitches_);
-        Gtk::TreeModel::Row row;
-        const int colsCount = captureSwitchTree_->append_column(STATUS, *rcell);
-        Gtk::TreeViewColumn* pColumn = captureSwitchTree_->get_column(colsCount -1);
+        Gtk::TreeModel::Row  row;
+        const int            colsCount = captureSwitchTree_->append_column(STATUS, *rcell);
+        Gtk::TreeViewColumn *pColumn   = captureSwitchTree_->get_column(colsCount - 1);
         if (colsCount)
             pColumn->add_attribute(rcell->property_active(), m_TColumns.m_col_toggle);
         for (const switchcap &scap : settings_->switchList()->captureSwitchList()) {
-            row = *(capSwitches_->append());
+            row                          = *(capSwitches_->append());
             row[m_TColumns.m_col_toggle] = scap.second;
-            row[m_TColumns.m_col_name] = scap.first;
+            row[m_TColumns.m_col_name]   = scap.first;
         }
         captureSwitchTree_->append_column(CP_SWITCH_NAME, m_TColumns.m_col_name);
         captureSwitchTree_->show_all_children();
@@ -315,15 +292,15 @@ void SettingsFrame::updateSwitchTree()
             enumSwitches_->clear();
         enumSwitches_ = Glib::RefPtr<Gtk::ListStore>(Gtk::ListStore::create(m_TColumns));
         otherSwitchTree_->set_model(enumSwitches_);
-        Gtk::TreeModel::Row row;
-        const int colsCount = otherSwitchTree_->append_column(STATUS, *ecell);
-        Gtk::TreeViewColumn* pColumn = otherSwitchTree_->get_column(colsCount -1);
+        Gtk::TreeModel::Row  row;
+        const int            colsCount = otherSwitchTree_->append_column(STATUS, *ecell);
+        Gtk::TreeViewColumn *pColumn   = otherSwitchTree_->get_column(colsCount - 1);
         if (colsCount)
             pColumn->add_attribute(ecell->property_active(), m_TColumns.m_col_toggle);
-        for(const switchcap &scap : settings_->switchList()->enumSwitchList()) {
-            row = *(enumSwitches_->append());
+        for (const switchcap &scap : settings_->switchList()->enumSwitchList()) {
+            row                          = *(enumSwitches_->append());
             row[m_TColumns.m_col_toggle] = scap.second;
-            row[m_TColumns.m_col_name] = scap.first;
+            row[m_TColumns.m_col_name]   = scap.first;
         }
         otherSwitchTree_->append_column(EN_SWITCH_NAME, m_TColumns.m_col_name);
         otherSwitchTree_->show_all_children();
@@ -354,7 +331,7 @@ void SettingsFrame::updateMixers(const std::vector<std::string> &mixers)
 
 void SettingsFrame::updateSwitches(const MixerSwitches::Ptr &slist)
 {
-    //settings_->clearSwitches();
+    // settings_->clearSwitches();
     settings_->addMixerSwitch(slist);
     updateSwitchTree();
 }
@@ -367,47 +344,38 @@ void SettingsFrame::mixerBoxChanged()
     }
 }
 
-void SettingsFrame::onPlaybackCellToggled(const Glib::ustring& path)
+void SettingsFrame::onPlaybackCellToggled(const Glib::ustring &path)
 {
-    Gtk::TreeModel::iterator it = pbSwitches_->get_iter(path);
-    Gtk::TreeModel::Row row = *it;
+    Gtk::TreeModel::iterator it  = pbSwitches_->get_iter(path);
+    Gtk::TreeModel::Row      row = *it;
     row[m_TColumns.m_col_toggle] = !bool(row.get_value(m_TColumns.m_col_toggle));
-    m_type_toggled_signal(row.get_value(m_TColumns.m_col_name),
-                          PLAYBACK,
-                          bool(row.get_value(m_TColumns.m_col_toggle)));
+    m_type_toggled_signal(row.get_value(m_TColumns.m_col_name), PLAYBACK, bool(row.get_value(m_TColumns.m_col_toggle)));
 }
 
-void SettingsFrame::onCaptureCellToggled(const Glib::ustring& path)
+void SettingsFrame::onCaptureCellToggled(const Glib::ustring &path)
 {
     Gtk::TreeModel::Row row;
-    std::for_each(capSwitches_->children().begin(), capSwitches_->children().end(), [&](Gtk::TreeModel::Row r){
-        row = std::move(r);
+    std::for_each(capSwitches_->children().begin(), capSwitches_->children().end(), [&](Gtk::TreeModel::Row r) {
+        row                          = std::move(r);
         row[m_TColumns.m_col_toggle] = false;
     });
     Gtk::TreeModel::iterator iter = capSwitches_->get_iter(path);
-    row = *iter;
+    row                           = *iter;
     if (!bool(row.get_value(m_TColumns.m_col_toggle))) {
         row[m_TColumns.m_col_toggle] = true;
     }
-    m_type_toggled_signal(row.get_value(m_TColumns.m_col_name),
-                          CAPTURE,
-                          bool(row.get_value(m_TColumns.m_col_toggle)));
+    m_type_toggled_signal(row.get_value(m_TColumns.m_col_name), CAPTURE, bool(row.get_value(m_TColumns.m_col_toggle)));
 }
 
-void SettingsFrame::onEnumCellToggled(const Glib::ustring& path)
+void SettingsFrame::onEnumCellToggled(const Glib::ustring &path)
 {
-    Gtk::TreeModel::iterator it = enumSwitches_->get_iter(path);
-    Gtk::TreeModel::Row row = *it;
+    Gtk::TreeModel::iterator it  = enumSwitches_->get_iter(path);
+    Gtk::TreeModel::Row      row = *it;
     row[m_TColumns.m_col_toggle] = !bool(row.get_value(m_TColumns.m_col_toggle));
-    m_type_toggled_signal(row.get_value(m_TColumns.m_col_name),
-                          ENUM,
-                          bool(row.get_value(m_TColumns.m_col_toggle)));
+    m_type_toggled_signal(row.get_value(m_TColumns.m_col_name), ENUM, bool(row.get_value(m_TColumns.m_col_toggle)));
 }
 
-void SettingsFrame::onAutorunToggled()
-{
-    settings_->setIsAutorun(isAutoRun_->get_active());
-}
+void SettingsFrame::onAutorunToggled() { settings_->setIsAutorun(isAutoRun_->get_active()); }
 
 #ifdef HAVE_PULSE
 void SettingsFrame::onPulseToggled()
@@ -425,29 +393,14 @@ void SettingsFrame::onUsePollingToggled()
     settings_->setUsePolling(usePoll);
 }
 
-void SettingsFrame::disablePulseCheckButton()
-{
-    usePulse_->set_visible(false);
-}
+void SettingsFrame::disablePulseCheckButton() { usePulse_->set_visible(false); }
 
-SettingsFrame::type_toggled_signal SettingsFrame::signal_switches_toggled()
-{
-    return m_type_toggled_signal;
-}
+SettingsFrame::type_toggled_signal SettingsFrame::signal_switches_toggled() { return m_type_toggled_signal; }
 
-SettingsFrame::type_int_signal SettingsFrame::signal_sndcard_changed()
-{
-    return m_signal_sndcard_changed;
-}
+SettingsFrame::type_int_signal SettingsFrame::signal_sndcard_changed() { return m_signal_sndcard_changed; }
 
 #ifdef HAVE_PULSE
-SettingsFrame::type_int_signal SettingsFrame::signal_pulsedevices_changed()
-{
-    return m_signal_pulsedev_changed;
-}
+SettingsFrame::type_int_signal SettingsFrame::signal_pulsedevices_changed() { return m_signal_pulsedev_changed; }
 
-SettingsFrame::type_bool_signal SettingsFrame::signal_pulsdev_toggled()
-{
-    return m_signal_pulse_toggled;
-}
+SettingsFrame::type_bool_signal SettingsFrame::signal_pulsdev_toggled() { return m_signal_pulse_toggled; }
 #endif

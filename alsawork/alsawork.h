@@ -20,46 +20,45 @@
 #ifndef ALSAWORK_H
 #define ALSAWORK_H
 
-#include "mixerswitches.h"
 #include "alsadevice.h"
-#include <vector>
+#include "mixerswitches.h"
 #include <memory>
+#include <vector>
 
 typedef std::vector<AlsaDevice::Ptr> AlsaDevicePtrList;
 
-class AlsaWork
-{
+class AlsaWork {
 public:
     AlsaWork();
     AlsaWork(AlsaWork const &);
     ~AlsaWork();
     typedef std::shared_ptr<AlsaWork> Ptr;
-    void setCurrentCard(int cardId);
-    void setCurrentMixer(const std::string &mixer);
-    void setCurrentMixer(int id);
-    void setAlsaVolume(double volume);
-    double getAlsaVolume() const;
-    static std::string getCardName(int index);
-    std::string getMixerName(int index);
-    std::string getCurrentMixerName() const;
-    const std::vector<std::string> &getCardsList() const;
-    const std::vector<std::string> &getVolumeMixers() const;
-    MixerSwitches::Ptr getSwitchList() const;
-    void setSwitch(const std::string& mixer, int id, bool enabled);
-    void setMute(bool enabled);
-    bool getMute();
-    bool cardExists(int id);
-    int getFirstCardWithMixers();
+    void                              setCurrentCard(int cardId);
+    void                              setCurrentMixer(const std::string &mixer);
+    void                              setCurrentMixer(int id);
+    void                              setAlsaVolume(double volume);
+    double                            getAlsaVolume() const;
+    static std::string                getCardName(int index);
+    std::string                       getMixerName(int index);
+    std::string                       getCurrentMixerName() const;
+    const std::vector<std::string>   &getCardsList() const;
+    const std::vector<std::string>   &getVolumeMixers() const;
+    MixerSwitches::Ptr                getSwitchList() const;
+    void                              setSwitch(const std::string &mixer, int id, bool enabled);
+    void                              setMute(bool enabled);
+    bool                              getMute();
+    bool                              cardExists(int id);
+    int                               getFirstCardWithMixers();
 
 private:
-    static int getTotalCards();
-    static void checkError (int errorIndex);
-    void getCards();
+    static int  getTotalCards();
+    static void checkError(int errorIndex);
+    void        getCards();
 
 private:
     std::vector<std::string> cardList_;
-    int totalCards_;
-    AlsaDevice::Ptr currentAlsaDevice_;
-    AlsaDevicePtrList devices_;
+    int                      totalCards_;
+    AlsaDevice::Ptr          currentAlsaDevice_;
+    AlsaDevicePtrList        devices_;
 };
 #endif // ALSAWORK_H

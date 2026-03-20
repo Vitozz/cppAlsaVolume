@@ -20,41 +20,39 @@
 #ifndef PULSEDEVICE_H
 #define PULSEDEVICE_H
 
-#include <pulse/volume.h>
-#include <pulse/introspect.h>
-#include <string>
 #include <memory>
+#include <pulse/introspect.h>
+#include <pulse/volume.h>
+#include <string>
 
-enum device_type {
-    SOURCE,
-    SINK
-};
+enum device_type { SOURCE, SINK };
 
-class PulseDevice
-{
+class PulseDevice {
 public:
     PulseDevice();
-    explicit PulseDevice(const pa_source_info* i_);
-    explicit PulseDevice(const pa_sink_info* i);
+    explicit PulseDevice(const pa_source_info *i_);
+    explicit PulseDevice(const pa_sink_info *i);
     typedef std::shared_ptr<PulseDevice> Ptr;
-    uint32_t index() const;
-    uint32_t card() const;
-    device_type type() const;
-    const std::string &name() const;
-    const std::string &description() const;
-    pa_cvolume volume;
-    int volume_percent();
-    bool mute() const;
-    double round(double value) const;
+    uint32_t                             index() const;
+    uint32_t                             card() const;
+    device_type                          type() const;
+    const std::string                   &name() const;
+    const std::string                   &description() const;
+    pa_cvolume                           volume;
+    int                                  volume_percent();
+    bool                                 mute() const;
+    double                               round(double value) const;
+
 private:
-    int percent(pa_cvolume& volume) const;
+    int percent(pa_cvolume &volume) const;
+
 private:
-    uint32_t index_;
-    uint32_t card_;
+    uint32_t    index_;
+    uint32_t    card_;
     device_type type_;
     std::string name_;
     std::string description_;
-    bool mute_;
+    bool        mute_;
 };
 
 #endif // PULSEDEVICE_H

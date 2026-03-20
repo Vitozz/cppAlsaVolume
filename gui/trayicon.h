@@ -20,12 +20,12 @@
 #ifndef TRAYICON_H
 #define TRAYICON_H
 
-#include <gtkmm/statusicon.h>
+#include "../tools/tools.h"
+#include <gtkmm/checkmenuitem.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
-#include <gtkmm/checkmenuitem.h>
+#include <gtkmm/statusicon.h>
 #include <memory>
-#include "../tools/tools.h"
 
 #if defined(USE_APPINDICATOR)
 #include "libappindicator/app-indicator.h"
@@ -35,75 +35,75 @@ typedef std::shared_ptr<AppIndicator> StatusNotifierPtr;
 typedef std::shared_ptr<StatusNotifierItem> StatusNotifierPtr;
 #endif
 
-class TrayIcon
-{
+class TrayIcon {
 public:
     TrayIcon(double volume, const std::string &cardName, const std::string &mixerName, bool muted);
     typedef std::shared_ptr<TrayIcon> Ptr;
     void on_signal_volume_changed(double volume, const std::string &cardName, const std::string &mixerName);
     void setMuted(bool isit);
-    //signals
-    typedef sigc::signal<void> type_trayicon_simple_signal;
+    // signals
+    typedef sigc::signal<void>               type_trayicon_simple_signal;
     typedef sigc::signal<void, iconPosition> type_trayicon_4int_signal;
-    typedef sigc::signal<void, double> type_trayicon_double_signal;
-    typedef sigc::signal<void, double> type_trayicon_bool_signal;
-    type_trayicon_double_signal signal_value_changed();
-    type_trayicon_4int_signal signal_on_restore();
-    type_trayicon_simple_signal signal_ask_dialog();
-    type_trayicon_simple_signal signal_ask_settings();
-    type_trayicon_simple_signal signal_save_settings();
-    type_trayicon_bool_signal signal_on_mute();
+    typedef sigc::signal<void, double>       type_trayicon_double_signal;
+    typedef sigc::signal<void, double>       type_trayicon_bool_signal;
+    type_trayicon_double_signal              signal_value_changed();
+    type_trayicon_4int_signal                signal_on_restore();
+    type_trayicon_simple_signal              signal_ask_dialog();
+    type_trayicon_simple_signal              signal_ask_settings();
+    type_trayicon_simple_signal              signal_save_settings();
+    type_trayicon_bool_signal                signal_on_mute();
 
 protected:
-    //menu actions
+    // menu actions
     void onHideRestore();
     void runSettings();
     void onMute();
     void onAbout();
     void onQuit();
-    //icon actions
+    // icon actions
     void onPopup(guint button, guint32 activate_time);
     bool onScrollEvent(GdkEventScroll *event);
     bool onButtonClick(GdkEventButton *event);
-    //signals
+    // signals
     type_trayicon_simple_signal m_signal_ask_dialog;
     type_trayicon_simple_signal m_signal_ask_settings;
     type_trayicon_simple_signal m_signal_save_settings;
-    type_trayicon_4int_signal m_signal_on_restore;
+    type_trayicon_4int_signal   m_signal_on_restore;
     type_trayicon_double_signal m_signal_value_changed;
-    type_trayicon_bool_signal m_signal_on_mute;
+    type_trayicon_bool_signal   m_signal_on_mute;
 
 private:
-    void setIcon(double value);
-    void setTooltip(const Glib::ustring &message);
+    void          setIcon(double value);
+    void          setTooltip(const Glib::ustring &message);
     Glib::ustring getIconName(double value) const;
-    void setMousePos(int X, int Y);
-    void getMousePosition();
-    void getIconPositionInfo();
+    void          setMousePos(int X, int Y);
+    void          getMousePosition();
+    void          getIconPositionInfo();
 #if defined(USE_APPINDICATOR)
     static void onScrollEventAI(AppIndicator *ai, gint steps, gint direction, TrayIcon *userdata);
 #elif defined(USE_KDE)
-    static void onActivate(StatusNotifierItem * sn, gint x, gint y, TrayIcon *userdata);
-    static void onSecondaryActivate(StatusNotifierItem * sn, gint x, gint y, TrayIcon *userdata);
-    static void onScroll(StatusNotifierItem * sn, gint delta, StatusNotifierScrollOrientation orient, TrayIcon *userdata);
-    static void onContextMenu(StatusNotifierItem * sn, gint x, gint y, TrayIcon *userdata);
-    bool checkDBusInterfaceExists(const Glib::ustring &serviceName);
-    static void onRegisterError(StatusNotifierItem * sn, GError *error, TrayIcon *userdata);
+    static void onActivate(StatusNotifierItem *sn, gint x, gint y, TrayIcon *userdata);
+    static void onSecondaryActivate(StatusNotifierItem *sn, gint x, gint y, TrayIcon *userdata);
+    static void onScroll(StatusNotifierItem *sn, gint delta, StatusNotifierScrollOrientation orient,
+                         TrayIcon *userdata);
+    static void onContextMenu(StatusNotifierItem *sn, gint x, gint y, TrayIcon *userdata);
+    bool        checkDBusInterfaceExists(const Glib::ustring &serviceName);
+    static void onRegisterError(StatusNotifierItem *sn, GError *error, TrayIcon *userdata);
 #endif
 
 private:
-    double volumeValue_;
-    std::string cardName_;
-    std::string mixerName_;
-    bool muted_;
-    Gtk::Menu *menu_;
-    Gtk::MenuItem *restoreItem_, *settingsItem_, *aboutItem_, *quitItem_;
-    Gtk::CheckMenuItem* muteItem_;
-    int mouseX_;
-    int mouseY_;
-    int pixbufWidth_;
-    int pixbufHeight_;
-    bool isLegacyIcon_;
+    double                    volumeValue_;
+    std::string               cardName_;
+    std::string               mixerName_;
+    bool                      muted_;
+    Gtk::Menu                *menu_;
+    Gtk::MenuItem            *restoreItem_, *settingsItem_, *aboutItem_, *quitItem_;
+    Gtk::CheckMenuItem       *muteItem_;
+    int                       mouseX_;
+    int                       mouseY_;
+    int                       pixbufWidth_;
+    int                       pixbufHeight_;
+    bool                      isLegacyIcon_;
     Glib::RefPtr<Gdk::Screen> screen_;
 #if defined(USE_APPINDICATOR) || defined(USE_KDE)
     StatusNotifierPtr newIcon_;

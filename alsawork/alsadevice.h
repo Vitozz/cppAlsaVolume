@@ -1,6 +1,6 @@
 /*
  * alsadevice.h
- * Copyright (C) 2014-2025 Vitaly Tonkacheyev
+ * Copyright (C) 2014-2026 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,56 +22,68 @@
 
 #include "alsa/asoundlib.h"
 #include "mixerswitches.h"
-#include <vector>
+#include <iostream>
 #include <memory>
+#include <vector>
 
-class AlsaDevice
-{
+struct AlsaMixerDeleter {
+    void operator()(snd_mixer_t *ptr) const
+    {
+        if (ptr) {
+            auto errId = snd_mixer_close(ptr);
+            if (errId < 0)
+                std::cerr << snd_strerror(errId) << std::endl;
+        }
+    }
+};
+
+using ScopedMixer = std::unique_ptr<snd_mixer_t, AlsaMixerDeleter>;
+
+class AlsaDevice {
 public:
     AlsaDevice(int id, std::string card);
     ~AlsaDevice();
     AlsaDevice(AlsaDevice const &);
     typedef std::shared_ptr<AlsaDevice> Ptr;
-    const std::string &name() const;
-    int id() const;
-    const std::vector<std::string> &mixers() const;
-    MixerSwitches::Ptr switches();
-    const std::string &currentMixer() const;
-    int currentMixerId() const;
-    bool havePlaybackMixers();
-    bool haveCaptureMixers();
-    bool haveMixers();
-    double getVolume();
-    bool getMute();
-    void setDeviceVolume(double volume);
-    void setCurrentMixer(int id);
-    void setCurrentMixer(const std::string &mixer);
-    void setSwitch(const std::string &mixer, int id, bool enabled);
-    void setMute(bool enabled);
-    static std::string formatCardName(long long int id);
+    const std::string                  &name() const;
+    int                                 id() const;
+    const std::vector<std::string>     &mixers() const;
+    MixerSwitches::Ptr                  switches();
+    const std::string                  &currentMixer() const;
+    int                                 currentMixerId() const;
+    bool                                havePlaybackMixers();
+    bool                                haveCaptureMixers();
+    bool                                haveMixers();
+    double                              getVolume();
+    bool                                getMute();
+    void                                setDeviceVolume(double volume);
+    void                                setCurrentMixer(int id);
+    void                                setCurrentMixer(const std::string &mixer);
+    void                                setSwitch(const std::string &mixer, int id, bool enabled);
+    void                                setMute(bool enabled);
+    static std::string                  formatCardName(long long int id);
 
 private:
-    static snd_mixer_t *getMixerHanlde(int id);
+    static ScopedMixer                  getMixerHanlde(int id);
     static snd_mixer_selem_channel_id_t checkMixerChannels(snd_mixer_elem_t *element);
-    static snd_mixer_elem_t *initMixerElement(snd_mixer_t *handle, const char *mixer);
-    static void checkError (int errorIndex);
-    void initMixerList();
-    static double getNormVolume(snd_mixer_elem_t *element);
-    static double getExp10(double value);
-    static bool useLinearDb(long min, long max);
-    static void setNormVolume(snd_mixer_elem_t *element, double volume);
-    void updateElements();
+    static snd_mixer_elem_t            *initMixerElement(snd_mixer_t *handle, const char *mixer);
+    static void                         checkError(int errorIndex);
+    void                                initMixerList();
+    static double                       getNormVolume(snd_mixer_elem_t *element);
+    static double                       getExp10(double value);
+    static bool                         useLinearDb(long min, long max);
+    static void                         setNormVolume(snd_mixer_elem_t *element, double volume);
+    void                                updateElements();
 
 private:
-    int id_;
-    std::string name_;
+    int                      id_;
+    std::string              name_;
     std::vector<std::string> volumeMixers_;
     std::vector<std::string> captureMixers_;
     std::vector<std::string> mixers_;
-    MixerSwitches::Ptr switches_;
-    int currentMixerId_;
-    std::string currentMixerName_;
-
+    MixerSwitches::Ptr       switches_;
+    int                      currentMixerId_;
+    std::string              currentMixerName_;
 };
 
 #endif // ALSADEVICE_H

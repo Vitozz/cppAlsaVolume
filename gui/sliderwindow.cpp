@@ -23,9 +23,8 @@
 #define SLIDER_HEIGHT 120
 #define SLIDER_MIN_WIDTH 20
 
-SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade)
-    : Gtk::Window(cobject),
-      volumeSlider_(nullptr)
+SliderWindow::SliderWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade) :
+    Gtk::Window(cobject), volumeSlider_(nullptr)
 {
     volumeValue_ = 0;
     refGlade->get_widget("volume_slider", volumeSlider_);
@@ -49,20 +48,17 @@ SliderWindow::SliderWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
     set_keep_above(true);
 }
 
-SliderWindow::~SliderWindow()
-{
-    delete volumeSlider_;
-}
+SliderWindow::~SliderWindow() { delete volumeSlider_; }
 
 void SliderWindow::setWindowPosition(const iconPosition &pos)
 {
     if (!get_visible()) {
         show_all();
 #ifndef IS_GTK_2
-        const int wWidth = volumeSlider_->get_allocated_width();
+        const int wWidth  = volumeSlider_->get_allocated_width();
         const int wHeight = volumeSlider_->get_allocated_height();
 #else
-        const int wWidth = volumeSlider_->get_width();
+        const int wWidth  = volumeSlider_->get_width();
         const int wHeight = SLIDER_HEIGHT;
 #endif
 #ifdef IS_DEBUG
@@ -75,13 +71,11 @@ void SliderWindow::setWindowPosition(const iconPosition &pos)
         std::cout << "iconX = " << pos.iconX_ << std::endl;
         std::cout << "iconY = " << pos.iconY_ << std::endl;
 #endif
-        int wY = pos.trayAtTop_ ? pos.iconHeight_ + 4
-                                : pos.screenHeight_ - wHeight - pos.iconHeight_ - 4;
+        int wY = pos.trayAtTop_ ? pos.iconHeight_ + 4 : pos.screenHeight_ - wHeight - pos.iconHeight_ - 4;
         int wX = pos.iconX_ - wWidth / 2;
         if (pos.geometryAvailable_) {
             wX += pos.iconWidth_ / 2;
-            wY = pos.trayAtTop_ ? pos.iconY_ + pos.iconHeight_ + 4
-                                : pos.iconY_ - pos.iconHeight_ - wHeight - 4;
+            wY = pos.trayAtTop_ ? pos.iconY_ + pos.iconHeight_ + 4 : pos.iconY_ - pos.iconHeight_ - wHeight - 4;
         }
 #ifdef IS_DEBUG
         std::cout << "Geometry available: " << pos.geometryAvailable_ << std::endl;
@@ -89,8 +83,7 @@ void SliderWindow::setWindowPosition(const iconPosition &pos)
         std::cout << "wX = " << wX << std::endl;
 #endif
         this->move(wX, wY);
-    }
-    else {
+    } else {
         hide();
     }
 }
@@ -101,13 +94,10 @@ void SliderWindow::on_volume_slider()
     m_signal_volume_changed(volumeValue_);
 }
 
-bool SliderWindow::on_focus_out(GdkEventCrossing* event)
+bool SliderWindow::on_focus_out(GdkEventCrossing *event)
 {
     if ((event->type == GDK_LEAVE_NOTIFY)
-            && (event->x < 0
-                ||event->x >= get_width()
-                ||event->y < 0
-                ||event->y >= get_height())){
+        && (event->x < 0 || event->x >= get_width() || event->y < 0 || event->y >= get_height())) {
         hide();
     }
     return false;
@@ -119,7 +109,4 @@ void SliderWindow::setVolumeValue(double value)
     volumeSlider_->set_value(value);
 }
 
-SliderWindow::type_sliderwindow_signal SliderWindow::signal_volume_changed()
-{
-    return m_signal_volume_changed;
-}
+SliderWindow::type_sliderwindow_signal SliderWindow::signal_volume_changed() { return m_signal_volume_changed; }

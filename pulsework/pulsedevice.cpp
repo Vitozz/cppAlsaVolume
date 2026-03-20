@@ -25,28 +25,18 @@
 
 static uint32_t getCardId(pa_proplist *pl)
 {
-    const char* cardId = pa_proplist_gets(pl, ALSA_CARDID_PROPERTY);
+    const char *cardId = pa_proplist_gets(pl, ALSA_CARDID_PROPERTY);
     return (cardId != nullptr) ? uint(std::stoi(std::string(cardId))) : 0;
 }
 
-PulseDevice::PulseDevice()
-    : volume({0,0}),
-      index_(0),
-      card_(0),
-      type_(SINK),
-      name_(std::string()),
-      description_(std::string()),
-      mute_(false)
+PulseDevice::PulseDevice() :
+    volume({ 0, 0 }), index_(0), card_(0), type_(SINK), name_(std::string()), description_(std::string()), mute_(false)
 {
 }
 
-PulseDevice::PulseDevice(const pa_source_info* i)
-    : volume({0,0}),
-      index_(i->index),
-      card_(getCardId(i->proplist)),
-      type_(SOURCE),
-      name_(std::string(i->name)),
-      description_(std::string(i->description))
+PulseDevice::PulseDevice(const pa_source_info *i) :
+    volume({ 0, 0 }), index_(i->index), card_(getCardId(i->proplist)), type_(SOURCE), name_(std::string(i->name)),
+    description_(std::string(i->description))
 {
     volume.channels = i->volume.channels;
     int n;
@@ -56,13 +46,9 @@ PulseDevice::PulseDevice(const pa_source_info* i)
     mute_ = i->mute == 1;
 }
 
-PulseDevice::PulseDevice(const pa_sink_info* i)
-    : volume({0,0}),
-      index_(i->index),
-      card_(getCardId(i->proplist)),
-      type_(SINK),
-      name_(std::string(i->name)),
-      description_(std::string(i->description))
+PulseDevice::PulseDevice(const pa_sink_info *i) :
+    volume({ 0, 0 }), index_(i->index), card_(getCardId(i->proplist)), type_(SINK), name_(std::string(i->name)),
+    description_(std::string(i->description))
 {
     volume.channels = i->volume.channels;
     int n;
@@ -72,48 +58,23 @@ PulseDevice::PulseDevice(const pa_sink_info* i)
     mute_ = i->mute == 1;
 }
 
-int PulseDevice::percent(pa_cvolume& volume_) const
+int PulseDevice::percent(pa_cvolume &volume_) const
 {
     return int(round((double(pa_cvolume_avg(&volume_) * 100.) / PA_VOLUME_NORM)));
 }
 
-double PulseDevice::round(double value) const
-{
-    return (value > 0.0) ? floor(value + 0.5) : ceil(value - 0.5);
-}
+double PulseDevice::round(double value) const { return (value > 0.0) ? floor(value + 0.5) : ceil(value - 0.5); }
 
-uint32_t PulseDevice::index() const
-{
-    return index_;
-}
+uint32_t PulseDevice::index() const { return index_; }
 
-uint32_t PulseDevice::card() const
-{
-    return card_;
-}
+uint32_t PulseDevice::card() const { return card_; }
 
-device_type PulseDevice::type() const
-{
-    return type_;
-}
+device_type PulseDevice::type() const { return type_; }
 
-const std::string &PulseDevice::name() const
-{
-    return name_;
-}
+const std::string &PulseDevice::name() const { return name_; }
 
-const std::string &PulseDevice::description() const
-{
-    return description_;
-}
+const std::string &PulseDevice::description() const { return description_; }
 
-int PulseDevice::volume_percent()
-{
-    return percent(volume);
-}
+int PulseDevice::volume_percent() { return percent(volume); }
 
-bool PulseDevice::mute() const
-{
-    return mute_;
-}
-
+bool PulseDevice::mute() const { return mute_; }

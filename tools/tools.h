@@ -20,63 +20,56 @@
 #ifndef FILEWORK_H
 #define FILEWORK_H
 
+#include <algorithm>
 #include <string>
 #include <vector>
-#include <algorithm>
 
-enum SwitchType {
-    PLAYBACK = 0,
-    CAPTURE = 1,
-    ENUM = 2
-};
+enum SwitchType { PLAYBACK = 0, CAPTURE = 1, ENUM = 2 };
 
-enum ListType {
-    CARDS = 0,
-    MIXERS = 1
-};
+enum ListType { CARDS = 0, MIXERS = 1 };
 
 struct iconPosition {
-    int iconX_ = 0;
-    int iconY_ = 0;
-    int iconWidth_ = 0;
-    int iconHeight_ = 0;
-    int screenHeight_ = 0;
-    int screenWidth_ = 0;
+    int  iconX_             = 0;
+    int  iconY_             = 0;
+    int  iconWidth_         = 0;
+    int  iconHeight_        = 0;
+    int  screenHeight_      = 0;
+    int  screenWidth_       = 0;
     bool geometryAvailable_ = false;
-    bool trayAtTop_ = false;
+    bool trayAtTop_         = false;
 };
 
 typedef std::pair<std::string, bool> switchcap;
 
 namespace Tools {
-std::string getCWD();
-std::string getHomePath();
+std::string              getCWD();
+std::string              getHomePath();
 std::vector<std::string> getProjectPathes();
-std::string getResPath(const char *resName);
-std::string getDirPath(const char *dirName);
-bool checkFileExists(const std::string &fileName);
-bool checkDirExists(const std::string &fileName);
-bool compareDouble(const double &a, const double &b);
-void createDirectory(const std::string &dirName);
-void saveFile(const std::string &fileName, const std::string &fileData);
+std::string              getResPath(const char *resName);
+std::string              getDirPath(const char *dirName);
+bool                     checkFileExists(const std::string &fileName);
+bool                     checkDirExists(const std::string &fileName);
+bool                     compareDouble(const double &a, const double &b);
+void                     createDirectory(const std::string &dirName);
+void                     saveFile(const std::string &fileName, const std::string &fileData);
 
 #ifdef IS_DEBUG
 void printList(const std::vector<std::string> &list);
 #endif
-//Template functions
-template <class T>
-int itemIndex(const std::vector<T> &vect, const T &item) {
-    int index = 0;
-    typename std::vector<T>::const_iterator it = std::find(vect.begin(), vect.end(), item);
+// Template functions
+template <class T> int itemIndex(const std::vector<T> &vect, const T &item)
+{
+    int                                     index = 0;
+    typename std::vector<T>::const_iterator it    = std::find(vect.begin(), vect.end(), item);
     if (it != vect.end()) {
         index = it - vect.begin();
     }
     return index;
 }
-template <class T>
-bool itemExists(const std::vector<T> &vect, const T &item) {
+template <class T> bool itemExists(const std::vector<T> &vect, const T &item)
+{
     typename std::vector<T>::const_iterator it = std::find(vect.begin(), vect.end(), item);
     return (it != vect.end());
 }
-}
+} // namespace Tools
 #endif // FILEWORK_H

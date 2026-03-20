@@ -17,36 +17,36 @@
  *
  */
 
-#include "tools/core.h"
 #include "gui/sliderwindow.h"
 #include "gui/trayicon.h"
+#include "tools/core.h"
 #ifndef IS_GTK_2
 #include <gtkmm/application.h>
 #else
 #include <gtkmm/main.h>
 #endif
-#include <gtkmm/builder.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/markup.h>
+#include <gtkmm/builder.h>
 #include <iostream>
 #include <libintl.h>
 #define _(String) gettext(String)
-#define N_(String) gettext_noop (String)
+#define N_(String) gettext_noop(String)
 #define PACKAGE "alsavolume"
 #define CODEC "UTF-8"
 
-int main (int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     bindtextdomain(PACKAGE, Tools::getDirPath("locale").c_str());
     bind_textdomain_codeset(PACKAGE, CODEC);
     textdomain(PACKAGE);
 #ifndef IS_GTK_2
-    Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "org.gtkmm.alsavolume");
-    Glib::ustring slider_ui_ = Tools::getResPath("gladefiles/SliderFrame.glade");
-    Glib::ustring settings_ui_ = Tools::getResPath("gladefiles/SettingsFrame.glade");
+    Glib::RefPtr<Gtk::Application> app          = Gtk::Application::create(argc, argv, "org.gtkmm.alsavolume");
+    Glib::ustring                  slider_ui_   = Tools::getResPath("gladefiles/SliderFrame.glade");
+    Glib::ustring                  settings_ui_ = Tools::getResPath("gladefiles/SettingsFrame.glade");
 #else
-    Gtk::Main app(argc, argv);
-    Glib::ustring slider_ui_ = Tools::getResPath("gladefiles/SliderFrame_2.glade");
+    Gtk::Main     app(argc, argv);
+    Glib::ustring slider_ui_   = Tools::getResPath("gladefiles/SliderFrame_2.glade");
     Glib::ustring settings_ui_ = Tools::getResPath("gladefiles/SettingsFrame_2.glade");
 #endif
     if (slider_ui_.empty()) {
@@ -61,16 +61,13 @@ int main (int argc, char *argv[])
     try {
         refBuilder->add_from_file(slider_ui_);
         refBuilder->add_from_file(settings_ui_);
-    }
-    catch(const Gtk::BuilderError& ex) {
+    } catch (const Gtk::BuilderError &ex) {
         std::cerr << "BuilderError::main.cpp::62 " << ex.what() << std::endl;
         return 1;
-    }
-    catch(const Glib::MarkupError& ex) {
+    } catch (const Glib::MarkupError &ex) {
         std::cerr << "MarkupError::main.cpp::62 " << ex.what() << std::endl;
         return 1;
-    }
-    catch(const Glib::FileError& ex) {
+    } catch (const Glib::FileError &ex) {
         std::cerr << "FileError::main.cpp::62 " << ex.what() << std::endl;
         return 1;
     }
@@ -80,10 +77,8 @@ int main (int argc, char *argv[])
 #endif
     SliderWindow *sliderWindow = nullptr;
     refBuilder->get_widget_derived("volumeFrame", sliderWindow);
-    TrayIcon::Ptr trayIcon(new TrayIcon(core->getVolumeValue(),
-                                        core->getSoundCardName(),
-                                        core->getActiveMixer(),
-                                        core->getMuted()));
+    TrayIcon::Ptr trayIcon(
+        new TrayIcon(core->getVolumeValue(), core->getSoundCardName(), core->getActiveMixer(), core->getMuted()));
     if (trayIcon && sliderWindow) {
         sliderWindow->setVolumeValue(core->getVolumeValue());
         core->signal_value_changed().connect(sigc::mem_fun(*trayIcon, &TrayIcon::on_signal_volume_changed));

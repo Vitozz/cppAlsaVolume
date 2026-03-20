@@ -18,14 +18,14 @@
  */
 
 #include "core.h"
-#include <gtkmm/builder.h>
-#include <gtkmm/aboutdialog.h>
-#include <gtkmm/messagedialog.h>
-#include <glibmm/main.h>
 #include "../gui/settingsframe.h"
+#include <glibmm/main.h>
+#include <gtkmm/aboutdialog.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/messagedialog.h>
 #include <iostream>
-#include <memory>
 #include <libintl.h>
+#include <memory>
 #define _(String) gettext(String)
 
 #define TITLE _("About AlsaVolume")
@@ -34,20 +34,14 @@
 #define COPYRIGHT _("2012-2025 (c) Vitaly Tonkacheyev")
 #define WEBSITE "https://sourceforge.net/projects/kukuruzo/files/alsavolume/"
 #define WEBSITELABEL _("Program Website")
-#define VERSION "0.3.5"
+#define VERSION "0.3.6"
 
 #define POLLING_INTERVAL 2000
 
-Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
-    : settings_(std::make_shared<Settings>()),
-      alsaWork_(std::make_shared<AlsaWork>()),
-      settingsStr_(std::make_shared<settingsStr>()),
-      mixerName_(settings_->getMixer()),
-      volumeValue_(0.0),
-      pollVolume_(0.0),
-      settingsDialog_(nullptr),
-      isPulse_(false),
-      isMuted_(false)
+Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade) :
+    settings_(std::make_shared<Settings>()), alsaWork_(std::make_shared<AlsaWork>()),
+    settingsStr_(std::make_shared<settingsStr>()), mixerName_(settings_->getMixer()), volumeValue_(0.0),
+    pollVolume_(0.0), settingsDialog_(nullptr), isPulse_(false), isMuted_(false)
 {
 #ifdef HAVE_PULSE
     isPulse_ = settings_->usePulse();
@@ -61,7 +55,7 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
     settingsStr_->setMixerId(uint(settings_->getMixerId()));
     settingsStr_->setIsAutorun(settings_->getAutorun());
     int cardId = settings_->getSoundCard();
-    cardId = (alsaWork_->cardExists(settings_->getSoundCard())) ? cardId : alsaWork_->getFirstCardWithMixers();
+    cardId     = (alsaWork_->cardExists(settings_->getSoundCard())) ? cardId : alsaWork_->getFirstCardWithMixers();
     mixerName_ = (mixerName_.empty()) ? alsaWork_->getMixerName(int(settingsStr_->mixerId())) : mixerName_;
     updateControls(cardId);
 #ifdef IS_DEBUG
@@ -72,22 +66,23 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade)
     settings_->setVersion(VERSION);
     settingsStr_->setUsePolling(settings_->usePolling());
     refGlade->get_widget_derived("settingsDialog", settingsDialog_);
-    //connect signals
+    // connect signals
     if (settingsDialog_) {
-        signal_switches_ = settingsDialog_->signal_switches_toggled().connect(sigc::mem_fun(*this, &Core::switchChanged));
-        signal_sndcard_ = settingsDialog_->signal_sndcard_changed().connect(sigc::mem_fun(*this, &Core::updateControls));
+        signal_switches_
+            = settingsDialog_->signal_switches_toggled().connect(sigc::mem_fun(*this, &Core::switchChanged));
+        signal_sndcard_
+            = settingsDialog_->signal_sndcard_changed().connect(sigc::mem_fun(*this, &Core::updateControls));
 #ifdef HAVE_PULSE
-        signal_pulsdev_ = settingsDialog_->signal_pulsdev_toggled().connect(sigc::mem_fun(*this, &Core::onSettingsDialogUsePulse));
-        signal_pulsedevices_ = settingsDialog_->signal_pulsedevices_changed().connect(sigc::mem_fun(*this, &Core::updatePulseDevices));
+        signal_pulsdev_
+            = settingsDialog_->signal_pulsdev_toggled().connect(sigc::mem_fun(*this, &Core::onSettingsDialogUsePulse));
+        signal_pulsedevices_
+            = settingsDialog_->signal_pulsedevices_changed().connect(sigc::mem_fun(*this, &Core::updatePulseDevices));
 #endif
     }
-    signal_timer_ = Glib::signal_timeout().connect(sigc::mem_fun(*this,&Core::onTimeout), POLLING_INTERVAL);
+    signal_timer_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &Core::onTimeout), POLLING_INTERVAL);
 }
 
-Core::~Core()
-{
-    delete settingsDialog_;
-}
+Core::~Core() { delete settingsDialog_; }
 
 void Core::runAboutDialog()
 {
@@ -100,10 +95,10 @@ void Core::runAboutDialog()
     dialog->set_copyright(copyrightString.append(" (thetvg@gmail.com)"));
     dialog->set_website(WEBSITE);
     dialog->set_website_label(WEBSITELABEL);
-    const std::string logoName = Tools::getResPath("icons/volume.png");
-    const std::string iconName = Tools::getResPath("icons/tb_icon100.png");
-    Glib::RefPtr<Gdk::Pixbuf> logo = Gdk::Pixbuf::create_from_file(logoName);
-    Glib::RefPtr<Gdk::Pixbuf> icon = Gdk::Pixbuf::create_from_file(iconName);
+    const std::string         logoName = Tools::getResPath("icons/volume.png");
+    const std::string         iconName = Tools::getResPath("icons/tb_icon100.png");
+    Glib::RefPtr<Gdk::Pixbuf> logo     = Gdk::Pixbuf::create_from_file(logoName);
+    Glib::RefPtr<Gdk::Pixbuf> icon     = Gdk::Pixbuf::create_from_file(iconName);
     dialog->set_icon(icon);
     dialog->set_logo(logo);
     dialog->run();
@@ -121,8 +116,7 @@ void Core::initPulseAudio()
             }
             pulse_->setCurrentDevice(pulseDevice_);
             updatePulseDevices(pulse_->getCurrentDeviceIndex());
-        }
-        else {
+        } else {
             errorDialog(_("Can't start PulseAudio! Using Alsa by default"));
             pulse_.reset();
             isPulse_ = false;
@@ -155,8 +149,7 @@ void Core::runSettings()
 #ifdef HAVE_PULSE
         if (pulse_) {
             updatePulseDevices(pulse_->getCurrentDeviceIndex());
-        }
-        else {
+        } else {
             settingsDialog_->disablePulseCheckButton();
         }
 #endif
@@ -165,7 +158,7 @@ void Core::runSettings()
         settingsDialog_->updateMixers(settingsStr_->mixerList());
         settingsDialog_->updateSwitches(settingsStr_->switchList());
         blockAllSignals(false);
-        if ( settingsDialog_->run() == settingsDialog_->OK_RESPONSE ) {
+        if (settingsDialog_->run() == settingsDialog_->OK_RESPONSE) {
             onSettingsDialogOk(settingsDialog_->getSettings());
         }
     }
@@ -197,7 +190,7 @@ void Core::onSettingsDialogOk(const settingsStr::Ptr &str)
     updateControls(int(settingsStr_->cardId()));
 #ifdef HAVE_PULSE
     if (isPulse_ && pulse_)
-        volumeValue_ =  pulse_->getVolume();
+        volumeValue_ = pulse_->getVolume();
 #endif
     saveSettings();
 }
@@ -214,10 +207,7 @@ void Core::onSettingsDialogUsePulse(bool isPulse)
 }
 #endif
 
-void Core::switchChanged(const std::string &name, int id, bool enabled)
-{
-    alsaWork_->setSwitch(name, id, enabled);
-}
+void Core::switchChanged(const std::string &name, int id, bool enabled) { alsaWork_->setSwitch(name, id, enabled); }
 
 void Core::soundMuted(bool mute)
 {
@@ -273,7 +263,7 @@ void Core::updateControls(int cardId)
     m_signal_volume_changed(volumeValue_);
     updateTrayIcon(volumeValue_);
     m_signal_mixer_muted(getMuted());
-    if(settingsDialog_) {
+    if (settingsDialog_) {
         blockAllSignals(true);
         settingsDialog_->updateMixers(settingsStr_->mixerList());
         settingsDialog_->updateSwitches(settingsStr_->switchList());
@@ -290,12 +280,12 @@ void Core::updatePulseDevices(int deviceId)
         settingsStr_->setPulseDevices(pulse_->getCardList());
         const std::string currDev = pulse_->getDeviceNameByIndex(deviceId);
         pulse_->setCurrentDevice(currDev);
-        pulseDevice_ = currDev;
+        pulseDevice_     = currDev;
         pulseDeviceDesc_ = pulse_->getDeviceDescription(pulseDevice_);
         settingsStr_->setPulseDeviceName(pulseDevice_);
         settingsStr_->setPulseDeviceDesc(pulseDeviceDesc_);
         settingsStr_->setPulseDeviceId(pulse_->getCurrentDeviceIndex());
-        if ( olddev != currDev ) {
+        if (olddev != currDev) {
             updateControls(pulse_->getCardIndex());
         }
     }
@@ -316,10 +306,7 @@ std::string Core::getSoundCardName() const
     return result;
 }
 
-std::string Core::getActiveMixer() const
-{
-    return ((!isPulse_) ? alsaWork_->getCurrentMixerName() : std::string());
-}
+std::string Core::getActiveMixer() const { return ((!isPulse_) ? alsaWork_->getCurrentMixerName() : std::string()); }
 
 double Core::getVolumeValue() const
 {
@@ -339,18 +326,17 @@ void Core::onTrayIconScroll(double value)
     volumeValue_ += value;
     if (volumeValue_ >= 100) {
         volumeValue_ = 100;
-    }
-    else if (volumeValue_ <= 0){
+    } else if (volumeValue_ <= 0) {
         volumeValue_ = 0;
     }
-    m_signal_volume_changed(volumeValue_); //send signal to sliderwindow
+    m_signal_volume_changed(volumeValue_); // send signal to sliderwindow
 }
 
 void Core::onVolumeSlider(double value)
 {
     signal_timer_.block(true);
     volumeValue_ = value;
-    pollVolume_ = value;
+    pollVolume_  = value;
     if (!isPulse_) {
         alsaWork_->setAlsaVolume(value);
         pollVolume_ = alsaWork_->getAlsaVolume();
@@ -370,13 +356,11 @@ void Core::updateTrayIcon(double value)
         const std::string mixer = getActiveMixer();
         if (!mixer.empty()) {
             m_signal_value_changed(value, getSoundCardName(), mixer);
-        }
-        else {
+        } else {
             errorDialog(_("Sound card not contains any volume control mixers"));
             m_signal_value_changed(value, getSoundCardName(), std::string("N/A"));
         }
-    }
-    else {
+    } else {
         m_signal_value_changed(value, getSoundCardName(), std::string());
     }
 }
@@ -393,7 +377,7 @@ bool Core::onTimeout()
                 return true;
             }
             const double volume = alsaWork_->getAlsaVolume();
-            bool ismute = !alsaWork_->getMute();
+            bool         ismute = !alsaWork_->getMute();
             if (Tools::compareDouble(pollVolume_, volume)) {
                 pollVolume_ = volume;
                 m_signal_volume_changed(pollVolume_);
@@ -410,7 +394,7 @@ bool Core::onTimeout()
                 return true;
             }
             const int volume = pulse_->getVolume();
-            bool ismute = pulse_->getMute();
+            bool      ismute = pulse_->getMute();
             if (Tools::compareDouble(pollVolume_, volume)) {
                 pollVolume_ = volume;
                 m_signal_volume_changed(pollVolume_);
@@ -426,26 +410,14 @@ bool Core::onTimeout()
     return true;
 }
 
-Core::type_double_signal Core::signal_volume_changed()
-{
-    return m_signal_volume_changed;
-}
+Core::type_double_signal Core::signal_volume_changed() { return m_signal_volume_changed; }
 
-Core::type_volumevalue_signal Core::signal_value_changed()
-{
-    return m_signal_value_changed;
-}
+Core::type_volumevalue_signal Core::signal_value_changed() { return m_signal_value_changed; }
 
-Core::type_bool_signal Core::signal_mixer_muted()
-{
-    return m_signal_mixer_muted;
-}
+Core::type_bool_signal Core::signal_mixer_muted() { return m_signal_mixer_muted; }
 
-Core::Core(Core const &core)
- : volumeValue_(core.volumeValue_),
-   pollVolume_(core.pollVolume_),
-   settingsDialog_(core.settingsDialog_),
-   isPulse_(core.isPulse_),
-   isMuted_(core.isMuted_)
+Core::Core(Core const &core) :
+    volumeValue_(core.volumeValue_), pollVolume_(core.pollVolume_), settingsDialog_(core.settingsDialog_),
+    isPulse_(core.isPulse_), isMuted_(core.isMuted_)
 {
 }

@@ -20,30 +20,31 @@
 #ifndef SLIDERWINDOW_H
 #define SLIDERWINDOW_H
 
-#include <gtkmm/window.h>
+#include "../tools/tools.h"
 #include <gtkmm/builder.h>
 #include <gtkmm/scale.h>
-#include "../tools/tools.h"
+#include <gtkmm/window.h>
 
-class SliderWindow : public Gtk::Window
-{
+class SliderWindow : public Gtk::Window {
 public:
-    SliderWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>&refGlade);
+    SliderWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade);
     ~SliderWindow() override;
-    void setWindowPosition(const iconPosition& pos);
+    void setWindowPosition(const iconPosition &pos);
     void setVolumeValue(double value);
-    //signal
+    // signal
     typedef sigc::signal<void, double> type_sliderwindow_signal;
-    type_sliderwindow_signal signal_volume_changed();
+    type_sliderwindow_signal           signal_volume_changed();
 
 private:
     void on_volume_slider();
-    bool on_focus_out(GdkEventCrossing* event);
+    bool on_focus_out(GdkEventCrossing *event);
+
 protected:
     type_sliderwindow_signal m_signal_volume_changed;
+
 private:
     Gtk::Scale *volumeSlider_;
-    double volumeValue_;
+    double      volumeValue_;
 };
 
 #endif // SLIDERWINDOW_H

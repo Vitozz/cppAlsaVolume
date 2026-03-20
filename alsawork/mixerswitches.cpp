@@ -19,13 +19,11 @@
 
 #include "mixerswitches.h"
 
-MixerSwitches::MixerSwitches()
-= default;
+MixerSwitches::MixerSwitches() = default;
 
-MixerSwitches::MixerSwitches(const MixerSwitches &ms)
-    : captureSwitchList_(ms.captureSwitchList()),
-      playbackSwitchList_(ms.playbackSwitchList()),
-      enumSwitchList_(ms.enumSwitchList())
+MixerSwitches::MixerSwitches(const MixerSwitches &ms) :
+    captureSwitchList_(ms.captureSwitchList()), playbackSwitchList_(ms.playbackSwitchList()),
+    enumSwitchList_(ms.enumSwitchList())
 {
 }
 
@@ -80,17 +78,8 @@ bool MixerSwitches::isEmpty()
     return (playbackSwitchList_.empty() && captureSwitchList_.empty() && enumSwitchList_.empty());
 }
 
-const std::vector<switchcap> &MixerSwitches::captureSwitchList() const
-{
-    return captureSwitchList_;
-}
+const std::vector<switchcap> &MixerSwitches::captureSwitchList() const { return captureSwitchList_; }
 
-const std::vector<switchcap> &MixerSwitches::playbackSwitchList() const
-{
-    return playbackSwitchList_;
-}
+const std::vector<switchcap> &MixerSwitches::playbackSwitchList() const { return playbackSwitchList_; }
 
-const std::vector<switchcap> &MixerSwitches::enumSwitchList() const
-{
-    return enumSwitchList_;
-}
+const std::vector<switchcap> &MixerSwitches::enumSwitchList() const { return enumSwitchList_; }

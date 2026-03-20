@@ -20,78 +20,75 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include "settings.h"
 #include "../alsawork/alsawork.h"
 #include "../gui/settingsframe.h"
+#include "settings.h"
 #include "settingsstr.h"
-#include <vector>
 #include <memory>
+#include <vector>
 #ifdef HAVE_PULSE
 #include "../pulsework/pulsecore.h"
 #endif
 
-
-
-class Core
-{
+class Core {
 public:
-    explicit Core(const Glib::RefPtr<Gtk::Builder>& refGlade);
+    explicit Core(const Glib::RefPtr<Gtk::Builder> &refGlade);
     Core(Core const &);
     ~Core();
     typedef std::shared_ptr<Core> Ptr;
-    void runAboutDialog();
-    std::string getSoundCardName() const;
-    std::string getActiveMixer() const;
-    void saveSettings();
-    void runSettings();
-    void switchChanged (const std::string& name, int id, bool enabled);
-    void soundMuted(bool mute);
-    bool getMuted();
-    double getVolumeValue() const;
-    void onTrayIconScroll(double value);
-    void onVolumeSlider(double value);
-    void onSettingsDialogOk(const settingsStr::Ptr &str);
-    void onSettingsDialogUsePulse(bool isPulse);
+    void                          runAboutDialog();
+    std::string                   getSoundCardName() const;
+    std::string                   getActiveMixer() const;
+    void                          saveSettings();
+    void                          runSettings();
+    void                          switchChanged(const std::string &name, int id, bool enabled);
+    void                          soundMuted(bool mute);
+    bool                          getMuted();
+    double                        getVolumeValue() const;
+    void                          onTrayIconScroll(double value);
+    void                          onVolumeSlider(double value);
+    void                          onSettingsDialogOk(const settingsStr::Ptr &str);
+    void                          onSettingsDialogUsePulse(bool isPulse);
 
-    typedef sigc::signal<void, double> type_double_signal;
-    type_double_signal signal_volume_changed();
+    typedef sigc::signal<void, double>                           type_double_signal;
+    type_double_signal                                           signal_volume_changed();
     typedef sigc::signal<void, double, std::string, std::string> type_volumevalue_signal;
-    type_volumevalue_signal signal_value_changed();
-    typedef sigc::signal<void, bool> type_bool_signal;
-    type_bool_signal signal_mixer_muted();
+    type_volumevalue_signal                                      signal_value_changed();
+    typedef sigc::signal<void, bool>                             type_bool_signal;
+    type_bool_signal                                             signal_mixer_muted();
 
 private:
-    type_double_signal m_signal_volume_changed;
+    type_double_signal      m_signal_volume_changed;
     type_volumevalue_signal m_signal_value_changed;
-    type_bool_signal m_signal_mixer_muted;
-    void updateControls(int cardId);
+    type_bool_signal        m_signal_mixer_muted;
+    void                    updateControls(int cardId);
 #ifdef HAVE_PULSE
     void updatePulseDevices(int deviceId);
     void initPulseAudio();
 #endif
-    void updateTrayIcon(double value);
-    void blockAllSignals(bool isblock);
+    void        updateTrayIcon(double value);
+    void        blockAllSignals(bool isblock);
     static void errorDialog(const std::string &errorMessage);
-    bool onTimeout();
+    bool        onTimeout();
 
 private:
-    Settings::Ptr settings_;
-    AlsaWork::Ptr alsaWork_;
-    settingsStr::Ptr settingsStr_;
-    std::string mixerName_;
-    double volumeValue_;
-    double pollVolume_;
-    SettingsFrame *settingsDialog_;
-    bool isPulse_;
-    bool isMuted_;
+    Settings::Ptr            settings_;
+    AlsaWork::Ptr            alsaWork_;
+    settingsStr::Ptr         settingsStr_;
+    std::string              mixerName_;
+    double                   volumeValue_;
+    double                   pollVolume_;
+    SettingsFrame           *settingsDialog_;
+    bool                     isPulse_;
+    bool                     isMuted_;
     std::vector<std::string> alsaCards_;
-    sigc::connection signal_switches_;
-    sigc::connection signal_sndcard_;
-    sigc::connection signal_timer_;
+    sigc::connection         signal_switches_;
+    sigc::connection         signal_sndcard_;
+    sigc::connection         signal_timer_;
 #ifdef HAVE_PULSE
-    PulseCore::Ptr pulse_;
-    std::string pulseDevice_;
-    std::string pulseDeviceDesc_;
+    PulseCore::Ptr   pulse_;
+    std::string      pulseDevice_;
+    std::string      pulseDeviceDesc_;
     sigc::connection signal_pulsdev_;
     sigc::connection signal_pulsedevices_;
 

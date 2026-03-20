@@ -23,19 +23,18 @@
 #include "../tools/tools.h"
 #include <memory>
 
-class MixerSwitches
-{
+class MixerSwitches {
 public:
     MixerSwitches();
     MixerSwitches(const MixerSwitches &ms);
     typedef std::shared_ptr<MixerSwitches> Ptr;
-    void pushBack(SwitchType sType, switchcap &item);
-    void clear(SwitchType sType);
-    void clearAll();
-    const std::vector<switchcap> &captureSwitchList() const;
-    const std::vector<switchcap> &playbackSwitchList() const;
-    const std::vector<switchcap> &enumSwitchList() const;
-    bool isEmpty();
+    void                                   pushBack(SwitchType sType, switchcap &item);
+    void                                   clear(SwitchType sType);
+    void                                   clearAll();
+    const std::vector<switchcap>          &captureSwitchList() const;
+    const std::vector<switchcap>          &playbackSwitchList() const;
+    const std::vector<switchcap>          &enumSwitchList() const;
+    bool                                   isEmpty();
 
 private:
     std::vector<switchcap> captureSwitchList_;

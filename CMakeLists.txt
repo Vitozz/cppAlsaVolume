@@ -221,6 +221,8 @@ else()
 	)
 endif()
 
+include(fix-codestyle)
+
 if( USE_SNI )
     add_executable( ${PROJECT_NAME} ${alsavolume_SRCS} ${alsavolume_HDRS} $<TARGET_OBJECTS:statusnotifier>)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE -DUSE_KDE)
