@@ -24,8 +24,6 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
-#define PATH_SUFFIX "/share/alsavolume/"
-#define MK_RIGHTS 0755
 
 bool Tools::checkFileExists(const std::string &fileName) { return g_file_test(fileName.c_str(), G_FILE_TEST_EXISTS); }
 
@@ -54,6 +52,7 @@ std::string Tools::getHomePath()
 std::vector<std::string> Tools::getProjectPathes()
 {
     const std::string        cwd = getCWD();
+    const std::string        PATH_SUFFIX = "/share/alsavolume/";
     std::vector<std::string> list({ getHomePath() + std::string("/.local") + PATH_SUFFIX, cwd + "/",
                                     cwd + "/" + PATH_SUFFIX, cwd.substr(0, cwd.find_last_of('/')) + PATH_SUFFIX,
                                     std::string("/usr") + PATH_SUFFIX, std::string("/usr/local") + PATH_SUFFIX });
@@ -86,6 +85,7 @@ void Tools::createDirectory(const std::string &dirName)
 {
     if (!checkDirExists(dirName)) {
         std::cerr << "Directory " << dirName << " not found. Attempting to create it.." << std::endl;
+        uint MK_RIGHTS = 0755;
         gint err = g_mkdir_with_parents(dirName.c_str(), MK_RIGHTS);
         if (err < 0) {
             std::cerr << "tools.cpp::102::createDirectory:: " << g_file_error_from_errno(err) << std::endl;
