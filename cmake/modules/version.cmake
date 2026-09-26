@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.5 )
+cmake_minimum_required( VERSION 3.10.0 )
 
 set(VER_FILE "${PROJECT_SOURCE_DIR}/tools/core.cpp")
 if(EXISTS "${VER_FILE}")

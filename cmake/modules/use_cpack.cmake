@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.5 )
+cmake_minimum_required( VERSION 3.10.0 )
 
 if("${GTKMM}" STREQUAL "3")
     set(GTK_DEP 'gtkmm3')
@@ -31,9 +31,13 @@ set(PACKAGE_URL "https://sourceforge.net/projects/kukuruzo/files/alsavolume/")
 find_program(RPMB_PATH rpmbuild DOC "Path to rpmbuild")
 find_program(DPKG_PATH dpkg DOC "Path to dpkg")
 find_program(MAKEPKG makepkg DOC "Path to makepkg")
+set(HOMEDIR "$ENV{HOME}")
+find_program(CPACK_APPIMAGE_TOOL_EXECUTABLE "${HOMEDIR}/AppImages/appimagetool.appimage" DOC "Path to appimagetool")
+find_program(CPACK_APPIMAGE_PATCHELF_EXECUTABLE patchelf DOC "Path to patchelf")
 set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(_CPACK_GENERATORS)
 if(RPMB_PATH)
-    set(CPACK_GENERATOR "RPM")
+    list(APPEND _CPACK_GENERATORS "RPM")
     set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}")
     set(CPACK_RPM_PACKAGE_LICENSE "GPL-3")
     set(CPACK_RPM_PACKAGE_GROUP "Applications/Multimedia")
@@ -42,14 +46,7 @@ if(RPMB_PATH)
     set(CPACK_RPM_PACKAGE_URL "${PACKAGE_URL}")
 endif()
 if(DPKG_PATH)
-    set(CPACK_GENERATOR "DEB")
-    exec_program("LANG=en date +'%a, %d %b %Y %T %z'"
-        OUTPUT_VARIABLE BUILD_DATE
-    )
-    exec_program("date +'%Y'"
-        OUTPUT_VARIABLE BUILD_YEAR
-    )
-    message(STATUS "Build date: ${BUILD_DATE}")
+    list(APPEND _CPACK_GENERATORS "DEB")
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${PACKAGE_MAINTAINER}")
     set(CPACK_DEBIAN_PACKAGE_SECTION "sound")
     exec_program("${DPKG_PATH} --print-architecture"
@@ -90,6 +87,40 @@ if(DPKG_PATH)
     endif()
     configure_file(copyright.in copyright @ONLY)
     set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_BINARY_DIR}/copyright")
+endif()
+if(CPACK_APPIMAGE_TOOL_EXECUTABLE AND CPACK_APPIMAGE_PATCHELF_EXECUTABLE)
+        list(APPEND _CPACK_GENERATORS "AppImage")
+        set(CPACK_PACKAGE_ICON "${PROJECT_NAME}.png")
+        install(CODE "
+file(GET_RUNTIME_DEPENDENCIES
+    EXECUTABLES \"${CMAKE_BINARY_DIR}/${PROJECT_NAME}\"
+    RESOLVED_DEPENDENCIES_VAR resolved_deps
+    POST_EXCLUDE_REGEXES
+        \".*/ld-linux[^/]*\\.so.*\"
+        \".*/libc\\.so.*\"
+        \".*/libm\\.so.*\"
+        \".*/libpthread\\.so.*\"
+        \".*/libdl\\.so.*\"
+        \".*/librt\\.so.*\"
+)
+
+foreach(dep \${resolved_deps})
+    # copy the symlink
+    file(COPY \${dep} DESTINATION \"\${CMAKE_INSTALL_PREFIX}/lib\")
+
+    # Resolve the real path of the dependency (follows symlinks)
+    file(REAL_PATH \${dep} resolved_dep_path)
+
+    # Copy the resolved file to the destination
+    file(COPY \${resolved_dep_path} DESTINATION \"\${CMAKE_INSTALL_PREFIX}/lib\")
+endforeach()
+")
+endif()
+
+if(_CPACK_GENERATORS)
+    set(CPACK_GENERATOR "${_CPACK_GENERATORS}")
+else()
+    message(WARNING "USE_CPACK flag is enabled but no generators available")
 endif()
 if(MAKEPKG)
     configure_file(PKGBUILD.in PKGBUILD @ONLY)

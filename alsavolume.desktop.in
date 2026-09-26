@@ -1,6 +1,5 @@
 [Desktop Entry]
-Encoding=UTF-8
-Icon=@PREFIX@/share/alsavolume/icons/volume_ico.png
+Icon=alsavolume
 Name=AlsaVolume
 Comment=Changes the volume of ALSA from the system tray
 Exec=alsavolume

@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.5 )
+cmake_minimum_required( VERSION 3.10.0 )
 project(alsavolume)
 
 if( NOT UNIX )
@@ -17,6 +17,8 @@ option( USE_APPINDICATOR "Use appindicator support" OFF )
 option( USE_SNI "Enable StatusNotifierItem support" OFF )
 option( USE_CPACK "Enable CPack support" OFF )
 option( DEV_MODE "Developer mode" OFF)
+
+include(GNUInstallDirs)
 
 find_package( PkgConfig REQUIRED )
 find_package( Intl REQUIRED )
@@ -251,23 +253,26 @@ if( DEV_MODE )
     endforeach()
 endif()
 
-if(USE_CPACK)
-	include(version)
-	include(use_cpack)
-endif()
-
 target_link_libraries( ${PROJECT_NAME} ${CUSTOM_LDFLAGS} ${DEPLIBS} )
 
-set( DATADIR_PATH ${CMAKE_INSTALL_PREFIX}/share )
+set( DATADIR_PATH ${CMAKE_INSTALL_DATAROOTDIR} )
+set( ICON_FILES_PREFIX "icons/logo_")
+set( ICON_INSTALL_PREFIX ${DATADIR_PATH}/icons/hicolor)
 
-INSTALL( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin )
+INSTALL( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} )
 set( PREFIX "${CMAKE_INSTALL_PREFIX}" )
-configure_file(${DESKTOP_FILES}.in "${PROJECT_BINARY_DIR}/${DESKTOP_FILES}" @ONLY)
+configure_file(${DESKTOP_FILES}.in "${PROJECT_BINARY_DIR}/${DESKTOP_FILES}" COPYONLY)
 INSTALL( FILES "${PROJECT_BINARY_DIR}/${DESKTOP_FILES}" DESTINATION ${DATADIR_PATH}/applications )
+set(RESOLUTIONS 16 32 48 64 128)
+foreach(resolution ${RESOLUTIONS})
+	unset(LOGO_NAME)
+	set(LOGO_NAME "${ICON_FILES_PREFIX}${resolution}.png")
+	install(FILES ${LOGO_NAME} DESTINATION "${ICON_INSTALL_PREFIX}/${resolution}x${resolution}/apps" RENAME ${PROJECT_NAME}.png)
+endforeach()
 INSTALL( FILES ${ICON_FILES} DESTINATION ${DATADIR_PATH}/${PROJECT_NAME}/icons )
 INSTALL( FILES ${GLADE_FILES} DESTINATION ${DATADIR_PATH}/${PROJECT_NAME}/gladefiles )
 if(USE_CPACK AND DPKG_PATH)
-    INSTALL( FILES ${PROJECT_BINARY_DIR}/copyright DESTINATION ${DATADIR_PATH}/doc/${PROJECT_NAME} )
+    INSTALL( FILES ${PROJECT_BINARY_DIR}/copyright DESTINATION ${CMAKE_INSTALL_DOCDIR} )
 endif()
 #TOOLS FOR BUILD LOCALES
 find_program( AV_XGETTEXT xgettext )
@@ -356,3 +361,7 @@ add_custom_target(alsavolume-transtalions
 	${PO_FULL_DIR}/${PROJECT_NAME}.pot
 	${AV_CATALOG_TARGETS}
 )
+if(USE_CPACK)
+	include(version)
+	include(use_cpack)
+endif()

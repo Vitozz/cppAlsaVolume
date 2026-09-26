@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.5 )
+cmake_minimum_required( VERSION 3.10.0 )
 
 find_file(DLFCN_H NAMES dlfcn.h PATHS /usr/include)
 if(NOT "${DLFCN_H}" STREQUAL "DLFCN_H-NOTFOUND")
