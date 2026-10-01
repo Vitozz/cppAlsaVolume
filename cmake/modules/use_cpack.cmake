@@ -8,9 +8,6 @@ if(_VERSION_PATCH)
     set(CPACK_PACKAGE_VERSION_PATCH "${_VERSION_PATCH}")
 endif()
 set(_CPACK_PKG_NAME "${PROJECT_NAME}")
-if(USE_GTK3)
-    set(_CPACK_PKG_NAME "${_CPACK_PKG_NAME}3")
-endif()
 if(USE_APPINDICATOR)
     set(_CPACK_PKG_NAME "${_CPACK_PKG_NAME}-unity")
 endif()
@@ -78,6 +75,26 @@ if(DPKG_PATH)
         endif()
     endif()
     set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+    set(_pkg_conflicts
+        "${PROJECT_NAME}3"
+        "${PROJECT_NAME}3-sni"
+        "${PROJECT_NAME}3-unity"
+        "${PROJECT_NAME}3-pulse"
+        "${PROJECT_NAME}3-sni-pulse"
+        "${PROJECT_NAME}3-unity-pulse"
+    )
+    if(NOT USE_APPINDICATOR)
+        list(APPEND _pkg_conflicts "${PROJECT_NAME}-unity")
+        list(APPEND _pkg_conflicts "${PROJECT_NAME}-unity-pulse")
+    endif()
+    if(NOT USE_SNI)
+        list(APPEND _pkg_conflicts "${PROJECT_NAME}-sni")
+        list(APPEND _pkg_conflicts "${PROJECT_NAME}-sni-pulse")
+    endif()
+    if(NOT USE_PULSE)
+        list(APPEND _pkg_conflicts "${PROJECT_NAME}-pulse")
+    endif()
+    list(JOIN _pkg_conflicts ", " CPACK_DEBIAN_PACKAGE_CONFLICTS)
     if(NOT CPACK_DEBIAN_PACKAGE_VERSION)
         set(CPACK_DEBIAN_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}${PKG_OS_SUFFIX}${OSCODENAME}")
     endif()

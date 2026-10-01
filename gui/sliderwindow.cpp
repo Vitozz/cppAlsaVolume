@@ -1,6 +1,6 @@
 /*
  * sliderwindow.cpp
- * Copyright (C) 2012-2025 Vitaly Tonkacheyev
+ * Copyright (C) 2012-2026 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,11 +37,7 @@ SliderWindow::SliderWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     set_border_width(0);
 
     int sliderWidth = 0;
-#ifndef IS_GTK_2
     sliderWidth = volumeSlider_->get_allocated_width();
-#else
-    sliderWidth = volumeSlider_->get_width();
-#endif
     if (sliderWidth < SLIDER_MIN_WIDTH) {
         set_size_request(SLIDER_MIN_WIDTH, SLIDER_HEIGHT);
     }
@@ -54,13 +50,8 @@ void SliderWindow::setWindowPosition(const iconPosition &pos)
 {
     if (!get_visible()) {
         show_all();
-#ifndef IS_GTK_2
         const int wWidth  = volumeSlider_->get_allocated_width();
         const int wHeight = volumeSlider_->get_allocated_height();
-#else
-        const int wWidth  = volumeSlider_->get_width();
-        const int wHeight = SLIDER_HEIGHT;
-#endif
 #ifdef IS_DEBUG
         std::cout << "Screen height = " << pos.screenHeight_ << std::endl;
         std::cout << "At top = " << pos.trayAtTop_ << std::endl;

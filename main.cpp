@@ -20,11 +20,7 @@
 #include "gui/sliderwindow.h"
 #include "gui/trayicon.h"
 #include "tools/core.h"
-#ifndef IS_GTK_2
 #include <gtkmm/application.h>
-#else
-#include <gtkmm/main.h>
-#endif
 #include <glibmm/fileutils.h>
 #include <glibmm/markup.h>
 #include <gtkmm/builder.h>
@@ -40,27 +36,13 @@ int main(int argc, char *argv[])
     bindtextdomain(PACKAGE, Tools::getDirPath("locale").c_str());
     bind_textdomain_codeset(PACKAGE, CODEC);
     textdomain(PACKAGE);
-#ifndef IS_GTK_2
     Glib::RefPtr<Gtk::Application> app          = Gtk::Application::create(argc, argv, "org.gtkmm.alsavolume");
-    Glib::ustring                  slider_ui_   = Tools::getResPath("gladefiles/SliderFrame.glade");
-    Glib::ustring                  settings_ui_ = Tools::getResPath("gladefiles/SettingsFrame.glade");
-#else
-    Gtk::Main     app(argc, argv);
-    Glib::ustring slider_ui_   = Tools::getResPath("gladefiles/SliderFrame_2.glade");
-    Glib::ustring settings_ui_ = Tools::getResPath("gladefiles/SettingsFrame_2.glade");
-#endif
-    if (slider_ui_.empty()) {
-        std::cerr << "No SliderFrame.glade file found" << std::endl;
-        return 1;
-    }
-    if (settings_ui_.empty()) {
-        std::cerr << "No SettingsFrame.glade file found" << std::endl;
-        return 1;
-    }
+    Glib::ustring                  slider_ui_   = "/org/vitozz/cppalsavolume/gladefiles/SliderFrame.glade";
+    Glib::ustring                  settings_ui_ = "/org/vitozz/cppalsavolume/gladefiles/SettingsFrame.glade";
     Glib::RefPtr<Gtk::Builder> refBuilder = Gtk::Builder::create();
     try {
-        refBuilder->add_from_file(slider_ui_);
-        refBuilder->add_from_file(settings_ui_);
+        refBuilder->add_from_resource(slider_ui_);
+        refBuilder->add_from_resource(settings_ui_);
     } catch (const Gtk::BuilderError &ex) {
         std::cerr << "BuilderError::main.cpp::62 " << ex.what() << std::endl;
         return 1;
@@ -70,13 +52,19 @@ int main(int argc, char *argv[])
     } catch (const Glib::FileError &ex) {
         std::cerr << "FileError::main.cpp::62 " << ex.what() << std::endl;
         return 1;
+    } catch (const Gio::ResourceError &e) {
+        std::cerr << "Resource error: " << e.what() << '\n';
+    } catch (const Glib::Error &e) {
+        std::cerr << "GTK/GLib error: " << e.what() << '\n';
     }
     Core::Ptr core(new Core(refBuilder));
-#ifndef IS_GTK_2
     app->hold();
-#endif
     SliderWindow *sliderWindow = nullptr;
     refBuilder->get_widget_derived("volumeFrame", sliderWindow);
+    if (!sliderWindow) {
+        std::cerr << "Failed to create SettingsFrame\n";
+        return 1;
+    }
     TrayIcon::Ptr trayIcon(
         new TrayIcon(core->getVolumeValue(), core->getSoundCardName(), core->getActiveMixer(), core->getMuted()));
     if (trayIcon && sliderWindow) {
@@ -92,11 +80,7 @@ int main(int argc, char *argv[])
         trayIcon->signal_on_mute().connect(sigc::mem_fun(*core, &Core::soundMuted));
         trayIcon->signal_value_changed().connect(sigc::mem_fun(*core, &Core::onTrayIconScroll));
         sliderWindow->set_visible(false);
-#ifndef IS_GTK_2
         return app->run();
-#else
-        Gtk::Main::run();
-#endif
     }
     delete sliderWindow;
     return 0;

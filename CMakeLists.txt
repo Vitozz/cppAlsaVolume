@@ -9,14 +9,11 @@ if(POLICY CMP0058)
     cmake_policy(SET CMP0058 NEW)
 endif()
 
-set( GTKMM "3" CACHE STRING "Gtkmm version to use: 2 | 3" )
 option( USE_PULSE "Enable pulseaudio support" OFF )
-option( USE_GTK3 "Build with gtkmm-3.0 support" ON )
 set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 option( USE_APPINDICATOR "Use appindicator support" OFF )
-option( USE_SNI "Enable StatusNotifierItem support" OFF )
+option( USE_SNI "Enable StatusNotifierItem support" ON )
 option( USE_CPACK "Enable CPack support" OFF )
-option( DEV_MODE "Developer mode" OFF)
 
 include(GNUInstallDirs)
 
@@ -33,33 +30,15 @@ if( USE_SNI )
 	option(USE_DBUSMENU "Use libdbusmenu to create context menu for StatusNotifierItem" ON)
 endif()
 
-if( "${GTKMM}" STREQUAL "3" )
-	set( GTKMM_NAME "gtkmm-3.0" )
-	if( USE_APPINDICATOR )
-		set(APPINDICATOR_NAME "appindicator3-0.1")
-	endif()
-	if( USE_DBUSMENU )
-		set(DBUSMENU_NAME "dbusmenu-gtk3-0.4")
-	endif()
-else()
-	set( GTKMM_NAME "gtkmm-2.4" )
-	if( USE_APPINDICATOR )
-		set(APPINDICATOR_NAME "appindicator-0.1")
-	endif()
-	if( USE_DBUSMENU )
-		set(DBUSMENU_NAME "dbusmenu-gtk-0.4")
-	endif()
-	add_definitions( -DIS_GTK_2 )
-endif()
-
-pkg_check_modules( GTKMM REQUIRED ${GTKMM_NAME} )
-
+set( GTKMM_NAME "gtkmm-3.0" )
 if( USE_APPINDICATOR )
-	pkg_check_modules( APPINDICATOR REQUIRED ${APPINDICATOR_NAME} )
-	add_definitions( -DUSE_APPINDICATOR )
-	link_directories( ${APPINDICATOR_LIBRARY_DIRS} )
-	include_directories( ${APPINDICATOR_INCLUDE_DIRS} )
+	set(APPINDICATOR_NAME "appindicator3-0.1")
 endif()
+if( USE_DBUSMENU )
+	set(DBUSMENU_NAME "dbusmenu-gtk3-0.4")
+endif()
+
+pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET "${GTKMM_NAME}")
 
 find_package( ALSA REQUIRED )
 set( CUSTOM_LDFLAGS "-Wl,-as-needed" )
@@ -70,25 +49,23 @@ if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR ( "${CMAKE_BUILD_TYPE}" STREQUAL "
 	set( CMAKE_CXX_FLAGS_DEBUG "-O0 ${CMAKE_CXX_FLAGS_DEBUG}")
 endif()
 
-add_definitions(
-	${GTKMM_CFLAGS_OTHER}
-)
-link_directories(
-	${GTKMM_LIBRARY_DIRS}
-)
+if(ALSA_FOUND)
+	message(STATUS "Found ALSA: (found version \"${ALSA_VERSION}\")")
+endif()
 
 include_directories(
-	${GTKMM_INCLUDE_DIRS}
 	${ALSA_INCLUDE_DIRS}
 )
 set( DEPLIBS
-	${GTKMM_LIBRARIES}
+	PkgConfig::GTKMM
 	${ALSA_LIBRARIES}
 )
 
 if( USE_APPINDICATOR )
+	pkg_check_modules( APPINDICATOR REQUIRED IMPORTED_TARGET ${APPINDICATOR_NAME} )
+	add_definitions( -DUSE_APPINDICATOR )
 	list(APPEND DEPLIBS
-		${APPINDICATOR_LIBRARIES}
+		PkgConfig::APPINDICATOR
 	)
 endif()
 
@@ -136,40 +113,40 @@ if( USE_SNI )
 	file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/enums")
 	file(COPY ${PROJECT_SOURCE_DIR}/third-party/statusnotifier/src/statusnotifier.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/enums/)
 	find_program( GLIB_MKENUMS glib-mkenums )
-	mark_as_advanced( GLIB_MKENUMS )
-	if(NOT "${GLIB_MKENUMS}" STREQUAL "glib-mkenums_NOTFOUND")
-		message(STATUS "GLIB_MKENUMS- ${GLIB_MKENUMS}")
+	if(GLIB_MKENUMS)
+		mark_as_advanced( GLIB_MKENUMS )
+		message(STATUS "GLIB_MKENUMS: ${GLIB_MKENUMS}")
 	endif()
 	set(enums_h "${CMAKE_CURRENT_BINARY_DIR}/enums/enums.h")
 	set(enums_c "${CMAKE_CURRENT_BINARY_DIR}/enums/enums.c")
-    add_custom_command(
-        OUTPUT
-        ${enums_h}
-        ${enums_c}
-        COMMAND
-        ${GLIB_MKENUMS}
-        ARGS
-        --template ${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/enums.h.template
-        ${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/statusnotifier.h --output ${enums_h}
-        COMMAND
-        ${GLIB_MKENUMS}
-        ARGS
-        --template ${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/enums.c.template
-        ${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/statusnotifier.h --output ${enums_c}
-        BYPRODUCTS byproducts.txt
-        DEPENDS
-        ${GLIB_MKENUMS}
-        ${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/enums.h.template
-        ${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/enums.c.template
-        ${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/statusnotifier.h
-        VERBATIM
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/enums
-    )
-    message(STATUS "${enums_h}")
-    message(STATUS "${enums_c}")
-    add_custom_target(prepare_enums DEPENDS ${enumc_h} ${enums_c})
-    add_library(statusnotifier OBJECT ${enums_c} ${enumc_h} ${statusnotifier_SRCS} ${statusnotifier_HDRS})
-    target_include_directories(statusnotifier BEFORE PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/enums)
+	add_custom_command(
+		OUTPUT
+		${enums_h}
+		${enums_c}
+		COMMAND
+		${GLIB_MKENUMS}
+		ARGS
+		--template ${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/enums.h.template
+		${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/statusnotifier.h --output ${enums_h}
+		COMMAND
+		${GLIB_MKENUMS}
+		ARGS
+		--template ${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/enums.c.template
+		${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/statusnotifier.h --output ${enums_c}
+		BYPRODUCTS byproducts.txt
+		DEPENDS
+		${GLIB_MKENUMS}
+		${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/enums.h.template
+		${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/enums.c.template
+		${CMAKE_CURRENT_SOURCE_DIR}/third-party/statusnotifier/src/statusnotifier.h
+		VERBATIM
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/enums
+	)
+        message(STATUS "${enums_h}")
+	message(STATUS "${enums_c}")
+	add_custom_target(prepare_enums DEPENDS ${enumc_h} ${enums_c})
+	add_library(statusnotifier OBJECT ${enums_c} ${enumc_h} ${statusnotifier_SRCS} ${statusnotifier_HDRS})
+	target_include_directories(statusnotifier BEFORE PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/enums)
 	if(USE_DBUSMENU)
 		pkg_check_modules( DBUSMENU_GTK REQUIRED ${DBUSMENU_NAME} )
 		target_compile_definitions(statusnotifier PRIVATE -DUSE_DBUSMENU)
@@ -201,57 +178,22 @@ if( USE_PULSE )
 endif()
 
 set( DESKTOP_FILES ${PROJECT_NAME}.desktop )
-set( ICON_FILES
-	icons/tb_icon0.png
-	icons/tb_icon20.png
-	icons/tb_icon40.png
-	icons/tb_icon60.png
-	icons/tb_icon80.png
-	icons/tb_icon100.png
-	icons/volume.png
-	icons/volume_ico.png
-)
-if( "${GTKMM}" STREQUAL "3"  )
-	set(GLADE_FILES
-		gladefiles/SliderFrame.glade
-		gladefiles/SettingsFrame.glade
-	)
-else()
-	set(GLADE_FILES
-		gladefiles/SliderFrame_2.glade
-		gladefiles/SettingsFrame_2.glade
-	)
-endif()
 
 include(fix-codestyle)
+include(gen-resources)
 
 if( USE_SNI )
-    add_executable( ${PROJECT_NAME} ${alsavolume_SRCS} ${alsavolume_HDRS} $<TARGET_OBJECTS:statusnotifier>)
+    add_executable( ${PROJECT_NAME} ${RESOURCE_C} ${alsavolume_SRCS} ${alsavolume_HDRS} $<TARGET_OBJECTS:statusnotifier>)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE -DUSE_KDE)
     add_dependencies( ${PROJECT_NAME} prepare_enums )
 	if( USE_DBUSMENU )
 		target_link_libraries(${PROJECT_NAME} ${DBUSMENU_GTK_LDFLAGS})
 	endif()
 else()
-    add_executable( ${PROJECT_NAME} ${alsavolume_SRCS} ${alsavolume_HDRS} )
+    add_executable( ${PROJECT_NAME} ${RESOURCE_C} ${alsavolume_SRCS} ${alsavolume_HDRS} )
 endif()
 
-if( DEV_MODE )
-    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gladefiles")
-    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/icons")
-    foreach(gladefile ${GLADE_FILES})
-		if( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${gladefile}" )
-            message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}/${gladefile}")
-            file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${gladefile} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/gladefiles/)
-        endif()
-    endforeach()
-    foreach(iconfile ${ICON_FILES})
-		if( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${iconfile}" )
-            message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}/${iconfile}")
-            file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${iconfile} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/icons/)
-        endif()
-    endforeach()
-endif()
+add_dependencies(${PROJECT_NAME} resources_target)
 
 target_link_libraries( ${PROJECT_NAME} ${CUSTOM_LDFLAGS} ${DEPLIBS} )
 
@@ -269,8 +211,7 @@ foreach(resolution ${RESOLUTIONS})
 	set(LOGO_NAME "${ICON_FILES_PREFIX}${resolution}.png")
 	install(FILES ${LOGO_NAME} DESTINATION "${ICON_INSTALL_PREFIX}/${resolution}x${resolution}/apps" RENAME ${PROJECT_NAME}.png)
 endforeach()
-INSTALL( FILES ${ICON_FILES} DESTINATION ${DATADIR_PATH}/${PROJECT_NAME}/icons )
-INSTALL( FILES ${GLADE_FILES} DESTINATION ${DATADIR_PATH}/${PROJECT_NAME}/gladefiles )
+
 if(USE_CPACK AND DPKG_PATH)
     INSTALL( FILES ${PROJECT_BINARY_DIR}/copyright DESTINATION ${CMAKE_INSTALL_DOCDIR} )
 endif()

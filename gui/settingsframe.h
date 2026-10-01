@@ -32,6 +32,7 @@
 
 class SettingsFrame : public Gtk::Dialog {
 public:
+    using BaseObjectType = Gtk::Dialog::BaseObjectType;
     SettingsFrame(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade);
     ~SettingsFrame() override;
     enum RESPONCES { OK_RESPONSE = 1, CANCEL_RESPONSE = 0 };

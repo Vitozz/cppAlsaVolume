@@ -1,6 +1,6 @@
 /*
  * core.cpp
- * Copyright (C) 2013-2025 Vitaly Tonkacheyev
+ * Copyright (C) 2013-2026 Vitaly Tonkacheyev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,10 +31,10 @@
 #define TITLE _("About AlsaVolume")
 #define PROGNAME _("Alsa Volume Changer")
 #define COMMENTS _("Tray Alsa Volume Changer written using gtkmm")
-#define COPYRIGHT _("2012-2025 (c) Vitaly Tonkacheyev")
+#define COPYRIGHT _("2012-2026 (c) Vitaly Tonkacheyev")
 #define WEBSITE "https://sourceforge.net/projects/kukuruzo/files/alsavolume/"
 #define WEBSITELABEL _("Program Website")
-#define VERSION "0.3.6"
+#define VERSION "0.3.7"
 
 #define POLLING_INTERVAL 2000
 
@@ -79,6 +79,10 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade) :
             = settingsDialog_->signal_pulsedevices_changed().connect(sigc::mem_fun(*this, &Core::updatePulseDevices));
 #endif
     }
+    if (!settingsDialog_) {
+        std::cerr << "Failed to create SettingsFrame\n";
+        return;
+    }
     signal_timer_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &Core::onTimeout), POLLING_INTERVAL);
 }
 
@@ -95,10 +99,10 @@ void Core::runAboutDialog()
     dialog->set_copyright(copyrightString.append(" (thetvg@gmail.com)"));
     dialog->set_website(WEBSITE);
     dialog->set_website_label(WEBSITELABEL);
-    const std::string         logoName = Tools::getResPath("icons/volume.png");
-    const std::string         iconName = Tools::getResPath("icons/tb_icon100.png");
-    Glib::RefPtr<Gdk::Pixbuf> logo     = Gdk::Pixbuf::create_from_file(logoName);
-    Glib::RefPtr<Gdk::Pixbuf> icon     = Gdk::Pixbuf::create_from_file(iconName);
+    const std::string logoName = "/org/vitozz/cppalsavolume/icons/volume.png";
+    const std::string iconName = "/org/vitozz/cppalsavolume/icons/tb_icon100.png";
+    auto              logo     = Gdk::Pixbuf::create_from_resource(logoName);
+    auto              icon     = Gdk::Pixbuf::create_from_resource(iconName);
     dialog->set_icon(icon);
     dialog->set_logo(logo);
     dialog->run();

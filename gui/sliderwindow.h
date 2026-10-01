@@ -27,6 +27,7 @@
 
 class SliderWindow : public Gtk::Window {
 public:
+    using BaseObjectType = Gtk::Window::BaseObjectType;
     SliderWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade);
     ~SliderWindow() override;
     void setWindowPosition(const iconPosition &pos);

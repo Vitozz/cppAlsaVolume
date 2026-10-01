@@ -23,10 +23,6 @@
 #include <gtkmm/separatormenuitem.h>
 #include <iostream>
 #include <libintl.h>
-#ifdef IS_GTK_2
-#define GDK_BUTTON_MIDDLE 2
-#define GDK_BUTTON_PRIMARY 1
-#endif
 #include <gdkmm/display.h>
 #include <gdkmm/seat.h>
 #ifdef USE_KDE
@@ -41,6 +37,8 @@
 #define VOLUMEL _("Volume: ")
 #define MIXERL _("Mixer: ")
 #define RESTOREITEM _("Restore")
+
+static const Glib::ustring iconsPrefix("/org/vitozz/cppalsavolume/icons/");
 
 static const int OFFSET = 2;
 
@@ -57,8 +55,8 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
     ,
     legacyIcon_(nullptr)
 {
-    const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(100);
-    const Glib::ustring iconPath   = Tools::getResPath(searchPath.c_str());
+    const Glib::ustring searchPath = iconsPrefix + getIconName(100);
+    auto                iconName   = Gdk::Pixbuf::create_from_resource(searchPath);
 #if defined(USE_APPINDICATOR)
     newIcon_ = StatusNotifierPtr(
         app_indicator_new("AlsaVolume", iconPath.c_str(), APP_INDICATOR_CATEGORY_APPLICATION_STATUS));
@@ -71,8 +69,8 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
     g_signal_connect(newIcon_.get(), "scroll-event", (GCallback)TrayIcon::onScrollEventAI, this);
 #elif defined(USE_KDE)
     if (checkDBusInterfaceExists("org.kde.StatusNotifierWatcher")) {
-        newIcon_ = StatusNotifierPtr(status_notifier_item_new_from_icon_name(
-            "AlsaVolume", STATUS_NOTIFIER_CATEGORY_APPLICATION_STATUS, iconPath.c_str()));
+        newIcon_ = StatusNotifierPtr(status_notifier_item_new_from_pixbuf(
+            "AlsaVolume", STATUS_NOTIFIER_CATEGORY_APPLICATION_STATUS, iconName->gobj()));
         if (newIcon_) {
             status_notifier_item_set_status(newIcon_.get(), STATUS_NOTIFIER_STATUS_ACTIVE);
             status_notifier_item_set_title(newIcon_.get(), "AlsaVolume");
@@ -98,7 +96,7 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
     }
 #endif
     if (isLegacyIcon_) {
-        legacyIcon_ = Gtk::StatusIcon::create(iconPath);
+        legacyIcon_ = Gtk::StatusIcon::create(iconName);
         // Staus icon signals
         legacyIcon_->signal_popup_menu().connect(sigc::mem_fun(*this, &TrayIcon::onPopup));
         legacyIcon_->signal_activate().connect(sigc::mem_fun(*this, &TrayIcon::onHideRestore));
@@ -273,9 +271,9 @@ void TrayIcon::onRegisterError(StatusNotifierItem *sn, GError *error, TrayIcon *
     (void)sn;
     std::cerr << error->code << " " << error->message << std::endl;
     if (userdata->isLegacyIcon_) {
-        const Glib::ustring searchPath = Glib::ustring("icons/") + userdata->getIconName(100);
-        const Glib::ustring iconPath   = Tools::getResPath(searchPath.c_str());
-        userdata->legacyIcon_          = Gtk::StatusIcon::create(iconPath);
+        const Glib::ustring searchPath = iconsPrefix + userdata->getIconName(100);
+        auto                iconName   = Gdk::Pixbuf::create_from_resource(searchPath);
+        userdata->legacyIcon_          = Gtk::StatusIcon::create(iconName);
         // Staus icon signals
         userdata->legacyIcon_->signal_popup_menu().connect(sigc::mem_fun(*userdata, &TrayIcon::onPopup));
         userdata->legacyIcon_->signal_activate().connect(sigc::mem_fun(*userdata, &TrayIcon::onHideRestore));
@@ -327,10 +325,9 @@ Glib::ustring TrayIcon::getIconName(double value) const
 
 void TrayIcon::setIcon(double value)
 {
-    const Glib::ustring searchPath = Glib::ustring("icons/") + getIconName(value);
-    const Glib::ustring iconPath   = Tools::getResPath(searchPath.c_str());
-    if (!iconPath.empty()) {
-        const Glib::RefPtr<Gdk::Pixbuf> pixbuf = Glib::RefPtr<Gdk::Pixbuf>(Gdk::Pixbuf::create_from_file(iconPath));
+    const Glib::ustring searchPath = iconsPrefix + getIconName(value);
+    auto                pixbuf     = Gdk::Pixbuf::create_from_resource(searchPath);
+    if (pixbuf) {
         pixbufWidth_                           = pixbuf->get_width();
         pixbufHeight_                          = pixbuf->get_height() + 4;
         try {
@@ -343,7 +340,7 @@ void TrayIcon::setIcon(double value)
             }
 #elif defined(USE_KDE)
             else {
-                status_notifier_item_set_from_icon_name(newIcon_.get(), STATUS_NOTIFIER_ICON, iconPath.c_str());
+                status_notifier_item_set_from_pixbuf(newIcon_.get(), STATUS_NOTIFIER_ICON, pixbuf->gobj());
             }
 #endif
         } catch (Glib::FileError &err) {
@@ -422,11 +419,6 @@ void TrayIcon::setMousePos(const int X, const int Y)
 void TrayIcon::getMousePosition()
 {
     int x = 0, y = 0;
-#ifdef IS_GTK_2
-    Glib::RefPtr<Gdk::Display> display = restoreItem_->get_display();
-    Gdk::ModifierType          type;
-    display->get_pointer(x, y, type);
-#else
     Glib::RefPtr<Gdk::Display> display = Gdk::Display::get_default();
     if (!display)
         return;
@@ -436,7 +428,6 @@ void TrayIcon::getMousePosition()
         if (pointer->get_source() == Gdk::SOURCE_MOUSE)
             pointer->get_position(x, y);
     }
-#endif
 #ifdef IS_DEBUG
     std::cout << "mouse_x: " << x << std::endl;
     std::cout << "mouse_y: " << y << std::endl;

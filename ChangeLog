@@ -1,3 +1,12 @@
+2026-10-01
+v0.3.7
+  - Removed GTK2 support
+  + Added resources file generation
+  * Now program uses built-in resources instead installed one
+  * Added AppImage CPack generator (CMake>=4.2)
+  * Improved DEB and RPM packages generation
+  - Removed DEV_MOE as not needed
+
 2026-03-20
 v0.3.6
   * Working with ALSA should be safer

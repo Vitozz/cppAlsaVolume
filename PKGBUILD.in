@@ -6,8 +6,8 @@ pkgdesc="@CPACK_PACKAGE_DESCRIPTION@"
 arch=('i686' 'x86_64')
 url="@PACKAGE_URL@"
 license=('GPL3')
-depends=( @GTK_DEP@ 'alsa-lib' 'pkg-config'
-          'intltool' 'glibmm' @DBUSMENU_DEP@)
+depends=( 'gtkmm3' 'alsa-lib' 'pkg-config'
+          'intltool' 'glibmm' 'libdbusmenu-gtk3')
 optdepends=('pulseaudio: support PulseAudio'
             'pipewire-pulse: support PulseAudio using PipeWire')
 makedepends=('git' 'cmake' 'glib2-devel')
@@ -17,10 +17,6 @@ md5sums=('SKIP')
 
 _gitroot=https://github.com/Vitozz/cppAlsaVolume
 _gitname=cppAlsaVolume
-
-is_installed() {
-    pacman -Q $1 &> /dev/null
-}
 
 build() {
   cd "$srcdir"
@@ -45,18 +41,10 @@ build() {
   cd "$srcdir/$_gitname-build/"
   
   # BUILD HERE
-
-  if is_installed "pipewire-pulse" || is_installed "pulseaudio"; then
-    use_pulse="ON"
-  else
-    use_pulse="OFF"
-  fi
-
   cmake -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_BUILD_TYPE=Release \
     -DUSE_PULSE=$use_pulse \
     -DUSE_SNI=@USE_SNI@ \
-    -DUSE_GTK3=@USE_GTK3@ \
     "$srcdir/$_gitname"
 
   make
@@ -65,5 +53,4 @@ build() {
 package() {
   cd "$srcdir/$_gitname-build/"
   make DESTDIR="$pkgdir/"  install
-
 }
