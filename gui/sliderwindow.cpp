@@ -37,7 +37,7 @@ SliderWindow::SliderWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     set_border_width(0);
 
     int sliderWidth = 0;
-    sliderWidth = volumeSlider_->get_allocated_width();
+    sliderWidth     = volumeSlider_->get_allocated_width();
     if (sliderWidth < SLIDER_MIN_WIDTH) {
         set_size_request(SLIDER_MIN_WIDTH, SLIDER_HEIGHT);
     }
@@ -50,29 +50,106 @@ void SliderWindow::setWindowPosition(const iconPosition &pos)
 {
     if (!get_visible()) {
         show_all();
-        const int wWidth  = volumeSlider_->get_allocated_width();
-        const int wHeight = volumeSlider_->get_allocated_height();
+        const int wWidth  = this->get_allocated_width();
+        const int wHeight = this->get_allocated_height();
+
+        int       wX     = 0;
+        int       wY     = 0;
+        const int offset = 6;
+
+        // get icon position according to screen edges
+        bool isTop    = pos.iconY_ < pos.screenHeight_ / 4;
+        bool isBottom = pos.iconY_ > (pos.screenHeight_ * 3 / 4);
+        bool isLeft   = pos.iconX_ < pos.screenWidth_ / 4;
+        bool isRight  = pos.iconX_ > (pos.screenWidth_ * 3 / 4);
+
+        if (!isTop && !isBottom && !isLeft && !isRight) {
+            isBottom = !pos.trayAtTop_;
+            isTop    = pos.trayAtTop_;
+        }
+
 #ifdef IS_DEBUG
         std::cout << "Screen height = " << pos.screenHeight_ << std::endl;
-        std::cout << "At top = " << pos.trayAtTop_ << std::endl;
         std::cout << "wHeight = " << wHeight << std::endl;
         std::cout << "wWidth = " << wWidth << std::endl;
         std::cout << "iconHeight = " << pos.iconHeight_ << std::endl;
         std::cout << "iconWidth = " << pos.iconWidth_ << std::endl;
         std::cout << "iconX = " << pos.iconX_ << std::endl;
         std::cout << "iconY = " << pos.iconY_ << std::endl;
+        std::cout << "Geom = " << pos.geometryAvailable_ << std::endl;
 #endif
-        int wY = pos.trayAtTop_ ? pos.iconHeight_ + 4 : pos.screenHeight_ - wHeight - pos.iconHeight_ - 4;
-        int wX = pos.iconX_ - wWidth / 2;
-        if (pos.geometryAvailable_) {
-            wX += pos.iconWidth_ / 2;
-            wY = pos.trayAtTop_ ? pos.iconY_ + pos.iconHeight_ + 4 : pos.iconY_ - pos.iconHeight_ - wHeight - 4;
-        }
+
+        if (isTop) {
+            // TOP panel:
+            // If icon geometry exists, position the window directly below the icon (or below the entire panel).
+            // The key point is that wY starts below the bottom edge of the icon/panel.
+            int panelBottomEdge = pos.geometryAvailable_ ? (pos.iconY_ + pos.iconHeight_) : (pos.iconY_);
+            wY                  = panelBottomEdge + offset;
+
+            // Center horizontally relative to the icon/click, but prevent it from going off-screen
+            int anchorX = pos.geometryAvailable_ ? (pos.iconX_ + pos.iconWidth_ / 2) : pos.iconX_;
+            wX          = anchorX - (wWidth / 2);
 #ifdef IS_DEBUG
-        std::cout << "Geometry available: " << pos.geometryAvailable_ << std::endl;
-        std::cout << "wY = " << wY << std::endl;
-        std::cout << "wX = " << wX << std::endl;
+            std::cout << "Panel at top, wY=" << wY << " wX=" << wX << std::endl;
 #endif
+        } else if (isBottom) {
+            // Panel at the BOTTOM:
+            // The window must be positioned ABOVE the panel / icon.
+            // Window's top edge = icon's top edge (or panel's top edge) minus window height.
+            int panelTopEdge = pos.geometryAvailable_ ? pos.iconY_ : pos.iconY_;
+            // If geometryAvailable_ is false, pos.iconY_ is the mouse click Y-coordinate (top of the panel minus a
+            // couple of pixels)
+            wY = panelTopEdge - wHeight - offset;
+
+            int anchorX = pos.geometryAvailable_ ? (pos.iconX_ + pos.iconWidth_ / 2) : pos.iconX_;
+            wX          = anchorX - (wWidth / 2);
+#ifdef IS_DEBUG
+            std::cout << "Panel at bottom, wY=" << wY << " wX=" << wX << std::endl;
+#endif
+        } else if (isLeft) {
+            // LEFT panel: window to the right of the panel/icon
+            int panelRightEdge = pos.geometryAvailable_ ? (pos.iconX_ + pos.iconWidth_) : pos.iconX_;
+            wX                 = panelRightEdge + offset;
+
+            int anchorY = pos.geometryAvailable_ ? (pos.iconY_ + pos.iconHeight_ / 2) : pos.iconY_;
+            wY          = anchorY - (wHeight / 2);
+#ifdef IS_DEBUG
+            std::cout << "Panel at left, wY=" << wY << " wX=" << wX << std::endl;
+#endif
+        } else if (isRight) {
+            // RIGHT panel: window to the left of the panel/icon
+            int panelLeftEdge = pos.geometryAvailable_ ? pos.iconX_ : pos.iconX_;
+            wX                = panelLeftEdge - wWidth - offset;
+
+            int anchorY = pos.geometryAvailable_ ? (pos.iconY_ + pos.iconHeight_ / 2) : pos.iconY_;
+            wY          = anchorY - (wHeight / 2);
+#ifdef IS_DEBUG
+            std::cout << "Panel at right, wY=" << wY << " wX=" << wX << std::endl;
+#endif
+        } else {
+            // Default (bottom of screen)
+            wX = pos.iconX_ - (wWidth / 2);
+            wY = pos.screenHeight_ - wHeight - 50;
+        }
+
+        // --- Smart constraint (to prevent the window from sticking tightly to screen edges or going off-screen) ---
+        if (wX < offset) {
+            wX = offset;
+        }
+        if (pos.screenWidth_ > 0 && wX + wWidth > pos.screenWidth_ - offset) {
+            wX = pos.screenWidth_ - wWidth - offset;
+        }
+        if (wY < offset) {
+            wY = offset;
+        }
+        if (pos.screenHeight_ > 0 && wY + wHeight > pos.screenHeight_ - offset) {
+            wY = pos.screenHeight_ - wHeight - offset;
+        }
+
+#ifdef IS_DEBUG
+        std::cout << "Final wX = " << wX << ", wY = " << wY << std::endl;
+#endif
+
         this->move(wX, wY);
     } else {
         hide();

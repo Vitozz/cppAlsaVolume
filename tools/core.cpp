@@ -18,7 +18,7 @@
  */
 
 #include "core.h"
-#include "../gui/settingsframe.h"
+#include "settingsframe.h"
 #include <glibmm/main.h>
 #include <gtkmm/aboutdialog.h>
 #include <gtkmm/builder.h>
@@ -34,14 +34,14 @@
 #define COPYRIGHT _("2012-2026 (c) Vitaly Tonkacheyev")
 #define WEBSITE "https://sourceforge.net/projects/kukuruzo/files/alsavolume/"
 #define WEBSITELABEL _("Program Website")
-#define VERSION "0.3.7"
+#define VERSION "0.3.8"
 
 #define POLLING_INTERVAL 2000
 
 Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade) :
     settings_(std::make_shared<Settings>()), alsaWork_(std::make_shared<AlsaWork>()),
     settingsStr_(std::make_shared<settingsStr>()), mixerName_(settings_->getMixer()), volumeValue_(0.0),
-    pollVolume_(0.0), settingsDialog_(nullptr), isPulse_(false), isMuted_(false)
+    pollVolume_(0.0), settingsDialog_(nullptr), isPulse_(false), isMuted_(false), invertedMouse_(false)
 {
 #ifdef HAVE_PULSE
     isPulse_ = settings_->usePulse();
@@ -65,6 +65,9 @@ Core::Core(const Glib::RefPtr<Gtk::Builder> &refGlade) :
     settingsStr_->setNotebookOrientation(settings_->getNotebookOrientation());
     settings_->setVersion(VERSION);
     settingsStr_->setUsePolling(settings_->usePolling());
+    invertedMouse_ = settings_->invertMouse();
+    settingsStr_->setInvertMouse(invertedMouse_);
+
     refGlade->get_widget_derived("settingsDialog", settingsDialog_);
     // connect signals
     if (settingsDialog_) {
@@ -176,6 +179,7 @@ void Core::saveSettings()
     settings_->setUsePulse(isPulse_);
     settings_->setAutorun(settingsStr_->isAutorun());
     settings_->setUsePolling(settingsStr_->usePolling());
+    settings_->setInvertMouse(settingsStr_->invertMouse());
     settings_->saveMixerId(int(settingsStr_->mixerId()));
 #ifdef HAVE_PULSE
     if (pulse_) {
@@ -191,6 +195,7 @@ void Core::onSettingsDialogOk(const settingsStr::Ptr &str)
     settingsStr_->setNotebookOrientation(str->notebookOrientation());
     settingsStr_->setIsAutorun(str->isAutorun());
     settingsStr_->setUsePolling(str->usePolling());
+    settingsStr_->setInvertMouse(str->invertMouse());
     updateControls(int(settingsStr_->cardId()));
 #ifdef HAVE_PULSE
     if (isPulse_ && pulse_)
@@ -327,7 +332,10 @@ double Core::getVolumeValue() const
 
 void Core::onTrayIconScroll(double value)
 {
-    volumeValue_ += value;
+    if (!settingsStr_->invertMouse())
+        volumeValue_ += value;
+    else
+        volumeValue_ += (-1) * value;
     if (volumeValue_ >= 100) {
         volumeValue_ = 100;
     } else if (volumeValue_ <= 0) {

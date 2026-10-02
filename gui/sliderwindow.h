@@ -20,7 +20,7 @@
 #ifndef SLIDERWINDOW_H
 #define SLIDERWINDOW_H
 
-#include "../tools/tools.h"
+#include "tools.h"
 #include <gtkmm/builder.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/window.h>

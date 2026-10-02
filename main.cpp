@@ -20,9 +20,9 @@
 #include "gui/sliderwindow.h"
 #include "gui/trayicon.h"
 #include "tools/core.h"
-#include <gtkmm/application.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/markup.h>
+#include <gtkmm/application.h>
 #include <gtkmm/builder.h>
 #include <iostream>
 #include <libintl.h>
@@ -39,23 +39,23 @@ int main(int argc, char *argv[])
     Glib::RefPtr<Gtk::Application> app          = Gtk::Application::create(argc, argv, "org.gtkmm.alsavolume");
     Glib::ustring                  slider_ui_   = "/org/vitozz/cppalsavolume/gladefiles/SliderFrame.glade";
     Glib::ustring                  settings_ui_ = "/org/vitozz/cppalsavolume/gladefiles/SettingsFrame.glade";
-    Glib::RefPtr<Gtk::Builder> refBuilder = Gtk::Builder::create();
+    Glib::RefPtr<Gtk::Builder>     refBuilder   = Gtk::Builder::create();
     try {
         refBuilder->add_from_resource(slider_ui_);
         refBuilder->add_from_resource(settings_ui_);
     } catch (const Gtk::BuilderError &ex) {
-        std::cerr << "BuilderError::main.cpp::62 " << ex.what() << std::endl;
+        std::cerr << "BuilderError" << "::" << __FILE_NAME__ << "::" << __LINE__ << " " << ex.what() << std::endl;
         return 1;
     } catch (const Glib::MarkupError &ex) {
-        std::cerr << "MarkupError::main.cpp::62 " << ex.what() << std::endl;
+        std::cerr << "MarkupError" << "::" << __FILE_NAME__ << "::" << __LINE__ << " " << ex.what() << std::endl;
         return 1;
     } catch (const Glib::FileError &ex) {
-        std::cerr << "FileError::main.cpp::62 " << ex.what() << std::endl;
+        std::cerr << "FileError" << "::" << __FILE_NAME__ << "::" << __LINE__ << " " << ex.what() << std::endl;
         return 1;
     } catch (const Gio::ResourceError &e) {
-        std::cerr << "Resource error: " << e.what() << '\n';
+        std::cerr << "Resource error" << "::" << __FILE_NAME__ << "::" << __LINE__ << " " << e.what() << std::endl;
     } catch (const Glib::Error &e) {
-        std::cerr << "GTK/GLib error: " << e.what() << '\n';
+        std::cerr << "GTK/GLib error" << "::" << __FILE_NAME__ << "::" << __LINE__ << " " << e.what() << std::endl;
     }
     Core::Ptr core(new Core(refBuilder));
     app->hold();

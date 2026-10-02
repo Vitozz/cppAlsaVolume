@@ -18,13 +18,13 @@
  */
 
 #include "trayicon.h"
-#include "../tools/tools.h"
+#include "tools.h"
+#include <gdkmm/display.h>
+#include <gdkmm/seat.h>
 #include <glibmm/fileutils.h>
 #include <gtkmm/separatormenuitem.h>
 #include <iostream>
 #include <libintl.h>
-#include <gdkmm/display.h>
-#include <gdkmm/seat.h>
 #ifdef USE_KDE
 #include <giomm/dbusproxy.h>
 #endif
@@ -103,6 +103,9 @@ TrayIcon::TrayIcon(double volume, const std::string &cardName, const std::string
         legacyIcon_->signal_scroll_event().connect(sigc::mem_fun(*this, &TrayIcon::onScrollEvent));
         legacyIcon_->signal_button_press_event().connect(sigc::mem_fun(*this, &TrayIcon::onButtonClick));
         //
+#ifdef IS_DEBUG
+        std::cout << "Legacy Icon created" << std::endl;
+#endif
     }
 
     Gtk::SeparatorMenuItem *separator2 = Gtk::manage(new Gtk::SeparatorMenuItem());
@@ -222,31 +225,9 @@ void TrayIcon::onSecondaryActivate(StatusNotifierItem *sn, gint x, gint y, TrayI
 void TrayIcon::onScroll(StatusNotifierItem *sn, gint delta, StatusNotifierScrollOrientation orient, TrayIcon *userdata)
 {
     (void)sn;
-    (void)orient;
-    double value = 0.0;
-    if (delta > 0) {
-        value += OFFSET;
-    } else {
-        value -= OFFSET;
+    if (orient == STATUS_NOTIFIER_SCROLL_ORIENTATION_VERTICAL) {
+        userdata->m_signal_value_changed((delta > 0) ? +OFFSET : -OFFSET);
     }
-    // Hack to detect right scroll direction
-    // Obtain the mouse cursor global position and if y-coordinate is smaller than
-    // half of the screen height than trayicon is placed on top of the screen and
-    // scroll direction should be reversed Not working in Wayland.
-    auto env       = getenv("XDG_SESSION_TYPE");
-    bool isWayland = std::string(env != nullptr ? env : "") == std::string("wayland");
-    if (!isWayland) {
-        int screenHalfHeight = userdata->screen_->get_height() / 2;
-        userdata->getMousePosition();
-        auto mouseY = userdata->mouseY_;
-        if (mouseY < screenHalfHeight)
-            value = (-1) * value;
-#ifdef IS_DEBUG
-        std::cout << "ScreenH: " << screenHalfHeight << std::endl;
-        std::cout << "Offset: " << value << std::endl;
-#endif
-    }
-    userdata->m_signal_value_changed(value);
 }
 
 bool TrayIcon::checkDBusInterfaceExists(const Glib::ustring &serviceName)
@@ -328,8 +309,8 @@ void TrayIcon::setIcon(double value)
     const Glib::ustring searchPath = iconsPrefix + getIconName(value);
     auto                pixbuf     = Gdk::Pixbuf::create_from_resource(searchPath);
     if (pixbuf) {
-        pixbufWidth_                           = pixbuf->get_width();
-        pixbufHeight_                          = pixbuf->get_height() + 4;
+        pixbufWidth_  = pixbuf->get_width();
+        pixbufHeight_ = pixbuf->get_height() + 4;
         try {
             if (isLegacyIcon_) {
                 legacyIcon_->set(pixbuf);
@@ -418,7 +399,7 @@ void TrayIcon::setMousePos(const int X, const int Y)
 
 void TrayIcon::getMousePosition()
 {
-    int x = 0, y = 0;
+    int                        x = 0, y = 0;
     Glib::RefPtr<Gdk::Display> display = Gdk::Display::get_default();
     if (!display)
         return;

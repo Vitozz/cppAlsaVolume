@@ -21,18 +21,18 @@
 
 settingsStr::settingsStr() :
     cardId_(0), mixerId_(0), notebookOrientation_(false), isAutorun_(false), usePulse_(false), usePolling_(true),
-    cardList_(std::vector<std::string>()), mixerList_(std::vector<std::string>()), switchList_(MixerSwitches::Ptr()),
-    pulseDevices_(std::vector<std::string>()), pulseDeviceId_(0), pulseDeviceName_(std::string()),
-    pulseDeviceDesc_(std::string())
+    invertMouse_(false), cardList_(std::vector<std::string>()), mixerList_(std::vector<std::string>()),
+    switchList_(MixerSwitches::Ptr()), pulseDevices_(std::vector<std::string>()), pulseDeviceId_(0),
+    pulseDeviceName_(std::string()), pulseDeviceDesc_(std::string())
 {
 }
 
 settingsStr::settingsStr(settingsStr &str) :
     cardId_(str.cardId()), mixerId_(str.mixerId()), notebookOrientation_(str.notebookOrientation()),
-    isAutorun_(str.isAutorun()), usePulse_(str.usePulse()), usePolling_(str.usePolling()), cardList_(str.cardList()),
-    mixerList_(str.mixerList()), switchList_(str.switchList()), pulseDevices_(str.pulseDevices()),
-    pulseDeviceId_(str.pulseDeviceId()), pulseDeviceName_(str.pulseDeviceName()),
-    pulseDeviceDesc_(str.pulseDeviceDesc())
+    isAutorun_(str.isAutorun()), usePulse_(str.usePulse()), usePolling_(str.usePolling()),
+    invertMouse_(str.invertMouse()), cardList_(str.cardList()), mixerList_(str.mixerList()),
+    switchList_(str.switchList()), pulseDevices_(str.pulseDevices()), pulseDeviceId_(str.pulseDeviceId()),
+    pulseDeviceName_(str.pulseDeviceName()), pulseDeviceDesc_(str.pulseDeviceDesc())
 {
 }
 
@@ -45,6 +45,8 @@ bool settingsStr::notebookOrientation() { return notebookOrientation_; }
 bool settingsStr::isAutorun() { return isAutorun_; }
 
 bool settingsStr::usePolling() { return usePolling_; }
+
+bool settingsStr::invertMouse() { return invertMouse_; }
 
 const std::vector<std::string> &settingsStr::cardList() const { return cardList_; }
 
@@ -123,3 +125,5 @@ void settingsStr::setPulseDevices(const std::vector<std::string> &devices)
 void settingsStr::setUsePulse(bool use) { usePulse_ = use; }
 
 void settingsStr::setUsePolling(bool use) { usePolling_ = use; }
+
+void settingsStr::setInvertMouse(bool use) { invertMouse_ = use; }

@@ -35,6 +35,7 @@ public:
     bool                              getAutorun();
     bool                              usePulse();
     bool                              usePolling();
+    bool                              invertMouse();
     std::string                       pulseDeviceName() const;
     void                              saveSoundCard(int soundCard);
     void                              saveMixer(const std::string &mixerName);
@@ -45,6 +46,7 @@ public:
     void                              setUsePulse(bool use);
     void                              savePulseDeviceName(const std::string &name);
     void                              setUsePolling(bool use);
+    void                              setInvertMouse(bool use);
 
 private:
     static void parseConfig(const Glib::ustring &keyFileName, const Glib::ustring &keyFileData);

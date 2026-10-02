@@ -79,6 +79,7 @@ protected:
     void          onEnumCellToggled(const Glib::ustring &path);
     void          onAutorunToggled();
     void          onUsePollingToggled();
+    void          onInvertMouseToggled();
 #ifdef HAVE_PULSE
     void onPulseToggled();
     void onPulseDeviceChanged();
@@ -116,6 +117,7 @@ private:
     Gtk::Box         *alsaHBox_;
     Gtk::CheckButton *usePulse_;
     Gtk::CheckButton *usePolling_;
+    Gtk::CheckButton *invertMouse_;
 #ifdef HAVE_PULSE
     Gtk::ComboBox               *pulseBox_;
     int                          pulseDev_;
@@ -130,6 +132,7 @@ private:
     uint                         mixerId_;
     uint                         cardId_;
     bool                         isPulse_;
+    bool                         invertedMouse_;
 };
 
 #endif // SETTINGSFRAME_H

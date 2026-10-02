@@ -18,7 +18,7 @@ option( USE_CPACK "Enable CPack support" OFF )
 include(GNUInstallDirs)
 
 find_package( PkgConfig REQUIRED )
-find_package( Intl REQUIRED )
+#find_package( Intl REQUIRED )
 
 if( USE_SNI AND USE_APPINDICATOR )
 	message(FATAL_ERROR "
@@ -55,6 +55,9 @@ endif()
 
 include_directories(
 	${ALSA_INCLUDE_DIRS}
+	${PROJECT_SOURCE_DIR}/alsawork
+	${PROJECT_SOURCE_DIR}/gui
+	${PROJECT_SOURCE_DIR}/tools
 )
 set( DEPLIBS
 	PkgConfig::GTKMM
@@ -98,7 +101,6 @@ set( alsavolume_SRCS
 
 if( USE_SNI )
 	include(statusnotifier-gen)
-	include_directories(${CMAKE_CURRENT_BINARY_DIR})
 	set( statusnotifier_SRCS
 		third-party/statusnotifier/src/closures.c
 		third-party/statusnotifier/src/statusnotifier.c
@@ -109,6 +111,10 @@ if( USE_SNI )
 		third-party/statusnotifier/src/statusnotifier.h
 		third-party/statusnotifier/src/closures.h
 		${CMAKE_CURRENT_BINARY_DIR}/config.h
+	)
+    include_directories(
+		${CMAKE_CURRENT_BINARY_DIR}
+		${PROJECT_SOURCE_DIR}/third-party/statusnotifier/src
 	)
 	file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/enums")
 	file(COPY ${PROJECT_SOURCE_DIR}/third-party/statusnotifier/src/statusnotifier.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/enums/)
@@ -160,7 +166,10 @@ if( USE_PULSE )
 	if( PulseAudio_FOUND )
 		message(STATUS "Found PulseAudio: (found version \"${PulseAudio_VERSION}\")")
 	endif()
-	include_directories( ${PULSEAUDIO_INCLUDE_DIR} )
+	include_directories(
+		${PULSEAUDIO_INCLUDE_DIR}
+		${PROJECT_SOURCE_DIR}/pulsework
+	)
 	list(APPEND alsavolume_HDRS
 		pulsework/pulsecore.h
 		pulsework/pulsedevice.h
@@ -212,18 +221,9 @@ foreach(resolution ${RESOLUTIONS})
 	install(FILES ${LOGO_NAME} DESTINATION "${ICON_INSTALL_PREFIX}/${resolution}x${resolution}/apps" RENAME ${PROJECT_NAME}.png)
 endforeach()
 
-if(USE_CPACK AND DPKG_PATH)
-    INSTALL( FILES ${PROJECT_BINARY_DIR}/copyright DESTINATION ${CMAKE_INSTALL_DOCDIR} )
-endif()
-#TOOLS FOR BUILD LOCALES
-find_program( AV_XGETTEXT xgettext )
-mark_as_advanced( AV_XGETTEXT )
-find_program( AV_INTLTOOL intltool-update )
-mark_as_advanced( AV_INTLTOOL )
-find_program( AV_MSGMERGE msgmerge )
-mark_as_advanced( AV_MSGMERGE )
-find_program( AV_MSGFMT msgfmt )
-mark_as_advanced( AV_MSGFMT )
+find_program(XGETTEXT xgettext REQUIRED)
+find_program(MSGMERGE msgmerge REQUIRED)
+find_program(MSGFMT msgfmt REQUIRED)
 
 #MAKE A WORK COPY OF PO DIRECTORY TO BUILD LOCALES
 file( COPY ${PROJECT_SOURCE_DIR}/po DESTINATION ${PROJECT_BINARY_DIR} )
@@ -232,76 +232,87 @@ set( alsavolume_LOCALES
 	ru
 	uk
 )
-set( PO_FULL_DIR
-	${PROJECT_BINARY_DIR}/po
-)
-set( LOCALES_WORKDIR
-	${PROJECT_BINARY_DIR}/locale
-)
-set( LOCALES_INSTALLPATH
-	${DATADIR_PATH}/${PROJECT_NAME}/locale
-)
-#ADD SOURCES PREFIX
-file( STRINGS ${PO_FULL_DIR}/POTFILES.in POTFILES_LINES )
+set(GETTEXT_PACKAGE "${PROJECT_NAME}")
+set( PO_DIR	${PROJECT_BINARY_DIR}/po )
+set( POT_FILE ${PO_DIR}/${GETTEXT_PACKAGE}.pot )
+
+#FORMAT POTFILES.in file with full pathes to resources
+file( STRINGS ${PO_DIR}/POTFILES.in POTFILES_LINES )
 set( POTFILES_CONTENTS )
 foreach( line ${POTFILES_LINES} )
-	set( POTFILES_CONTENTS
+	set(POTFILES_CONTENTS
 		"${POTFILES_CONTENTS}
 ${PROJECT_SOURCE_DIR}/${line}"
+    )
+endforeach()
+set(NEW_POTFILE_IN "${PO_DIR}/POTFILES.in")
+file( WRITE ${NEW_POTFILE_IN} "${POTFILES_CONTENTS}" )
+
+add_custom_target(update-potfile
+	COMMAND ${XGETTEXT}
+	    --default-domain=${GETTEXT_PACKAGE}
+		--directory=${PROJECT_SOURCE_DIR}
+		--files-from=${NEW_POTFILE_IN}
+		--output=${POT_FILE}
+		--from-code=UTF-8
+		--keyword=_
+		--keyword=N_
+		--keyword=C_:1,2
+		--keyword=NC_:1,2
+		--add-comments
+		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+	COMMENT "Generating pot file..."
+)
+
+# Variables to check built MO-files
+set(MO_FILES "")
+set( LOCALES_WORKDIR ${PROJECT_BINARY_DIR}/locale )
+set( LOCALES_INSTALLPATH ${DATADIR_PATH}/${PROJECT_NAME}/locale )
+
+# Update po-files and compile them
+foreach(lang ${alsavolume_LOCALES})
+	set(PO_FILE ${PO_DIR}/${lang}.po)
+	set(MO_FILE ${LOCALES_WORKDIR}/${lang}/LC_MESSAGES/${GETTEXT_PACKAGE}.mo)
+	file(MAKE_DIRECTORY "${LOCALES_WORKDIR}/${lang}/LC_MESSAGES")
+
+	# update po-file using pot-file (if POT has changed)
+	add_custom_command(
+		OUTPUT ${PO_FILE}
+		DEPENDS ${POT_FILE}
+		COMMAND ${MSGMERGE} --update --backup=none ${PO_FILE} ${POT_FILE}
+		COMMENT "Updating ${lang}.po..."
+	)
+
+    # compile PO-file into MO-file
+	add_custom_command(
+		OUTPUT ${MO_FILE}
+		DEPENDS ${PO_FILE}
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/${lang}/LC_MESSAGES
+		COMMAND ${MSGFMT} -o ${MO_FILE} ${PO_FILE}
+		COMMENT "Compiling ${lang}.mo..."
+	)
+
+    # add mo-file to mo-files list
+	list(APPEND MO_FILES ${MO_FILE})
+
+	# Install MO-files
+	install(FILES ${MO_FILE}
+		DESTINATION ${LOCALES_INSTALLPATH}/${lang}/LC_MESSAGES
+		RENAME ${GETTEXT_PACKAGE}.mo
 	)
 endforeach()
-file( WRITE ${PO_FULL_DIR}/POTFILES.in "${POTFILES_CONTENTS}" )
 
-add_custom_target(alsavolume-update-sources
-	AV_INTLTOOL -m
-	WORKING_DIRECTORY ${PO_FULL_DIR}
-)
-add_custom_command(OUTPUT ${PO_FULL_DIR}/${PROJECT_NAME}.pot
-	COMMAND ${AV_XGETTEXT}
-	ARGS
-	--files-from ${PO_FULL_DIR}/POTFILES.in --keyword=_ -o ${PO_FULL_DIR}/${PROJECT_NAME}.pot --no-wrap --no-location
-	DEPENDS ${PO_FULL_DIR}/POTFILES.in
-	WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-)
-set( AV_CATALOG_TARGETS )
-foreach( locale ${alsavolume_LOCALES} )
-		add_custom_target( alsavolume-update-${locale}.po
-			${AV_MSGMERGE} ${locale} ${PO_FULL_DIR}/${PROJECT_NAME}.pot -o ${locale}.po --no-wrap
-			DEPENDS ${locale}.po
-			WORKING_DIRECTORY ${PO_FULL_DIR}
-		)
-		file( MAKE_DIRECTORY
-			"${LOCALES_WORKDIR}/${locale}/LC_MESSAGES"
-		)
-		add_custom_command(
-			OUTPUT
-			${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT_NAME}.mo
-			COMMAND
-			${AV_MSGFMT}
-			ARGS
-			-c -o ${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT_NAME}.mo ${PO_FULL_DIR}/${locale}.po
-			DEPENDS
-			${PO_FULL_DIR}/${locale}.po
-		)
-
-		install(
-			FILES
-			${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT_NAME}.mo
-			DESTINATION
-			${LOCALES_INSTALLPATH}/${locale}/LC_MESSAGES
-		)
-
-		set(AV_CATALOG_TARGETS
-			${AV_CATALOG_TARGETS}
-			${LOCALES_WORKDIR}/${locale}/LC_MESSAGES/${PROJECT_NAME}.mo
-		)
-endforeach()
-add_custom_target(alsavolume-transtalions
+# Translations target update build and install translations
+add_custom_target(
+	translations
 	ALL
 	DEPENDS
-	${PO_FULL_DIR}/${PROJECT_NAME}.pot
-	${AV_CATALOG_TARGETS}
+	update-potfile
+	${MO_FILES}
 )
+
+add_dependencies(${PROJECT_NAME} translations)
+
 if(USE_CPACK)
 	include(version)
 	include(use_cpack)

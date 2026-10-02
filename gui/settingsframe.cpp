@@ -31,14 +31,14 @@ SettingsFrame::SettingsFrame(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     Gtk::Dialog(cobject), okButton_(nullptr), cancelButton_(nullptr), sndCardBox_(nullptr), mixerBox_(nullptr),
     playbackSwitchTree_(nullptr), captureSwitchTree_(nullptr), otherSwitchTree_(nullptr), isAutoRun_(nullptr),
     tabPos_(nullptr), tabWidget_(nullptr), pulseHBox_(nullptr), alsaHBox_(nullptr), usePulse_(nullptr),
-    usePolling_(nullptr),
+    usePolling_(nullptr), invertMouse_(nullptr),
 #ifdef HAVE_PULSE
     pulseBox_(nullptr), pulseDev_(0), pulseCards_(Glib::RefPtr<Gtk::ListStore>()),
 #endif
     cards_(Glib::RefPtr<Gtk::ListStore>()), mixers_(Glib::RefPtr<Gtk::ListStore>()),
     pbSwitches_(Glib::RefPtr<Gtk::ListStore>()), capSwitches_(Glib::RefPtr<Gtk::ListStore>()),
     enumSwitches_(Glib::RefPtr<Gtk::ListStore>()), settings_(settingsStr::Ptr()), mixerId_(0), cardId_(0),
-    isPulse_(false)
+    isPulse_(false), invertedMouse_(false)
 {
     // init all lists
     const Glib::RefPtr<Gtk::Builder> &builder = refGlade;
@@ -56,6 +56,7 @@ SettingsFrame::SettingsFrame(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     builder->get_widget("alsaBox", alsaHBox_);
     builder->get_widget("usePulse", usePulse_);
     builder->get_widget("usePolling", usePolling_);
+    builder->get_widget("invertmouse", invertMouse_);
 #ifdef HAVE_PULSE
     builder->get_widget("pulseDevices", pulseBox_);
 #endif
@@ -74,6 +75,8 @@ SettingsFrame::SettingsFrame(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
         mixerBox_->signal_changed().connect(sigc::mem_fun(*this, &SettingsFrame::mixerBoxChanged));
     if (usePolling_)
         usePolling_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onUsePollingToggled));
+    if (invertMouse_)
+        invertMouse_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onInvertMouseToggled));
 #ifdef HAVE_PULSE
     if (usePulse_)
         usePulse_->signal_toggled().connect(sigc::mem_fun(*this, &SettingsFrame::onPulseToggled));
@@ -92,6 +95,7 @@ SettingsFrame::~SettingsFrame()
 #ifdef HAVE_PULSE
     delete pulseBox_;
 #endif
+    delete invertMouse_;
     delete usePulse_;
     delete pulseHBox_;
     delete okButton_;
@@ -115,6 +119,8 @@ void SettingsFrame::initParms(const settingsStr::Ptr &str)
         isAutoRun_->set_active(settings_->isAutorun());
     if (usePolling_)
         usePolling_->set_active(settings_->usePolling());
+    if (invertMouse_)
+        invertMouse_->set_active(settings_->invertMouse());
 #ifdef HAVE_PULSE
     if (usePulse_)
         usePulse_->set_active(settings_->usePulse());
@@ -391,6 +397,12 @@ void SettingsFrame::onUsePollingToggled()
 {
     bool usePoll = usePolling_->get_active();
     settings_->setUsePolling(usePoll);
+}
+
+void SettingsFrame::onInvertMouseToggled()
+{
+    bool toggled = invertMouse_->get_active();
+    settings_->setInvertMouse(toggled);
 }
 
 void SettingsFrame::disablePulseCheckButton() { usePulse_->set_visible(false); }

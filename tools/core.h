@@ -20,14 +20,14 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include "../alsawork/alsawork.h"
-#include "../gui/settingsframe.h"
+#include "alsawork.h"
 #include "settings.h"
+#include "settingsframe.h"
 #include "settingsstr.h"
 #include <memory>
 #include <vector>
 #ifdef HAVE_PULSE
-#include "../pulsework/pulsecore.h"
+#include "pulsecore.h"
 #endif
 
 class Core {
@@ -81,6 +81,7 @@ private:
     SettingsFrame           *settingsDialog_;
     bool                     isPulse_;
     bool                     isMuted_;
+    bool                     invertedMouse_;
     std::vector<std::string> alsaCards_;
     sigc::connection         signal_switches_;
     sigc::connection         signal_sndcard_;

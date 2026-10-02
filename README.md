@@ -1,19 +1,18 @@
 This is a simple application to control one of the Alsa's mixer volume in tray.
 
-Application uses GTK+ interface via gtkmm library
+Application uses GTK+ interface via gtkmm3 library
 
 Build Deps:
 
 	- gtkmm-3.0 (libgtkmm-3.0-dev package in Ubuntu)
-	- gtkmm-2.4 (only for gtkmm-2.4 support) 
 	- glib (libglibmm-2.4-dev package in Ubuntu)
 	- alsa/asoundlib (libasound2-dev package in Ubuntu)
 	- libpulse (only for pulseaudio support / optional)
-	- cmake >= 3.5.0
+	- cmake >= 3.10.0
 	- libappindicator (libappindicator3 for GTK3 / optional)
-	- libdbusmenu-gtk2 (libdbusmenu for GTK2 / optional)
 	- libdbusmenu-gtk3 (libdbusmenu for GTK3 / optional)
 	- glib2-devel (for glib-mkenums binary)
+	- gettext (to build locales)
 
 Howto build application:
 
@@ -28,12 +27,6 @@ if You have cmake installed
 to build with pulseaudio support:
 
 >cmake -DUSE_PULSE=ON ..
-
->make
-
-to build with gtkmm-2.4 support:
-
->cmake -DGTKMM=2 ..
 
 >make
 

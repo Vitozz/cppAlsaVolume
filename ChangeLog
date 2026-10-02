@@ -1,3 +1,11 @@
+2026-10-02
+v0.3.8
+  * On X11 fixed window position according to tray orientation
+  + Added Invert Mouse option to invert mouse scroll direction
+  * Code optimizations
+  * Locales updated
+  * Updated CMake files: improved locale generation, fixed errors
+
 2026-10-01
 v0.3.7
   - Removed GTK2 support

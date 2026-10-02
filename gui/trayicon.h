@@ -20,7 +20,7 @@
 #ifndef TRAYICON_H
 #define TRAYICON_H
 
-#include "../tools/tools.h"
+#include "tools.h"
 #include <gtkmm/checkmenuitem.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
@@ -31,7 +31,7 @@
 #include "libappindicator/app-indicator.h"
 typedef std::shared_ptr<AppIndicator> StatusNotifierPtr;
 #elif defined(USE_KDE)
-#include "../third-party/statusnotifier/src/statusnotifier.h"
+#include "statusnotifier.h"
 typedef std::shared_ptr<StatusNotifierItem> StatusNotifierPtr;
 #endif
 

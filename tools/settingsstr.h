@@ -20,7 +20,7 @@
 #ifndef SETTINGSSTR_H
 #define SETTINGSSTR_H
 
-#include "../alsawork/mixerswitches.h"
+#include "mixerswitches.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -38,6 +38,7 @@ public:
     bool                                 isAutorun();
     bool                                 usePulse();
     bool                                 usePolling();
+    bool                                 invertMouse();
     const std::string                   &pulseDeviceName() const;
     const std::string                   &pulseDeviceDesc() const;
     const std::vector<std::string>      &cardList() const;
@@ -58,6 +59,7 @@ public:
     void                                 setPulseDevices(const std::vector<std::string> &devices);
     void                                 setUsePulse(bool use);
     void                                 setUsePolling(bool use);
+    void                                 setInvertMouse(bool use);
 
 private:
     unsigned int             cardId_;
@@ -66,6 +68,7 @@ private:
     bool                     isAutorun_;
     bool                     usePulse_;
     bool                     usePolling_;
+    bool                     invertMouse_;
     std::vector<std::string> cardList_;
     std::vector<std::string> mixerList_;
     MixerSwitches::Ptr       switchList_;
