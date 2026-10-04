@@ -43,7 +43,7 @@ build() {
   # BUILD HERE
   cmake -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_BUILD_TYPE=Release \
-    -DUSE_PULSE=$use_pulse \
+    -DUSE_PULSE=@USE_PULSE@ \
     -DUSE_SNI=@USE_SNI@ \
     "$srcdir/$_gitname"
 
