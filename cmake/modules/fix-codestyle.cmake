@@ -6,7 +6,6 @@ if(CLF_BIN)
     set(SRC_LIST ${alsavolume_SRCS} ${alsavolume_HDRS})
     add_custom_target(fix-codestyle
         COMMAND ${CLF_BIN}
-        ARGS
         --verbose
         -style=file
         -i ${SRC_LIST}

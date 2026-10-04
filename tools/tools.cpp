@@ -43,6 +43,24 @@ std::string Tools::getCWD()
     return result != nullptr ? result : std::string();
 }
 
+std::string Tools::getBinaryDir()
+{
+    std::vector<char> buffer(1024);
+    std::string       binPath;
+    while (true) {
+        ssize_t len = readlink("/proc/self/exe", buffer.data(), buffer.size());
+        if (len < 0)
+            return std::string();
+        if (static_cast<size_t>(len) < buffer.size())
+            binPath = std::string(buffer.data(), len);
+        buffer.resize(buffer.size() * 2);
+    }
+    size_t lastSlash = binPath.find_last_of('/');
+    if (lastSlash == std::string::npos)
+        return "";
+    return binPath.substr(0, lastSlash + 1);
+}
+
 std::string Tools::getHomePath()
 {
     auto home = getenv("HOME");
@@ -52,9 +70,11 @@ std::string Tools::getHomePath()
 std::vector<std::string> Tools::getProjectPathes()
 {
     const std::string        cwd         = getCWD();
+    const std::string        curBinDir   = getBinaryDir();
     const std::string        PATH_SUFFIX = "/share/alsavolume/";
     std::vector<std::string> list({ getHomePath() + std::string("/.local") + PATH_SUFFIX, cwd + "/",
                                     cwd + "/" + PATH_SUFFIX, cwd.substr(0, cwd.find_last_of('/')) + PATH_SUFFIX,
+                                    curBinDir.substr(0, curBinDir.find_last_of('/')) + PATH_SUFFIX,
                                     std::string("/usr") + PATH_SUFFIX, std::string("/usr/local") + PATH_SUFFIX });
     return list;
 }
